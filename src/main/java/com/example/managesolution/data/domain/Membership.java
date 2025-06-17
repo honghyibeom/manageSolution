@@ -1,11 +1,13 @@
 package com.example.managesolution.data.domain;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -13,8 +15,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Membership {
     private Long membershipId;
+    @NotNull(message = "회원이 선택되지 않았습니다.")
     private Long memberId;
+    @NotNull(message = "시작일을 입력해주세요.")
     private LocalDate startDate;
+    @NotNull(message = "종료일을 입력해주세요.")
     private LocalDate endDate;
+    @NotNull(message = "가격을 입력해주세요.")
+    private int price;
+    private LocalDateTime createdAt;
     private Boolean isActive;
 }

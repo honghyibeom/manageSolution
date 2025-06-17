@@ -11,10 +11,12 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Session {
-    private Long sessionId;
-    private Long memberId;
-    private Long trainerId;
-    private LocalDateTime sessionTime;
-    private String status; // RESERVED, COMPLETED, CANCELED
+public class AppUser {
+    private Long userId;
+    private String email;
+    private String password;
+    private String name;
+    private String phone;
+    private String role; // ADMIN or Trainer
+    private LocalDateTime createdAt;
 }

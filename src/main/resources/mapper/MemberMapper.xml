@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.managesolution.mapper.MemberMapper">
+<!--    회원 전체 조회-->
+    <select id="findPaged" resultType="Member">
+        SELECT memberId, name, phone, birthDate, gender, status, memo, created_at AS createdAt
+        FROM member
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM member
+    </select>
+
+    <!--    ID 한건 조회-->
+    <select id="findById" parameterType="long" resultType="Member">
+        SELECT memberId, name, phone, birthDate, gender, status, memo, created_at as createdAt
+        FROM member
+        WHERE memberId = #{memberId}
+    </select>
+
+<!--    회원 등록 useGeneratedKey는 키 자동 생성-->
+    <insert id="insert" parameterType="Member" useGeneratedKeys="true" keyProperty="memberId">
+        INSERT INTO member (name, phone, birthDate, gender, status, memo, created_at)
+        VALUES (#{name}, #{phone}, #{birthDate}, #{gender}, #{status}, #{memo}, NOW())
+    </insert>
+
+<!--    회원 수정-->
+    <update id="update" parameterType="Member">
+        UPDATE member
+        SET name        = #{name},
+            phone       = #{phone},
+            birthDate   = #{birthDate},
+            gender      = #{gender},
+            status      = #{status},
+            memo        = #{memo}
+        WHERE memberId  = #{memberId}
+    </update>
+
+    <!-- 회원 삭제 -->
+    <delete id="delete" parameterType="long">
+        DELETE FROM member WHERE memberId = #{memberId}
+    </delete>
+</mapper>

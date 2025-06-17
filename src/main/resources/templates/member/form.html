@@ -1,0 +1,71 @@
+<!-- templates/member/form.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title th:replace="~{::title}">회원 등록</title>
+</head>
+
+<body>
+<main layout:fragment="content" class="container mt-4">
+    <h2 th:text="${member.memberId == null ? '회원 등록' : '회원 수정'}"></h2>
+
+    <form th:action="@{${member.memberId == null} ? '/members' : '/members/' + ${member.memberId} + '/edit'}"
+          th:object="${member}" method="post">
+
+        <!-- 이름 -->
+        <div class="mb-3">
+            <label for="name" class="form-label">이름</label>
+            <input type="text" id="name" th:field="*{name}" class="form-control" />
+            <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+
+        <!-- 전화번호 -->
+        <div class="mb-3">
+            <label for="phone" class="form-label">전화번호</label>
+            <input type="text" id="phone" th:field="*{phone}" class="form-control" />
+            <div class="text-danger" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+        </div>
+
+        <!-- 생년월일 -->
+        <div class="mb-3">
+            <label for="birthDate" class="form-label">생년월일</label>
+            <input type="date" id="birthDate" th:field="*{birthDate}" class="form-control" />
+            <div class="text-danger" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
+        </div>
+
+        <!-- 성별 -->
+        <div class="mb-3">
+            <label for="gender" class="form-label">성별</label>
+            <select id="gender" th:field="*{gender}" class="form-select">
+                <option value="">선택</option>
+                <option value="남성">남성</option>
+                <option value="여성">여성</option>
+            </select>
+            <div class="text-danger" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+        </div>
+
+        <!-- 상태 -->
+        <div class="mb-3">
+            <label for="status" class="form-label">상태</label>
+            <select id="status" th:field="*{status}" class="form-select">
+                <option th:each="s : ${T(com.example.managesolution.data.enumerate.Status).values()}"
+                        th:value="${s}" th:text="${s}"></option>
+            </select>
+        </div>
+
+        <!-- 메모 -->
+        <div class="mb-3">
+            <label for="memo" class="form-label">메모</label>
+            <textarea id="memo" th:field="*{memo}" class="form-control" rows="3"></textarea>
+        </div>
+
+        <!-- 제출 -->
+        <button type="submit" class="btn btn-primary">저장</button>
+        <a th:href="@{/members}" class="btn btn-secondary">취소</a>
+    </form>
+</main>
+</body>
+</html>

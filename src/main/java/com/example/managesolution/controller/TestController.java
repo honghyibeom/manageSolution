@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 //@RequestMapping("")
 public class TestController {
 
-    @GetMapping("/")
+    @GetMapping("/main")
     public String test() {
-        return "login";
+        return "main";
     }
 }

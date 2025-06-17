@@ -17,4 +17,5 @@ public class Payment {
     private Integer amount;
     private String method; // CASH or CARD
     private LocalDateTime paidAt;
+    private String memo;
 }

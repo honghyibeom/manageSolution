@@ -5,12 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Trainer {
+public class PtSession {
+    private Long sessionId;
+    private Long memberId;
     private Long trainerId;
-    private String name;
-    private String phone;
+    private LocalDateTime sessionTime;
+    private String status; // RESERVED, COMPLETED, CANCELED
 }

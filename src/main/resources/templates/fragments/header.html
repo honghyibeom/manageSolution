@@ -1,0 +1,40 @@
+<div th:fragment="header">
+    <nav class="navbar navbar-light bg-light border-bottom position-relative">
+        <div class="container-fluid">
+
+            <!-- 왼쪽 사이드바 버튼 -->
+            <button class="btn btn-outline-secondary border-0 me-2" id="sidebarToggle"
+                    aria-label="Toggle Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                     class="bi bi-layout-sidebar-inset" viewBox="0 0 16 16">
+                    <path d="M14 2a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2z"/>
+                    <path d="M3 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+                </svg>
+            </button>
+
+            <!-- 중앙 로고 -->
+            <div class="position-absolute start-50 translate-middle-x">
+                <span class="navbar-brand mb-0 h4">Company Name</span>
+            </div>
+
+            <!-- 우측 드롭다운 버튼 -->
+            <div class="d-flex align-items-center ms-auto ">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary border-0 dropdown-toggle" type="button"
+                            id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                        </svg>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#">프로필</a></li>
+                        <li><a class="dropdown-item" href="#">설정</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">로그아웃</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+</div>
