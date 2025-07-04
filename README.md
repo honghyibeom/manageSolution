@@ -19,7 +19,7 @@
 - `JDK 17.0.14`
 - **IDE** : Intelij
 - **Framework** : Springboot(3.3.1)
-- **Database** : Maria DB(11xe)
+- **Database** : Maria DB(11xe), H2
 - **SQL Mapper** : myBatis
 
 ### 📌 사용 기술
@@ -34,21 +34,21 @@
 - 회원 CRUD
 
 #### 회원권 관리
-- 회원권 정보 CRUD
+- 
 
 #### 회원 CARE 뷰
-- 회원 등록 현황
+- 
   
 #### 강사(트레이너) 관리 
-- 강사 정보 CRUD 
+-
 
 #### 수업 관리
-- 수업 CRUD
-- 달력
+- 
+- 
 
 #### 매출 관리
-- 일, 월, 년 단위 매출 그래프
-- 매출 조회 기능
+- 
+- 
 
 ## 🗒 ERD
 
