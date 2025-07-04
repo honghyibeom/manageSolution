@@ -45,4 +45,104 @@
     <delete id="delete" parameterType="long">
         DELETE FROM member WHERE memberId = #{memberId}
     </delete>
+
+<!--   회원 이름 검색-->
+    <select id="findByNameContaining" resultType="Member">
+        SELECT *
+        FROM member
+        WHERE name LIKE CONCAT(#{keyword}, '%')
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+<!-- 회원 폰 번호 검색-->
+    <select id="findByPhoneContaining" resultType="Member">
+        SELECT *
+        FROM member
+        WHERE phone LIKE CONCAT(#{keyword}, '%')
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 상태 검색 -->
+    <select id="findByStatus" resultType="Member">
+        SELECT *
+        FROM member
+        WHERE status = #{status}
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="findByStatusAndPhone" resultType="Member">
+        SELECT *
+        FROM member
+        WHERE status = #{status}
+          AND phone LIKE CONCAT(#{keyword}, '%')
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="findByStatusAndName" resultType="Member">
+        SELECT *
+        FROM member
+        WHERE status = #{status}
+          AND name LIKE CONCAT(#{keyword}, '%')
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="findUnpaidMembers" resultType="MemberUnpaidDTO">
+        SELECT
+            m.memberId,
+            m.name AS memberName,
+            m.phone,
+            p.name AS productName,
+            p.type AS productType,
+            p.price AS amount,
+            p.productId
+        FROM member m
+                 LEFT JOIN membership ms ON ms.memberId = m.memberId
+                 LEFT JOIN pt_package pp ON pp.memberId = m.memberId
+                 LEFT JOIN payment pay ON pay.memberId = m.memberId
+                 LEFT JOIN product p ON (ms.productId = p.productId OR pp.productId = p.productId)
+        WHERE (ms.paymentId IS NULL OR pp.paymentId IS NOT NULL)
+        ORDER BY m.created_at DESC
+    </select>
+
+    <select id="findExpiredMembers" resultType="MemberExpiredDTO">
+        SELECT
+            m.memberId,
+            GREATEST(
+                    COALESCE(ms.endDate, NULL),
+                    COALESCE(pp.endDate, NULL)
+            ) AS expiredDate,
+            m.name AS memberName,
+            m.phone,
+            prevProd.name AS previousProduct,
+            prevProd.type AS productType,
+            prevProd.price AS amount
+        FROM member m
+                 LEFT JOIN membership ms ON ms.memberId = m.memberId AND ms.isActive = FALSE
+                 LEFT JOIN pt_package pp ON pp.memberId = m.memberId AND pp.isActive = FALSE
+                 LEFT JOIN product prevProd ON prevProd.productId = COALESCE(ms.productId, pp.productId)
+        WHERE (ms.membershipId IS NOT NULL OR pp.packageId IS NOT NULL)
+          AND NOT EXISTS (
+            SELECT 1
+            FROM membership ms2
+            WHERE ms2.memberId = m.memberId AND ms2.isActive = TRUE
+            UNION ALL
+            SELECT 1
+            FROM pt_package pp2
+            WHERE pp2.memberId = m.memberId AND pp2.isActive = TRUE
+        )
+        ORDER BY expiredDate ASC
+    </select>
+
+
+    <update id="updateStatusActive">
+        UPDATE member
+        SET status = 'ACTIVE'
+        WHERE memberId = #{memberId}
+    </update>
+
 </mapper>

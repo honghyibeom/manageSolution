@@ -1,0 +1,76 @@
+<!-- templates/product/modal.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="productForm">
+    <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- ✅ 등록과 수정을 모두 처리하는 하나의 form -->
+                <form th:action="@{/products}" method="post">
+                    <!-- ✅ 수정 시 필요한 ID -->
+                    <input type="hidden" name="productId" />
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">상품 등록</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">상품명</label>
+                                    <input type="text" name="name" class="form-control" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">상품 유형</label>
+                                    <select name="type" class="form-select" required>
+                                        <option value="MEMBERSHIP">회원권</option>
+                                        <option value="PT">PT</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">유효 기간 (일)</label>
+                                    <input type="number" name="duration" class="form-control" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">PT 횟수 (PT만 해당)</label>
+                                    <input type="number" name="count" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">가격 (원)</label>
+                                    <input type="number" name="price" class="form-control" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">활성화 여부</label><br />
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="isActive" value=true id="activeTrue" checked>
+                                        <label class="form-check-label" for="activeTrue">활성</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="isActive" value=false id="activeFalse">
+                                        <label class="form-check-label" for="activeFalse">비활성</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">설명</label>
+                                <textarea name="description" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary">저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

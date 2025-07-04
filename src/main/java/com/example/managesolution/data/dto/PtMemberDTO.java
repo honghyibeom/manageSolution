@@ -1,19 +1,19 @@
 package com.example.managesolution.data.dto;
 
-import com.example.managesolution.data.enumerate.Status;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Getter
+@Data
 @Builder
-public class MemberDTO {
+public class PtMemberDTO {
     private Long memberId;
     private String name;
     private String phone;
     private LocalDate birth;
-    private Status status;
-    private LocalDateTime creatAt;
+    private int remainingCount;
+    private int totalCount;
+    private LocalDate startDate;
+    private LocalDate endDate;
 }

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>결제 관리</title>
+</head>
+
+<body>
+<main layout:fragment="content">
+    <style>
+        .card-body.fixed-height {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .scroll-table {
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+        .action-buttons {
+            margin-top: auto;
+        }
+    </style>
+
+    <div class="container-fluid">
+        <div class="row gx-4">
+            <div class="col-12 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                        <span>미 결제 회원</span>
+
+                        <form th:action="@{/payment/unpaid}" method="get" class="d-flex" role="search">
+                            <input type="text" name="keyword" class="form-control form-control-sm me-2"
+                                   placeholder="회원명 검색" th:value="${param.keyword}">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">검색</button>
+                        </form>
+                    </div>
+
+                    <div class="card-body fixed-height">
+                        <div class="scroll-table">
+                            <table class="table table-bordered text-center align-middle mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th><input type="checkbox" onclick="toggleAll(this)"></th>
+                                    <th>회원명</th>
+                                    <th>전화번호</th>
+                                    <th>상품명</th>
+                                    <th>유형</th>
+                                    <th>금액</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="member : ${unpaidMembers}">
+                                    <td>
+                                        <input type="checkbox" class="payment-checkbox"
+                                               th:value="${member.memberId}"
+                                               th:data-product-id="${member.productId}"
+                                               th:data-amount="${member.amount}"
+                                               th:data-product-type="${member.productType}">
+                                    </td>
+                                    <td th:text="${member.memberName}"></td>
+                                    <td th:text="${member.phone}"></td>
+                                    <td th:text="${member.productName}"></td>
+                                    <td th:text="${member.productType}"></td>
+                                    <td th:text="${#numbers.formatInteger(member.amount, 0, 'COMMA')}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="action-buttons mt-3 d-flex justify-content-end gap-2">
+                            <label></label>
+                            <select id="paymentMethod" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+                                <option value="CARD">카드</option>
+                                <option value="CASH">현금</option>
+                            </select>
+                            <button type="button" class="btn btn-primary" onclick="registerSelected()">등록</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 마감 회원 -->
+            <div class="col-12 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                        <span>마감 회원</span>
+                        <form th:action="@{/payment/expired}" method="get" class="d-flex" role="search">
+                            <input type="text" name="keyword" class="form-control form-control-sm me-2"
+                                   placeholder="회원명 검색" th:value="${param.keyword}">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">검색</button>
+                        </form>
+                    </div>
+
+                    <div class="card-body fixed-height">
+                        <div class="scroll-table">
+                            <table class="table table-bordered text-center align-middle mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>등록</th>
+                                    <th>마감일</th>
+                                    <th>회원명</th>
+                                    <th>전화번호</th>
+                                    <th>이전상품</th>
+                                    <th>유형</th>
+                                    <th>금액</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="member : ${expiredMembers}">
+                                    <td>
+                                        <a th:href="@{'/members/' + ${member.memberId} + '/register'}" class="btn btn-sm btn-primary">등록</a>
+                                    </td>
+
+                                    <td th:text="${#temporals.format(member.expiredDate, 'yyyy-MM-dd')}">마감일</td>
+                                    <td th:text="${member.memberName}">회원명</td>
+                                    <td th:text="${member.phone}">전화번호</td>
+                                    <td th:text="${member.previousProduct}">이전상품</td>
+                                    <td th:text="${member.productType}">유형</td>
+                                    <td th:text="${#numbers.formatInteger(member.amount, 0, 'COMMA')}">금액</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 text-center my-2">
+                <i class="bi bi-chevron-down fs-3"></i>
+            </div>
+
+        </div>
+
+        <!-- 결제 내역 -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                        <span>결제 내역</span>
+                        <form th:action="@{/payment/history}" method="get" class="d-flex" role="search">
+                            <input type="text" name="keyword" class="form-control form-control-sm me-2"
+                                   placeholder="회원명 검색" th:value="${param.keyword}">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">검색</button>
+                        </form>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>결제일</th>
+                                    <th>회원명</th>
+                                    <th>전화번호</th>
+                                    <th>상품명</th>
+                                    <th>유형</th>
+                                    <th>금액</th>
+                                    <th>결제수단</th>
+                                    <th>등록일</th>
+                                    <th>마감일</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="pay : ${paymentHistory}">
+                                    <td th:text="${#temporals.format(pay.paymentDate, 'yyyy-MM-dd HH:mm')}">결제일</td>
+                                    <td th:text="${pay.memberName}">회원명</td>
+                                    <td th:text="${pay.phone}">전화번호</td>
+                                    <td th:text="${pay.productName}">상품명</td>
+                                    <td th:text="${pay.productType}">유형</td>
+                                    <td th:text="${#numbers.formatInteger(pay.amount, 0, 'COMMA')}">금액</td>
+                                    <td th:text="${pay.method == 'CARD' ? '카드' : '현금'}">결제수단</td>
+                                    <td th:text="${#temporals.format(pay.startDate, 'yyyy-MM-dd')}">등록일</td>
+                                    <td th:text="${#temporals.format(pay.endDate, 'yyyy-MM-dd')}">마감일</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleAll(master) {
+            const checked = master.checked;
+            document.querySelectorAll('.payment-checkbox').forEach(cb => {
+                cb.checked = checked;
+            });
+        }
+
+        function registerSelected() {
+            const selected = [];
+            const method = document.getElementById('paymentMethod').value;
+            document.querySelectorAll('.payment-checkbox:checked').forEach(cb => {
+                selected.push({
+                    memberId: cb.value,
+                    productId: cb.dataset.productId,
+                    amount: cb.dataset.amount,
+                    productType: cb.dataset.productType,
+                    method: method
+                });
+            });
+
+            if (selected.length === 0) {
+                alert('선택된 회원이 없습니다.');
+                return;
+            }
+
+            fetch('/payment/unpaid/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(selected)
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert('등록이 완료되었습니다.');
+                        location.reload();
+                    } else {
+                        alert('등록에 실패했습니다.');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('오류가 발생했습니다.');
+                });
+        }
+    </script>
+
+</main>
+</body>
+</html>

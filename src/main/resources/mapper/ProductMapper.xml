@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.managesolution.mapper.ProductMapper">
+
+    <select id="findById" resultType="Product">
+        SELECT *
+        FROM product
+        WHERE productId = #{productId}
+    </select>
+
+    <!-- 상품 전체 조회 -->
+    <select id="findAll" resultType="Product">
+        SELECT *
+        FROM product
+    </select>
+
+    <!-- 상품 등록 -->
+    <insert id="insert" parameterType="Product">
+        INSERT INTO product (
+            name, type, duration, count, price, description, isActive , createdAt
+        ) VALUES (
+                     #{name}, #{type}, #{duration}, #{count}, #{price}, #{description}, #{isActive}, NOW()
+                 )
+    </insert>
+
+    <update id="update" parameterType="Product">
+        UPDATE product
+        SET name = #{name},
+            type = #{type},
+            duration = #{duration},
+            count = #{count},
+            price = #{price},
+            description = #{description},
+            isActive = #{isActive}
+        WHERE productId = #{productId}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE
+        FROM product
+        where productId = #{productId}
+    </delete>
+
+<!--    회원권 상품 조회-->
+    <select id="findMembershipProducts" resultType="Product">
+        SELECT *
+        FROM product
+        WHERE type = 'MEMBERSHIP'
+        AND isActive = true
+    </select>
+
+    <!-- PT 상품 조회-->
+    <select id="findPtProducts" resultType="Product">
+        SELECT *
+        FROM product
+        WHERE type = 'PT'
+        AND isActive = true
+    </select>
+
+</mapper>

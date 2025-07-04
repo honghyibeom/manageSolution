@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>회원 CARE</title>
+    <style>
+        .table-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            height: 100%;
+        }
+        .table-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .table-description {
+            font-size: 0.85rem;
+            color: gray;
+            margin-bottom: 1rem;
+        }
+        .scroll-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<main layout:fragment="content">
+    <div class="container-fluid py-4">
+        <h4 class="fw-bold mb-4">회원 CARE</h4>
+
+        <!-- 검색 영역 -->
+        <form class="d-flex align-items-center gap-2 mb-4" th:action="@{/care}" method="get">
+            <input type="text" class="form-control" name="keyword"
+                   placeholder="이름 또는 전화번호를 입력하세요."
+                   th:value="${keyword}" style="width: 300px;" />
+            <button type="submit" class="btn btn-outline-secondary">검색</button>
+        </form>
+
+        <!-- 메인 2단 테이블 -->
+        <div class="row g-4">
+            <!-- 첫 수업 CARE -->
+            <div class="col-md-6">
+                <div class="table-container">
+                    <div class="table-title">PT 수업 CARE</div>
+                    <div class="table-description">🩺 마감순으로 PT 수업을 수강한 회원님들 입니다.</div>
+
+                    <div class="scroll-table">
+                        <table class="table table-bordered text-center align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>이름</th>
+                                <th>전화번호</th>
+                                <th>사용 횟수</th>
+                                <th>총 횟수</th>
+                                <th>시작일</th>
+                                <th>종료일</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="pt : ${ptMembers}">
+                                <td th:text="${pt.name}"></td>
+                                <td th:text="${pt.phone}"></td>
+                                <td th:text="${pt.remainingCount}"></td>
+                                <td th:text="${pt.totalCount}"></td>
+                                <td th:text="${#temporals.format(pt.startDate, 'yyyy-MM-dd')}"></td>
+                                <td th:text="${#temporals.format(pt.endDate, 'yyyy-MM-dd')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 수업 관리 CARE -->
+            <div class="col-md-6">
+                <div class="table-container">
+                    <div class="table-title">회원 CARE</div>
+                    <div class="table-description">📆 마감 순으로 나열된 회원님들 입니다.</div>
+
+                    <div class="scroll-table">
+                        <table class="table table-bordered text-center align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>이름</th>
+                                <th>전화번호</th>
+                                <th>회원권</th>
+                                <th>시작일</th>
+                                <th>종료일</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="membership : ${membershipMembers}">
+                                <td th:text="${membership.name}"></td>
+                                <td th:text="${membership.phone}"></td>
+                                <td th:text="${membership.productName}"></td>
+                                <td th:text="${#temporals.format(membership.startDate, 'yyyy-MM-dd')}"></td>
+                                <td th:text="${#temporals.format(membership.endDate, 'yyyy-MM-dd')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</html>

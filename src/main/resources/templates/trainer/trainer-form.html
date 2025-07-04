@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+  <title th:text="${trainer.trainerId != null} ? '강사 수정' : '강사 등록'">강사 등록</title>
+  <style>
+    .form-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<main layout:fragment="content">
+  <div class="container py-4 form-wrapper">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h4 class="fw-bold mb-4" th:text="${trainer.trainerId != null} ? '강사 수정' : '강사 등록'">강사 등록</h4>
+
+        <form th:action="${trainer.trainerId != null} ? @{'/trainer/' + ${trainer.trainerId} + '/edit'} : @{/trainer/register}"
+              method="post">
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">이메일</label>
+              <input type="email" name="email" class="form-control"
+                     th:value="${trainer.email}" th:readonly="${trainer.trainerId != null}" required />
+            </div>
+
+            <div class="col-md-6 mb-3" th:if="${trainer.trainerId == null}">
+              <label class="form-label">비밀번호</label>
+              <input type="password" name="password" class="form-control" required />
+            </div>
+          </div>
+
+          <div class="row" th:if="${trainer.trainerId == null}">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">비밀번호 확인</label>
+              <input type="password" name="passwordConfirm" class="form-control" required />
+            </div>
+
+
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">이름</label>
+              <input type="text" name="name" class="form-control" th:value="${trainer.name}" required />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">전화번호</label>
+              <input type="text" name="phone" class="form-control" th:value="${trainer.phone}" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">생년월일</label>
+              <input type="date" name="birthDate" class="form-control"
+                     th:value="${#temporals.format(trainer.birthDate, 'yyyy-MM-dd')}" />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">성별</label>
+              <select name="gender" class="form-select">
+                <option value="male" th:selected="${trainer.gender == 'male'}">남성</option>
+                <option value="female" th:selected="${trainer.gender == 'female'}">여성</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">경력(년)</label>
+              <input type="text" name="careerYears" class="form-control"
+                     th:value="${trainer.careerYears}" />
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">기본급</label>
+              <input type="text" name="baseSalary" class="form-control"
+                     th:value="${trainer.baseSalary}" />
+              </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">수당</label>
+              <input type="text" name="payPerSession" class="form-control"
+                     th:value="${trainer.payPerSession}" />
+              </select>
+            </div>
+          </div>
+
+
+          <input type="hidden" name="role" value="trainer" />
+
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary" th:text="${trainer.trainerId != null} ? '수정' : '등록'">등록</button>
+            <a th:href="@{/trainer}" class="btn btn-secondary">취소</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+</html>

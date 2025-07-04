@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.managesolution.mapper.MemberShipMapper">
+    <insert id="saveMembership" parameterType="Membership">
+        INSERT INTO membership (memberId, productId, startDate, endDate, price, created_at, isActive)
+        VALUES (#{memberId}, #{productId}, #{startDate}, #{endDate}, #{price}, #{createdAt},#{isActive})
+    </insert>
+
+    <select id="getAllCareMembers" resultType="MemberShipCareDTO">
+        SELECT  m.name,
+                m.phone,
+                p.name as productName,
+                ms.startDate,
+                ms.endDate
+        FROM membership ms
+                INNER JOIN member m
+                        ON ms.memberId = m.memberId
+                INNER JOIN product p
+                        ON ms.productId = p.productId
+        ORDER BY ms.endDate
+    </select>
+
+    <update id="deactivateByMemberId" parameterType="long">
+        UPDATE membership
+        SET isActive = false
+        WHERE memberId = #{memberId}
+        AND isActive = true
+    </update>
+
+
+    <!--    <update id="updateMembership" parameterType="Membership">-->
+<!--        UPDATE pt_package-->
+<!--        SET productId       = #{productId},-->
+<!--            startDate       = #{startDate},-->
+<!--            endDate         = #{endDate},-->
+<!--            price           = #{price}-->
+<!--        WHERE memberId = #{memberId}-->
+<!--    </update>-->
+
+    <!--   회원 이름 검색-->
+    <select id="findByNameContaining" resultType="MemberShipCareDTO">
+        SELECT  m.name,
+                m.phone,
+                p.name as productName,
+                ms.startDate,
+                ms.endDate
+        FROM membership ms
+                 INNER JOIN member m
+                            ON ms.memberId = m.memberId
+                 INNER JOIN product p
+                            ON ms.productId = p.productId
+        WHERE m.name LIKE CONCAT(#{keyword}, '%')
+        ORDER BY ms.endDate
+    </select>
+
+    <!-- 회원 폰 번호 검색-->
+    <select id="findByPhoneContaining" resultType="MemberShipCareDTO">
+        SELECT  m.name,
+                m.phone,
+                p.name as productName,
+                ms.startDate,
+                ms.endDate
+        FROM membership ms
+                 INNER JOIN member m
+                            ON ms.memberId = m.memberId
+                 INNER JOIN product p
+                            ON ms.productId = p.productId
+        WHERE m.phone LIKE CONCAT(#{keyword}, '%')
+        ORDER BY ms.endDate
+    </select>
+
+    <select id="findByMemberId" parameterType="long" resultType="Membership">
+        SELECT top 1 memberId, productId, startDate, endDate, price
+        FROM membership
+        where memberId = #{memberId}
+        ORDER BY endDate DESC
+    </select>
+
+    <update id="updatePaymentId">
+        UPDATE membership
+        SET paymentId = #{paymentId}
+        WHERE memberId = #{memberId} AND paymentId IS NULL
+    </update>
+
+</mapper>

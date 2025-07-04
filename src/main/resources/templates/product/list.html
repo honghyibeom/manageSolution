@@ -1,0 +1,137 @@
+<!-- templates/product/list.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>상품 목록</title>
+</head>
+<body>
+<main layout:fragment="content">
+  <div class="container">
+    <h4 class="fw-bold mb-4">상품 목록</h4>
+
+    <!-- 상품 유형 필터 + 등록 버튼 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <!-- 좌측: 필터 탭 -->
+      <div class="btn-group" role="group">
+        <a th:href="@{/products(type='ALL')}"
+           class="btn"
+           th:classappend="${type == 'ALL'} ? 'btn-primary' : 'btn-outline-secondary'">
+          전체
+        </a>
+        <a th:href="@{/products(type='MEMBERSHIP')}"
+           class="btn"
+           th:classappend="${type == 'MEMBERSHIP'} ? 'btn-primary' : 'btn-outline-secondary'">
+          회원권
+        </a>
+        <a th:href="@{/products(type='PT')}"
+           class="btn"
+           th:classappend="${type == 'PT'} ? 'btn-primary' : 'btn-outline-secondary'">
+          PT권
+        </a>
+      </div>
+
+      <!-- 우측: 등록 버튼 -->
+      <button type="button" class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#productModal"
+              onclick="openRegisterModal()">
+        + 상품 등록
+      </button>
+    </div>
+
+    <!-- ✅ 카드 기반 상품 목록 -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      <div class="col" th:each="product : ${products}">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title" th:text="${product.name}">상품명</h5>
+            <h6 class="card-subtitle mb-2 text-muted" th:text="${product.type == 'MEMBERSHIP' ? '회원권' : 'PT'}"></h6>
+            <p class="card-text">
+              유효기간: <span th:text="${product.duration + '일'}"></span><br />
+              PT 횟수: <span th:text="${product.count != null ? product.count + '회' : '-'}"></span><br />
+              가격: <strong th:text="${#numbers.formatInteger(product.price, 3, 'COMMA') + '원'}"></strong><br />
+              상태:
+              <span th:text="${product.isActive ? '활성' : '비활성'}"
+                    th:classappend="${product.isActive ? 'text-success' : 'text-danger'}"></span><br />
+              등록일: <span th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd')}"></span>
+            </p>
+            <!-- 수정 버튼 -->
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    th:onclick="'loadProductAndOpenModal(' + ${product.productId} + ')'">
+              수정
+            </button>
+            <!-- 삭제 버튼 -->
+            <form th:action="@{|/products/${product.productId}/delete|}" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-outline-danger"
+                      onclick="return confirm('정말 삭제하시겠습니까?')">
+                삭제
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ 상품 등록/수정 모달 include -->
+  <div th:replace="~{product/modal :: productForm}"></div>
+
+  <!-- ✅ 자바스크립트: 등록/수정 -->
+  <script th:inline="javascript">
+
+    function openRegisterModal() {
+      const form = document.querySelector('#productModal form');
+      form.reset(); // 모든 필드 초기화
+      form.querySelector('[name="productId"]').value = ''; // ID 비우기
+      form.querySelector('[name="isActive"][value="true"]').checked = true; // 기본값 체크
+      document.getElementById('productModalLabel').textContent = '상품 등록';
+    }
+
+
+
+    // 서버에서 JSON 데이터 요청 → 모달 열기
+    function loadProductAndOpenModal(productId) {
+      fetch(`/products/${productId}/json`)
+              .then(response => {
+                if (!response.ok) throw new Error("데이터를 불러오지 못했습니다.");
+                return response.json();
+              })
+              .then(product => {
+                openEditModal(product);
+              })
+              .catch(err => alert(err.message));
+    }
+
+    // 모달에 데이터 채우기
+    function openEditModal(product) {
+      const form = document.querySelector('#productModal form');
+      form.reset();
+
+      form.querySelector('[name="productId"]').value = product.productId;
+      form.querySelector('[name="name"]').value = product.name;
+      form.querySelector('[name="type"]').value = product.type;
+      form.querySelector('[name="duration"]').value = product.duration;
+      form.querySelector('[name="count"]').value = product.count ?? '';
+      form.querySelector('[name="price"]').value = product.price;
+
+      // ✅ 수정: isActive → 정확한 name 사용
+      form.querySelector('[name="isActive"][value="' + product.isActive + '"]').checked = true;
+
+      form.querySelector('[name="description"]').value = product.description ?? '';
+
+      // 상태가 있으면 설정
+      const statusRadio = form.querySelector('[name="status"][value="' + product.status + '"]');
+      if (statusRadio) statusRadio.checked = true;
+
+      document.getElementById('productModalLabel').textContent = '상품 수정';
+      new bootstrap.Modal(document.getElementById('productModal')).show();
+    }
+  </script>
+
+</main>
+</body>
+</html>

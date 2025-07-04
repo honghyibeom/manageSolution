@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.managesolution.mapper.PtPackageMapper">
+
+<!--    pt를 등록한 회원 조회-->
+    <select id="getAllCareMembers" resultType="PtCareDTO">
+        SELECT
+            m.name,
+            m.phone,
+            p.totalCount,
+            p.remainingCount,
+            p.startDate,
+            p.endDate
+        FROM pt_package p
+                INNER JOIN member m
+                        ON p.memberId = m.memberId
+        ORDER BY p.endDate
+    </select>
+
+    <insert id="savePtPackage" parameterType="PtPackage">
+        INSERT INTO pt_package (memberId, trainerId, productId, totalCount, remainingCount,startDate, endDate, price, created_at)
+        VALUES (#{memberId}, #{trainerId}, #{productId}, #{totalCount}, #{remainingCount}, #{startDate}, #{endDate}, #{price}, #{createdAt})
+    </insert>
+
+    <update id="deactivateByMemberId" parameterType="long">
+        UPDATE pt_package
+        SET isActive = false
+        WHERE memberId = #{memberId} AND
+              isActive = true
+    </update>
+
+
+<!--    <update id="updatePtPackage" parameterType="PtPackage">-->
+<!--        UPDATE pt_package-->
+<!--        SET trainerId       = #{trainerId},-->
+<!--            productId       = #{productId},-->
+<!--            startDate       = #{startDate},-->
+<!--            endDate         = #{endDate},-->
+<!--            totalCount      = #{totalCount},-->
+<!--            remainingCount  = #{remainingCount},-->
+<!--            price           = #{price}-->
+<!--        WHERE memberId = #{memberId}-->
+<!--    </update>-->
+
+    <!--   회원 이름 검색-->
+    <select id="findByNameContaining" resultType="PtCareDTO">
+        SELECT m.name,
+               m.phone,
+               p.totalCount,
+               p.remainingCount,
+               p.startDate,
+               p.endDate
+        FROM pt_package p
+                 INNER JOIN member m
+                            ON p.memberId = m.memberId
+        WHERE m.name LIKE CONCAT(#{keyword}, '%')
+        ORDER BY p.endDate
+    </select>
+
+    <!-- 회원 폰 번호 검색-->
+    <select id="findByPhoneContaining" resultType="PtCareDTO">
+        SELECT m.name,
+               m.phone,
+               p.totalCount,
+               p.remainingCount,
+               p.startDate,
+               p.endDate
+        FROM pt_package p
+                 INNER JOIN member m
+                            ON p.memberId = m.memberId
+        WHERE m.phone LIKE CONCAT(#{keyword}, '%')
+        ORDER BY p.endDate
+    </select>
+
+    <select id="findByTrainerId" parameterType="long" resultType="PtMemberDTO">
+        SELECT
+            p.memberId,
+            m.name,
+            m.phone,
+            m.birthDate,
+            p.totalCount,
+            p.remainingCount,
+            p.startDate,
+            p.endDate
+        FROM pt_package p
+                 INNER JOIN member m
+                            ON p.memberId = m.memberId
+        WHERE p.trainerId = #{trainerId}
+        ORDER BY m.name
+    </select>
+
+<!--    한 회원의 PtPackage 조회-->
+    <select id="findPackageIdByMemberId" parameterType="long" resultType="long">
+        SELECT top 1 packageId
+        FROM pt_package
+        WHERE memberId = #{memberId}
+    </select>
+
+    <update id="updateTrainerByMemberId">
+        UPDATE pt_package
+        SET trainerId = #{trainerId}
+        WHERE memberId = #{memberId}
+    </update>
+
+    <update id="increaseRemainingCount">
+        UPDATE pt_package
+        SET remainingCount = remainingCount + 1
+        WHERE packageId = #{packageId}
+    </update>
+
+    <select id="findByMemberId" parameterType="long" resultType="PtPackage">
+        SELECT top 1 memberId, trainerId, productId, totalCount, remainingCount, startDate, endDate, price
+        FROM pt_package
+        WHERE memberId = #{memberId}
+        ORDER BY endDate DESC
+    </select>
+
+    <update id="updatePaymentId">
+        UPDATE pt_package
+        SET paymentId = #{paymentId}
+        WHERE memberId = #{memberId} AND paymentId IS NULL
+    </update>
+</mapper>

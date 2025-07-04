@@ -4,17 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PtSession {
-    private Long sessionId;
+    private Long ptSessionId;
     private Long memberId;
     private Long trainerId;
-    private LocalDateTime sessionTime;
-    private String status; // RESERVED, COMPLETED, CANCELED
+    private Long packageId;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate sessionDate;
+    @DateTimeFormat(pattern = "HH:mm")
+    private LocalTime sessionTime;
 }

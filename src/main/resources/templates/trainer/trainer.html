@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>강사 관리</title>
+    <style>
+        .scroll-table {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .clickable-row {
+            cursor: pointer;
+        }
+        .clickable-row:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+
+<main layout:fragment="content">
+        <div class="container">
+            <h4 class="fw-bold mb-4">강사 관리</h4>
+
+            <!-- 트레이너 목록 -->
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-10 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="text-black fw-bold">강사 목록</span>
+                            <a th:href="@{/trainer/register}" class="btn btn-primary btn-sm">+ 강사 등록</a>
+                        </div>
+                        <div class="card-body scroll-table">
+                            <table class="table table-striped table-hover text-center align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>이름</th>
+                                    <th>연락처</th>
+                                    <th>성별</th>
+                                    <th>생년월일</th>
+                                    <th>이메일</th>
+                                    <th>경력(년)</th>
+                                    <th>수당</th>
+                                    <th>월급</th>
+                                    <th>관리</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="pt : ${trainers}"
+                                    th:attr="data-href=@{'/trainer/' + ${pt.trainerId}}"
+                                    th:classappend="${selectedTrainerId == pt.trainerId} ? 'table-primary'"
+                                    class="clickable-row">
+                                    <td th:text="${pt.name}"></td>
+                                    <td th:text="${pt.phone}"></td>
+                                    <td th:text="${pt.gender == 'male'} ? '남' : '여'"></td>
+                                    <td th:text="${#temporals.format(pt.birthDate, 'yyyy-MM-dd')}"></td>
+                                    <td th:text="${pt.email}"></td>
+                                    <td th:text="${pt.careerYears}"></td>
+                                    <td th:text="${pt.payPerSession}"></td>
+                                    <td th:text="${pt.baseSalary}"></td>
+                                    <td>
+                                        <a th:href="@{'/trainer/' + ${pt.trainerId} + '/edit'}" class="btn btn-sm btn-outline-secondary">수정</a>
+                                        <form th:action="@{'/trainer/' + ${pt.trainerId} + '/delete'}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 해당 트레이너 회원 목록 -->
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-10">
+                    <div class="card shadow-sm">
+                        <div class="card-header fw-bold">
+                            <span th:if="${selectedTrainerId != null}">강사 회원 목록</span>
+                            <span th:if="${selectedTrainerId == null}" class="text-muted">강사를 선택해주세요</span>
+                        </div>
+
+                        <!-- ✅ 폼으로 감싸기 -->
+                        <form th:action="@{/trainer/change}" method="post">
+                            <div class="card-body scroll-table">
+                                <table class="table table-striped table-hover text-center align-middle"
+                                       th:if="${ptMembers != null and !ptMembers.isEmpty()}">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAll" onclick="toggleAll(this)"/></th>
+                                        <th>이름</th>
+                                        <th>연락처</th>
+                                        <th>생년월일</th>
+                                        <th>사용 횟수</th>
+                                        <th>남는 횟수</th>
+                                        <th>시작일</th>
+                                        <th>종료일</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="pm : ${ptMembers}">
+                                        <td><input type="checkbox" name="selectedMemberIds" th:value="${pm.memberId}"/></td>
+                                        <td th:text="${pm.name}"></td>
+                                        <td th:text="${pm.phone}"></td>
+                                        <td th:text="${#temporals.format(pm.birth, 'yyyy-MM-dd')}"></td>
+                                        <td th:text="${pm.remainingCount}"></td>
+                                        <td th:text="${pm.totalCount}"></td>
+                                        <td th:text="${#temporals.format(pm.startDate, 'yyyy-MM-dd')}"></td>
+                                        <td th:text="${#temporals.format(pm.endDate, 'yyyy-MM-dd')}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                                <p class="text-muted" th:if="${ptMembers == null or ptMembers.isEmpty()}">등록된 회원이 없습니다.</p>
+                            </div>
+
+                            <!-- ✅ 일괄 트레이너 변경 영역 -->
+                            <div class="card-footer d-flex justify-content-end align-items-center gap-2" th:if="${ptMembers != null and !ptMembers.isEmpty()}">
+                                <select name="newTrainerId" class="form-select w-auto">
+                                    <option value="">트레이너 선택</option>
+                                    <option th:each="t : ${trainers}" th:value="${t.trainerId}" th:text="${t.name}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-outline-primary"
+                                        onclick="return confirm('선택된 회원들의 트레이너를 변경하시겠습니까?')">트레이너 변경</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- ✅ 행 클릭 스크립트 -->
+    <script>
+        function toggleAll(masterCheckbox) {
+            document.querySelectorAll("input[name='selectedMemberIds']").forEach(cb => {
+                cb.checked = masterCheckbox.checked;
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(function (row) {
+                row.addEventListener("click", function (e) {
+                    if (e.target.closest('a') || e.target.closest('button')) return;
+                    window.location = this.dataset.href;
+                });
+            });
+        });
+    </script>
+</main>
+</html>

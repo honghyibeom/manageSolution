@@ -16,7 +16,7 @@ public class AppUser {
     private String email;
     private String password;
     private String name;
-    private String phone;
     private String role; // ADMIN or Trainer
     private LocalDateTime createdAt;
+
 }

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class Attendance {
     private Long attendanceId;
     private Long memberId;
-    private LocalDateTime checkIn;
-    private LocalDateTime checkOut;
+    private Long sessionId;
+    private String status;
+    private LocalDateTime attendedAt;
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.managesolution.mapper.TrainerMapper">
+
+    <select id="getAllTrainer" parameterType="string" resultType="TrainerDTO">
+        SELECT
+            t.trainerId,
+            a.name,
+            t.phone,
+            t.birthDate,
+            a.email,
+            t.gender,
+            t.payPerSession,
+            t.baseSalary,
+            t.careerYears
+        FROM trainer t
+                JOIN app_user a ON t.trainerId = a.userId
+    </select>
+
+    <insert id="insert" parameterType="Trainer" keyProperty="trainerId">
+        INSERT INTO trainer (trainerId, phone, gender, birthDate, baseSalary, payPerSession, careerYears, created_at)
+        VALUES (#{trainerId}, #{phone}, #{gender}, #{birthDate}, #{baseSalary}, #{payPerSession},#{careerYears},#{createdAt})
+    </insert>
+
+</mapper>

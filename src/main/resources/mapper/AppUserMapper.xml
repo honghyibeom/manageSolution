@@ -17,4 +17,9 @@
         WHERE email = #{email}
     </select>
 
+    <insert id="insert" parameterType="AppUser" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO app_user (email, password, name, role, created_at)
+        VALUES (#{email}, #{password}, #{name}, #{role}, #{createdAt})
+    </insert>
+
 </mapper>

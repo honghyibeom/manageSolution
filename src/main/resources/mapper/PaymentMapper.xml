@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.managesolution.mapper.PaymentMapper">
+    <select id="findPaymentHistory" resultType="PaymentHistoryDTO">
+        SELECT
+            p.paidAt AS paymentDate,
+            m.name AS memberName,
+            m.phone,
+            prod.name AS productName,
+            prod.type AS productType,
+            p.amount,
+            p.method,
+            COALESCE(ms.startDate, pp.startDate) AS startDate,
+            COALESCE(ms.endDate, pp.endDate) AS endDate
+        FROM payment p
+                 INNER JOIN member m ON p.memberId = m.memberId
+                 LEFT JOIN product prod ON p.productId = prod.productId
+                 LEFT JOIN membership ms ON ms.paymentId = p.paymentId
+                 LEFT JOIN pt_package pp ON pp.paymentId = p.paymentId
+        ORDER BY p.paidAt DESC
+    </select>
+
+    <insert id="insertPayment" useGeneratedKeys="true" keyProperty="paymentId">
+        INSERT INTO payment (memberId, productId, amount, method, paidAt)
+        VALUES (#{memberId}, #{productId}, #{amount}, #{method}, #{paidAt})
+    </insert>
+
+
+</mapper>

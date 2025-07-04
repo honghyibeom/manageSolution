@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class Payment {
     private Long PaymentId;
     private Long memberId;
+    private Long productId;
     private Integer amount;
     private String method; // CASH or CARD
     private LocalDateTime paidAt;
-    private String memo;
 }
