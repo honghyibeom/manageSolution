@@ -63,6 +63,13 @@
     <div class="container-fluid py-4">
         <div class="row">
 
+            <div class="d-flex align-items-center mb-3">
+                <label for="trainerId" class="form-label"></label>
+                <select class="form-select w-auto" id="trainerId" name="trainerId">
+                    <option value="">트레이너 선택</option>
+                </select>
+            </div>
+
             <!-- ⬅ 달력 -->
             <div class="col-md-5">
                 <div class="card shadow-sm mb-5">
@@ -150,7 +157,9 @@
 
         // 켈린더 날짜 생성
         function loadCalendar(year, month) {
-            fetch(`/lecture/month?year=${year}&month=${month}`)
+            const trainerId = document.getElementById("trainerId").value;
+
+            fetch(`/lecture/month?year=${year}&month=${month}${trainerId ? `&trainerId=${trainerId}` : ""}`)
                 .then(res => res.json())
                 .then(data => drawCalendar(year, month, data));
         }
@@ -175,9 +184,9 @@
                 cell.className = "calendar-cell calendar-box";
                 const lesson = lessons.find(l => l.day === i && l.enabled);
 
-                cell.innerHTML = `<div>${i}</div>`;
+                cell.innerHTML = `<div style="font-size: 1.2rem;">${i}</div>`;
                 if (lesson && lesson.lessonCount > 0) {
-                    cell.innerHTML += `<div style="font-size:0.8rem;">수업 ${lesson.lessonCount}건</div>`;
+                    cell.innerHTML += `<div style="font-size:0.8rem; margin-top: 8px;">수업 ${lesson.lessonCount}건</div>`;
                 }
 
                 cell.onclick = () => {
@@ -196,7 +205,9 @@
 
         // 켈린더 클릭햇을때
         function loadLessonList(date) {
-            fetch(`/lecture/day?date=${date}`)
+            const trainerId = document.getElementById("trainerId").value;
+
+            fetch(`/lecture/day?date=${date}${trainerId ? `&trainerId=${trainerId}` : ""}`)
                 .then(res => res.json())
                 .then(data => {
                     console.log("🚨 받아온 데이터:", data); // 👈 데이터 형태 확인
@@ -265,6 +276,7 @@
                 });
         }
 
+        // 저번달 버튼
         function prevMonth() {
             currentMonth--;
             if (currentMonth < 1) {
@@ -274,6 +286,7 @@
             loadCalendar(currentYear, currentMonth);
         }
 
+        // 다음달 버튼
         function nextMonth() {
             currentMonth++;
             if (currentMonth > 12) {
@@ -287,6 +300,7 @@
             loadCalendar(currentYear, currentMonth);
         });
 
+        // 모달창 오픈
         function openRegisterModal() {
             if (!selectedDate) {
                 alert("날짜를 먼저 선택하세요.");
@@ -300,32 +314,31 @@
                 return;
             }
 
-            loadTrainerList();
-
+            loadTrainerList("trainerIdModal");
             dateInput.value = selectedDate;
 
             const modal = new bootstrap.Modal(document.getElementById('registerModal'));
             modal.show();
         }
 
-        function loadTrainerList() {
+        // 모든 트레이너 조회
+        function loadTrainerList(targetId = "trainerId") {
+            const select = document.getElementById(targetId);
+            select.innerHTML = '<option value="">트레이너 선택</option>';
+
             fetch("/lecture/trainers")
                 .then(res => res.json())
                 .then(trainers => {
-                    console.log("받은 트레이너 리스트:", trainers); // ✅ 이걸 반드시 확인
-
-                    const select = document.getElementById("trainerId");
-                    select.innerHTML = '<option value="">트레이너 선택</option>';
-
                     trainers.forEach(t => {
                         const option = document.createElement("option");
-                        option.value = t.userId; // 이 값이 undefined면 문제가 여기에 있음
+                        option.value = t.trainerId;
                         option.textContent = t.name;
                         select.appendChild(option);
                     });
                 });
         }
 
+        // 트레이너를 선택했을때 등록한 회원 조회
         function loadMembersByTrainer(trainerId) {
             const memberSelect = document.getElementById("memberId");
             memberSelect.innerHTML = '<option value="">회원 선택</option>'; // 초기화
@@ -348,6 +361,7 @@
                 });
         }
 
+        // 회원 선택했을때 상품Id 반환 (PtSession 저장을 하기위해)
         function loadPackageByMember(memberId) {
             const packageInput = document.getElementById("packageId");
 
@@ -406,12 +420,15 @@
                 });
         }
 
+        //수업 반복 등록 여부
         document.getElementById("repeatEnabled").addEventListener("change", function () {
             const options = document.getElementById("repeatOptions");
             options.style.display = this.checked ? "block" : "none";
         });
 
+        // 페이지 로드할때
         document.addEventListener("DOMContentLoaded", () => {
+            loadTrainerList("trainerId");
             const form = document.getElementById("registerForm");
 
             form.addEventListener("submit", function (e) {
@@ -441,11 +458,22 @@
                         bootstrap.Modal.getInstance(document.getElementById("registerModal")).hide();
                         loadCalendar(currentYear, currentMonth);
                         loadLessonList(selectedDate);
+                        loadTrainerList("trainerId");
                     })
                     .catch(err => {
                         alert("등록 실패: " + err.message);
                     });
             });
+        });
+
+        // 트레이너 드롭다운 변경시
+        document.getElementById("trainerId").addEventListener("change", () => {
+            // 달력 새로고침 (선택된 트레이너 기준으로)
+            loadCalendar(currentYear, currentMonth);
+
+            if (selectedDate) {
+                loadLessonList(selectedDate);
+            }
         });
     </script>
 </main>

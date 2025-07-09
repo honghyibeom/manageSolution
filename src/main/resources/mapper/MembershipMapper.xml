@@ -31,14 +31,14 @@
     </update>
 
 
-    <!--    <update id="updateMembership" parameterType="Membership">-->
-<!--        UPDATE pt_package-->
-<!--        SET productId       = #{productId},-->
-<!--            startDate       = #{startDate},-->
-<!--            endDate         = #{endDate},-->
-<!--            price           = #{price}-->
-<!--        WHERE memberId = #{memberId}-->
-<!--    </update>-->
+        <update id="updateMembership" parameterType="Membership">
+        UPDATE membership
+        SET productId       = #{productId},
+            startDate       = #{startDate},
+            endDate         = #{endDate},
+            price           = #{price}
+        WHERE memberId = #{memberId}
+    </update>
 
     <!--   회원 이름 검색-->
     <select id="findByNameContaining" resultType="MemberShipCareDTO">

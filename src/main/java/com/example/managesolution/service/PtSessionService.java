@@ -26,11 +26,18 @@ public class PtSessionService {
     private final PtSessionMapper ptSessionMapper;
 
 
-    public List<DayLessonDTO> getLessonCalendar(int year, int month) {
+    public List<DayLessonDTO> getLessonCalendar(int year, int month, Long trainerId) {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.plusMonths(1);
 
-        List<DayLessonDTO> result = ptSessionMapper.getSessionCountByMonth(start, end);
+        // 🔷 트레이너 조건에 따라 Mapper 호출
+        List<DayLessonDTO> result;
+        if (trainerId != null) {
+            result = ptSessionMapper.getSessionCountByMonthAndTrainer(start, end, trainerId);
+        } else {
+            result = ptSessionMapper.getSessionCountByMonth(start, end);
+        }
+
 
         Map<Integer, Integer> dayCountMap = result.stream()
                 .collect(Collectors.toMap(DayLessonDTO::getDay, DayLessonDTO::getLessonCount));
@@ -55,8 +62,12 @@ public class PtSessionService {
         return calendar;
     }
 
-    public List<LessonDTO> getLessonsByDate(LocalDate date) {
-        return ptSessionMapper.selectLessonsByDate(Date.valueOf(date));
+    public List<LessonDTO> getLessonsByDate(LocalDate date, Long trainerId) {
+        if (trainerId != null) {
+            return ptSessionMapper.selectLessonsByDateAndTrainer(Date.valueOf(date), trainerId);
+        } else {
+            return ptSessionMapper.selectLessonsByDate(Date.valueOf(date));
+        }
     }
 
     @Transactional

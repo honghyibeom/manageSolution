@@ -24,16 +24,16 @@ private final MemberMapper memberMapper;
         private final MemberShipMapper memberShipMapper;
         private final PtPackageMapper ptPackageMapper;
 
-        public List<MemberUnpaidDTO> getUnpaidMembers() {
-                return memberMapper.findUnpaidMembers();
+        public List<MemberUnpaidDTO> getUnpaidMembers(String keyword) {
+                return memberMapper.findUnpaidMembers(keyword);
         }
 
-        public List<MemberExpiredDTO> getExpiredMembers() {
-                return memberMapper.findExpiredMembers();
+        public List<MemberExpiredDTO> getExpiredMembers(String keyword) {
+                return memberMapper.findExpiredMembers(keyword);
         }
 
-        public List<PaymentHistoryDTO> getPaymentHistory() {
-                return paymentMapper.findPaymentHistory();
+        public List<PaymentHistoryDTO> getPaymentHistory(String keyword) {
+                return paymentMapper.findPaymentHistory(keyword);
         }
 
         @Transactional

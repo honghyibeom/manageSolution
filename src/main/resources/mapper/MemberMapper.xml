@@ -105,7 +105,11 @@
                  LEFT JOIN pt_package pp ON pp.memberId = m.memberId
                  LEFT JOIN payment pay ON pay.memberId = m.memberId
                  LEFT JOIN product p ON (ms.productId = p.productId OR pp.productId = p.productId)
-        WHERE (ms.paymentId IS NULL OR pp.paymentId IS NOT NULL)
+        WHERE (ms.paymentId IS NULL AND pp.paymentId IS NULL)
+        AND p.productId IS NOT NULL
+        <if test="keyword != null and keyword != ''">
+            AND m.name LIKE CONCAT('%', #{keyword}, '%')
+        </if>
         ORDER BY m.created_at DESC
     </select>
 
@@ -113,8 +117,8 @@
         SELECT
             m.memberId,
             GREATEST(
-                    COALESCE(ms.endDate, NULL),
-                    COALESCE(pp.endDate, NULL)
+                    COALESCE(ms.endDate, '1900-01-01'),
+                    COALESCE(pp.endDate, '1900-01-01')
             ) AS expiredDate,
             m.name AS memberName,
             m.phone,
@@ -135,6 +139,9 @@
             FROM pt_package pp2
             WHERE pp2.memberId = m.memberId AND pp2.isActive = TRUE
         )
+        <if test="keyword != null and keyword != ''">
+            AND m.name LIKE CONCAT('%', #{keyword}, '%')
+        </if>
         ORDER BY expiredDate ASC
     </select>
 

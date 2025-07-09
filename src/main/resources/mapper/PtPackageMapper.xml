@@ -33,17 +33,17 @@
     </update>
 
 
-<!--    <update id="updatePtPackage" parameterType="PtPackage">-->
-<!--        UPDATE pt_package-->
-<!--        SET trainerId       = #{trainerId},-->
-<!--            productId       = #{productId},-->
-<!--            startDate       = #{startDate},-->
-<!--            endDate         = #{endDate},-->
-<!--            totalCount      = #{totalCount},-->
-<!--            remainingCount  = #{remainingCount},-->
-<!--            price           = #{price}-->
-<!--        WHERE memberId = #{memberId}-->
-<!--    </update>-->
+    <update id="updatePtPackage" parameterType="PtPackage">
+        UPDATE pt_package
+        SET trainerId       = #{trainerId},
+            productId       = #{productId},
+            startDate       = #{startDate},
+            endDate         = #{endDate},
+            totalCount      = #{totalCount},
+            remainingCount  = #{remainingCount},
+            price           = #{price}
+        WHERE memberId = #{memberId}
+    </update>
 
     <!--   회원 이름 검색-->
     <select id="findByNameContaining" resultType="PtCareDTO">

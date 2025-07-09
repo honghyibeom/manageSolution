@@ -20,6 +20,11 @@
                  LEFT JOIN product prod ON p.productId = prod.productId
                  LEFT JOIN membership ms ON ms.paymentId = p.paymentId
                  LEFT JOIN pt_package pp ON pp.paymentId = p.paymentId
+        <where>
+            <if test="keyword != null and keyword != ''">
+                 m.name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
         ORDER BY p.paidAt DESC
     </select>
 

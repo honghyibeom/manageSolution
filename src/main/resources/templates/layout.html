@@ -11,6 +11,15 @@
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
     <link th:href="@{/css/styles.css}" rel="stylesheet" />
 </head>
+<style>
+    .logo-hover {
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .logo-hover:hover {
+        transform: scale(1.1);
+    }
+</style>
 
 <!-- ✅ Flexbox 기반 footer 고정 레이아웃 -->
 <body class="d-flex flex-column min-vh-100">

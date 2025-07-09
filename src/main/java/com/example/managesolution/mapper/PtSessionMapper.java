@@ -16,7 +16,17 @@ public interface PtSessionMapper {
     List<DayLessonDTO> getSessionCountByMonth(@Param("startDate") LocalDate startDate,
                                               @Param("endDate") LocalDate endDate);
 
+    List<DayLessonDTO> getSessionCountByMonthAndTrainer(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("trainerId") Long trainerId
+    );
+
+
     List<LessonDTO> selectLessonsByDate(@Param("sessionDate") Date sessionDate);
+
+    List<LessonDTO> selectLessonsByDateAndTrainer(@Param("sessionDate") Date sessionDate,
+                                                  @Param("trainerId") Long trainerId);
 
     void insert(PtSession session);
 

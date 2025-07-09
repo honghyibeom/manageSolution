@@ -14,7 +14,7 @@ public interface MemberShipMapper {
 
     void deactivateByMemberId(Long memberId);
 
-//    void updateMembership(Membership membership);
+    void updateMembership(Membership membership);
 
     List<MemberShipCareDTO> getAllCareMembers();
 

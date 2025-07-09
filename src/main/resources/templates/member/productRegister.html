@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+  <title>회원권 등록</title>
+</head>
+
+<body>
+<main layout:fragment="content" class="container mt-4">
+  <h4 class="fw-bold mb-4">회원권 등록</h4>
+
+  <form th:action="@{/members/{id}/register(id=${memberForm.memberId})}"
+        th:object="${memberForm}" method="post">
+
+    <div class="row justify-content-center">
+      <!-- 왼쪽: 회원 정보 (읽기 전용) -->
+      <div class="col-md-6">
+        <div class="card p-4 mb-4">
+          <div class="mb-3">
+            <label class="form-label">이름</label>
+            <input type="text" th:field="*{name}" class="form-control" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">전화번호</label>
+            <input type="text" th:field="*{phone}" class="form-control" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">생년월일</label>
+            <input type="date" th:field="*{birthDate}" class="form-control" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">성별</label>
+            <input type="text" th:value="${memberForm.gender}" class="form-control" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">메모</label>
+            <textarea th:field="*{memo}" class="form-control" rows="3" readonly></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 상품 등록 -->
+      <div class="col-md-6">
+        <div class="card p-4 mb-4">
+          <label class="form-label">상품 등록</label>
+          <select th:field="*{productType}" id="productType" onchange="toggleProductSection()" class="form-select mb-3">
+            <option value="">선택</option>
+            <option value="MEMBERSHIP">회원권</option>
+            <option value="PT">PT 패키지</option>
+          </select>
+
+          <!-- 회원권 -->
+          <div id="membershipSection" class="d-none">
+            <div class="mb-2">
+              <label class="form-label">회원권 상품</label>
+              <select th:field="*{membershipProductId}" id="membershipProductId" onchange="handleMembershipChange()" class="form-select">
+                <option th:each="p : ${membershipProducts}" th:value="${p.productId}"
+                        th:data-duration="${p.duration}" th:data-price="${p.price}" th:text="${p.name}"></option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">시작일</label>
+              <input type="date" th:field="*{membershipStartDate}" id="membershipStartDate" onchange="recalculateMembershipEndDate()" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">종료일</label>
+              <input type="date" th:field="*{membershipEndDate}" id="membershipEndDate" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">가격</label>
+              <input type="number" th:field="*{membershipPrice}" id="membershipPrice" class="form-control" />
+            </div>
+          </div>
+
+          <!-- PT -->
+          <div id="ptSection" class="d-none">
+            <div class="mb-2">
+              <label class="form-label">PT 상품</label>
+              <select th:field="*{ptProductId}" id="ptProductId" onchange="handlePtProductChange()" class="form-select">
+                <option th:each="p : ${ptProducts}" th:value="${p.productId}"
+                        th:data-count="${p.count}" th:data-duration="${p.duration}" th:data-price="${p.price}" th:text="${p.name}"></option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">트레이너</label>
+              <select th:field="*{trainerId}" class="form-select">
+                <option th:each="t : ${trainers}" th:value="${t.trainerId}" th:text="${t.name}"></option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">시작일</label>
+              <input type="date" th:field="*{ptStartDate}" id="ptStartDate" onchange="recalculatePtEndDate()" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">종료일</label>
+              <input type="date" th:field="*{ptEndDate}" id="ptEndDate" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">총 횟수</label>
+              <input type="number" th:field="*{ptTotalCount}" id="ptTotalCount" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">가격</label>
+              <input type="number" th:field="*{ptPrice}"  id="ptPrice" class="form-control" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-end mt-3">
+      <button type="submit" class="btn btn-primary">저장</button>
+      <a th:href="@{/payment}" class="btn btn-secondary">취소</a>
+    </div>
+  </form>
+
+  <script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      toggleProductSection();
+    });
+
+    function toggleProductSection() {
+      const type = document.getElementById("productType").value;
+
+      document.getElementById("membershipSection").classList.toggle("d-none", type !== "MEMBERSHIP");
+      document.getElementById("ptSection").classList.toggle("d-none", type !== "PT");
+
+      const mode = document.querySelector("main").dataset.mode;
+      console.log("모드 확인:", mode);
+
+        if (type === 'MEMBERSHIP') {
+          handleMembershipChange();
+        }
+        if (type === 'PT') {
+          handlePtProductChange();
+        }
+      }
+
+
+    function addDays(date, days) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result.toISOString().split('T')[0];
+    }
+
+    function handleMembershipChange() {
+      const sel = document.getElementById("membershipProductId").selectedOptions[0];
+      if (!sel) return;
+
+      const duration = parseInt(sel.dataset.duration);
+      const price = parseInt(sel.dataset.price);
+
+      document.querySelector("input[name='membershipStartDate']").value = new Date().toISOString().split('T')[0];
+
+      const startDate = document.querySelector("input[name='membershipStartDate']").value || new Date().toISOString().split('T')[0];
+      if (!isNaN(duration)) {
+        document.querySelector("input[name='membershipEndDate']").value = addDays(new Date(startDate), duration);
+      }
+      if (!isNaN(price)) {
+        document.querySelector("input[name='membershipPrice']").value = price;
+      }
+    }
+
+    function handlePtProductChange() {
+      const sel = document.getElementById("ptProductId").selectedOptions[0];
+      if (!sel) return;
+
+      const count = parseInt(sel.dataset.count);
+      const duration = parseInt(sel.dataset.duration);
+      const price = parseInt(sel.dataset.price);
+
+      document.getElementById("ptStartDate").value = new Date().toISOString().split('T')[0];
+
+      const startDate = document.getElementById("ptStartDate").value || new Date().toISOString().split('T')[0];
+      if (!isNaN(duration)) {
+        document.getElementById("ptEndDate").value = addDays(new Date(startDate), duration);
+      }
+      if (!isNaN(count)) {
+        document.getElementById("ptTotalCount").value = count;
+      }
+      if (!isNaN(price)) {
+        document.querySelector("input[name='ptPrice']").value = price;
+      }
+    }
+
+
+    function recalculateMembershipEndDate() {
+      const start = document.querySelector("input[name='membershipStartDate']").value;
+      const sel = document.getElementById("membershipProductId").selectedOptions[0];
+      if (!start || !sel) return;
+
+      const duration = parseInt(sel.dataset.duration);
+      if (!isNaN(duration)) {
+        document.querySelector("input[name='membershipEndDate']").value = addDays(new Date(start), duration);
+      }
+    }
+
+    function recalculatePtEndDate() {
+      const start = document.getElementById("ptStartDate").value;
+      const sel = document.getElementById("ptProductId").selectedOptions[0];
+      if (!start || !sel) return;
+
+      const duration = parseInt(sel.dataset.duration);
+      if (!isNaN(duration)) {
+        document.getElementById("ptEndDate").value = addDays(new Date(start), duration);
+      }
+    }
+  </script>
+</main>
+</body>
+</html>

@@ -12,6 +12,16 @@
         GROUP BY DAY_OF_MONTH(sessionDate)
     </select>
 
+    <select id="getSessionCountByMonthAndTrainer" resultType="DayLessonDTO">
+        SELECT
+            DAY_OF_MONTH(sessionDate) AS "day",
+            COUNT(*) AS lessonCount
+        FROM pt_session
+        WHERE sessionDate BETWEEN #{startDate} AND #{endDate}
+        AND trainerId = #{trainerId}
+        GROUP BY DAY_OF_MONTH(sessionDate)
+    </select>
+
     <select id="selectLessonsByDate" parameterType="date" resultType="LessonDTO">
         SELECT
             s.sessionId AS sessionId,
@@ -34,6 +44,32 @@
                  JOIN member m ON s.memberId = m.memberId
                  JOIN app_user u ON s.trainerId = u.userId
         WHERE s.sessionDate = #{sessionDate}
+        ORDER BY s.sessionTime ASC
+    </select>
+
+    <select id="selectLessonsByDateAndTrainer" parameterType="map" resultType="LessonDTO">
+        SELECT
+            s.sessionId AS sessionId,
+            s.memberId AS memberId,
+            s.packageId,
+            m.name AS memberName,
+            u.name AS trainerName,
+            s.sessionDate,
+            s.sessionTime,
+            EXISTS (
+                SELECT 1 FROM attendance a
+                WHERE a.sessionId = s.sessionId
+                  AND a.memberId = s.memberId
+            ) AS attended,
+            (select a.status from attendance a
+             where a.sessionId = s.sessionId
+               AND a.memberId = s.memberId
+                ) AS status
+        FROM pt_session s
+                 JOIN member m ON s.memberId = m.memberId
+                 JOIN app_user u ON s.trainerId = u.userId
+        WHERE s.sessionDate = #{sessionDate}
+          AND s.trainerId = #{trainerId}
         ORDER BY s.sessionTime ASC
     </select>
 

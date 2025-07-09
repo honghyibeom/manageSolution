@@ -39,14 +39,22 @@ public class PtSessionController {
 //    --------------------------------------json----------------------------------------------------------
     @ResponseBody
     @GetMapping("/month")
-    public List<DayLessonDTO> getMonthLessons(@RequestParam int year, @RequestParam int month) {
-        return ptSessionService.getLessonCalendar(year, month);
+    public List<DayLessonDTO> getMonthLessons(
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam(required = false) Long trainerId
+    ) {
+        return ptSessionService.getLessonCalendar(year, month, trainerId);
     }
+
 
     @ResponseBody
     @GetMapping("/day")
-    public List<LessonDTO> getLessonsByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ptSessionService.getLessonsByDate(date);
+    public List<LessonDTO> getLessonsByDate(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) Long trainerId
+    ) {
+        return ptSessionService.getLessonsByDate(date, trainerId);
     }
 
     @ResponseBody // JSON 반환을 위함

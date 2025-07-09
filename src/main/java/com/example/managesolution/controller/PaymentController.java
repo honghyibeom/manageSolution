@@ -1,5 +1,6 @@
 package com.example.managesolution.controller;
 
+import com.example.managesolution.data.dto.MemberExpiredDTO;
 import com.example.managesolution.data.dto.PaymentDTO;
 import com.example.managesolution.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +18,14 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping("")
-    public String list(Model model) {
-        model.addAttribute("unpaidMembers", paymentService.getUnpaidMembers());
-        model.addAttribute("expiredMembers", paymentService.getExpiredMembers());
-        model.addAttribute("paymentHistory", paymentService.getPaymentHistory());
+    public String list(@RequestParam(value = "unpaidKeyword", required = false) String unpaidKeyword,
+                       @RequestParam(value = "expiredKeyword", required = false) String expiredKeyword,
+                       @RequestParam(value = "historyKeyword", required = false) String historyKeyword,
+                       Model model) {
+        List<MemberExpiredDTO> memberExpiredDTO = paymentService.getExpiredMembers(expiredKeyword);
+        model.addAttribute("unpaidMembers", paymentService.getUnpaidMembers(unpaidKeyword));
+        model.addAttribute("expiredMembers", memberExpiredDTO);
+        model.addAttribute("paymentHistory", paymentService.getPaymentHistory(historyKeyword));
         return "payment/list";
     }
 

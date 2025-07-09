@@ -14,7 +14,7 @@ public interface PtPackageMapper {
 
     void deactivateByMemberId(Long memberId);
 
-//    void updatePtPackage(PtPackage ptPackage);
+    void updatePtPackage(PtPackage ptPackage);
 
     List<PtCareDTO> getAllCareMembers();
 

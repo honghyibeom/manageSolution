@@ -99,10 +99,6 @@ public class MemberService {
                 .build();
         memberMapper.update(member);
 
-        // 2. 기존 패키지 비활성화
-        ptPackageMapper.deactivateByMemberId(id);       // is_active = false
-        memberShipMapper.deactivateByMemberId(id);      // is_active = false
-
         // 2. 상품 등록
         if ("MEMBERSHIP".equals(dto.getProductType())) {
             Membership membership = Membership.builder()
@@ -114,7 +110,10 @@ public class MemberService {
                     .createdAt(LocalDateTime.now())
                     .isActive(true)
                     .build();
-            memberShipMapper.saveMembership(membership);
+            if (LocalDate.now().isAfter(membership.getEndDate())) {
+                membership.setIsActive(false);
+            }
+            memberShipMapper.updateMembership(membership);
 
         } else if ("PT".equals(dto.getProductType())) {
             PtPackage ptPackage = PtPackage.builder()
@@ -128,7 +127,10 @@ public class MemberService {
                     .price(dto.getPtPrice())
                     .createdAt(LocalDateTime.now())
                     .build();
-            ptPackageMapper.savePtPackage(ptPackage);
+            if (LocalDate.now().isAfter(ptPackage.getEndDate())) {
+                ptPackage.setIsActive(false);
+            }
+            ptPackageMapper.updatePtPackage(ptPackage);
         }
     }
 

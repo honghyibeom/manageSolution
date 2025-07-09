@@ -46,9 +46,9 @@ public interface MemberMapper {
                                       @Param("limit")int limit,
                                       @Param("offset")int offset);
 
-    List<MemberUnpaidDTO> findUnpaidMembers();
+    List<MemberUnpaidDTO> findUnpaidMembers(@Param("keyword") String keyword);
 
-    List<MemberExpiredDTO> findExpiredMembers();
+    List<MemberExpiredDTO> findExpiredMembers(@Param("keyword") String keyword);
 
     void updateStatusActive(Long memberId);
 

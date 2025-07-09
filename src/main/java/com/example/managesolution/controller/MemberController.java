@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -72,6 +73,7 @@ public class MemberController {
     public String form(Model model) {
         MemberFormDTO memberFormDTO = new MemberFormDTO();
         model.addAttribute("memberForm", memberFormDTO);
+        model.addAttribute("mode", "create");
 
         System.out.println("등록 진입: memberId = " + memberFormDTO.getMemberId());
 
@@ -112,7 +114,6 @@ public class MemberController {
         dto.setBirthDate(member.getBirthDate());
         dto.setGender(member.getGender());
         dto.setMemo(member.getMemo());
-        dto.setStatus(member.getStatus());
 
         if (membership != null) {
             dto.setProductType("MEMBERSHIP");
@@ -132,6 +133,7 @@ public class MemberController {
 
         model.addAttribute("memberForm", dto);
 
+        model.addAttribute("mode", "edit");
         model.addAttribute("membershipProducts", productService.getMembershipProducts());
         model.addAttribute("ptProducts", productService.getPtProducts());
         model.addAttribute("trainers", trainerService.getTrainerList());
@@ -144,10 +146,13 @@ public class MemberController {
     @PostMapping("/{id}/edit")
     public String update(@PathVariable Long id, @Valid @ModelAttribute("dto")  MemberFormDTO dto,
                          BindingResult bindingResult, Model model) {
+
         if (bindingResult.hasErrors()) {
             // 다시 등록 폼으로
             return "member/form";
         }
+        Member member = memberService.findById(id);
+        dto.setStatus(member.getStatus());
         memberService.update(id, dto);
         return "redirect:/members";
     }
@@ -159,7 +164,7 @@ public class MemberController {
         return "redirect:/members";
     }
 
-    //기존 member에서 상품만 수정하려는 폼 보여주기
+    //기존 member에서 상품만 등록 하려는 폼 보여주기
     @GetMapping("/{id}/register")
     public String registerForm(@PathVariable Long id, Model model) {
         Member member = memberService.findById(id);
@@ -173,15 +178,18 @@ public class MemberController {
         dto.setMemo(member.getMemo());
         dto.setStatus(member.getStatus());
 
+
         model.addAttribute("memberForm", dto);
+
+        model.addAttribute("mode", "register");
         model.addAttribute("membershipProducts", productService.getMembershipProducts());
         model.addAttribute("ptProducts", productService.getPtProducts());
         model.addAttribute("trainers", trainerService.getTrainerList());
 
-        return "member/form";
+        return "member/productRegister";
     }
 
-    // 상품만 수정함(결제관리 마감회원에서 넘어온것임)
+    // 상품만 등록(결제관리 마감회원에서 넘어온것임)
     @PostMapping("/{id}/register")
     public String registerProduct(@PathVariable Long id, @Valid @ModelAttribute("memberForm") MemberFormDTO dto,
                                   BindingResult bindingResult, Model model) {
@@ -189,9 +197,8 @@ public class MemberController {
             model.addAttribute("membershipProducts", productService.getMembershipProducts());
             model.addAttribute("ptProducts", productService.getPtProducts());
             model.addAttribute("trainers", trainerService.getTrainerList());
-            return "payment";
+            return "payment/list";
         }
-
         memberService.registerNewProduct(id, dto);
         return "redirect:/payment";
     }

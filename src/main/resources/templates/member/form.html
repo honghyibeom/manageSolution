@@ -159,11 +159,7 @@
             const duration = parseInt(sel.dataset.duration);
             const price = parseInt(sel.dataset.price);
 
-            const mode = document.querySelector("main").dataset.mode;
-
-            if (mode === 'create') {
-                document.querySelector("input[name='membershipStartDate']").value = new Date().toISOString().split('T')[0];
-            }
+            document.querySelector("input[name='membershipStartDate']").value = new Date().toISOString().split('T')[0];
 
             const startDate = document.querySelector("input[name='membershipStartDate']").value || new Date().toISOString().split('T')[0];
             if (!isNaN(duration)) {
@@ -182,11 +178,7 @@
             const duration = parseInt(sel.dataset.duration);
             const price = parseInt(sel.dataset.price);
 
-            const mode = document.querySelector("main").dataset.mode;
-
-            if (mode === 'create') {
-                document.getElementById("ptStartDate").value = new Date().toISOString().split('T')[0];
-            }
+            document.getElementById("ptStartDate").value = new Date().toISOString().split('T')[0];
 
             const startDate = document.getElementById("ptStartDate").value || new Date().toISOString().split('T')[0];
             if (!isNaN(duration)) {

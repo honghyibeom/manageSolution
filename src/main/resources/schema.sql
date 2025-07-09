@@ -43,7 +43,7 @@ CREATE TABLE membership (
                             memo VARCHAR(255),
                             isActive BOOLEAN DEFAULT TRUE,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            FOREIGN KEY (memberId) REFERENCES member(memberId),
+                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
                             FOREIGN KEY (productId) REFERENCES product(productId)
 );
 
@@ -63,7 +63,7 @@ CREATE TABLE pt_package (
                             memo VARCHAR(255),
                             isActive BOOLEAN DEFAULT TRUE,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            FOREIGN KEY (memberId) REFERENCES member(memberId),
+                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
                             FOREIGN KEY (trainerId) REFERENCES app_user(userId),
                             FOREIGN KEY (productId) REFERENCES product(productId)
 );
