@@ -1,10 +1,15 @@
 package com.example.managesolution.controller;
 
+import com.example.managesolution.data.dto.SalesDTO;
+import com.example.managesolution.data.dto.StatisticsResponseDTO;
+import com.example.managesolution.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -15,20 +20,29 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatisticsController {
 
+    private final PaymentService paymentService;
+
     @GetMapping("")
     public String statistics(Model model) {
 
         model.addAttribute("today", LocalDate.now().toString());
 
-
-
-
-        List<String> labels = List.of("1월", "2월", "3월", "4월", "5월");
-        List<Integer> sales = List.of(120, 150, 180, 130, 200);
-
-        model.addAttribute("labels", labels);
-        model.addAttribute("sales", sales);
+        model.addAttribute("sales", paymentService.getSales());
 
         return "statistics/list";
     }
+
+//    ---------------------------------------restAPI-------------------------------------
+    @GetMapping("/api")
+    @ResponseBody
+    public StatisticsResponseDTO statisticsData(@RequestParam String start,
+                                                @RequestParam String end,
+                                                @RequestParam String type) {
+
+        LocalDate startDate = LocalDate.parse(start);
+        LocalDate endDate = LocalDate.parse(end);
+
+        return paymentService.getStatisticsData(startDate, endDate, type);
+    }
+
 }

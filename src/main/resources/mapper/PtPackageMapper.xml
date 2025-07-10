@@ -123,4 +123,16 @@
         SET paymentId = #{paymentId}
         WHERE memberId = #{memberId} AND paymentId IS NULL
     </update>
+
+    <select id="selectPtMembers" resultType="PtMemberSalesDTO">
+        SELECT
+            m.name AS memberName,
+            pp.totalCount AS count,
+            pp.price,
+            pp.startDate AS date
+        FROM pt_package pp
+                 JOIN member m ON pp.memberId = m.memberId
+        WHERE pp.startDate BETWEEN #{startDate} AND #{endDate}
+        ORDER BY pp.startDate
+    </select>
 </mapper>

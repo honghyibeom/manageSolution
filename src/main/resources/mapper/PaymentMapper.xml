@@ -32,6 +32,46 @@
         INSERT INTO payment (memberId, productId, amount, method, paidAt)
         VALUES (#{memberId}, #{productId}, #{amount}, #{method}, #{paidAt})
     </insert>
+    
+    <select id="findTotalSales" resultType="long">
+        SELECT COALESCE(SUM(amount), 0) AS totalSales
+        FROM payment;
+    </select>
+
+    <select id="findMonthlySales" resultType="long">
+        SELECT COALESCE(SUM(amount), 0) AS monthlySales
+        FROM payment
+        WHERE FORMATDATETIME(paidAt, 'yyyy-MM') = FORMATDATETIME(CURRENT_DATE, 'yyyy-MM');
+    </select>
+
+    <select id="findDailySales" resultType="long">
+        SELECT COALESCE(SUM(amount), 0) AS dailySales
+        FROM payment
+        WHERE CAST(paidAt AS DATE) = CURRENT_DATE;
+    </select>
+
+    <select id="selectChartData" resultType="LabelAndAmountDTO">
+        SELECT
+        <choose>
+            <when test="type == 'year'">
+                FORMATDATETIME(paidAt, 'yyyy')
+            </when>
+            <when test="type == 'month'">
+                FORMATDATETIME(paidAt, 'yyyy-MM')
+            </when>
+            <otherwise>
+                FORMATDATETIME(paidAt, 'yyyy-MM-dd')
+            </otherwise>
+        </choose>
+        AS label,
+        SUM(amount) AS amount
+        FROM payment
+        WHERE FORMATDATETIME(paidAt, 'yyyy-MM-dd') BETWEEN #{startDate} AND #{endDate}
+        GROUP BY label
+        ORDER BY label
+    </select>
+
+
 
 
 </mapper>

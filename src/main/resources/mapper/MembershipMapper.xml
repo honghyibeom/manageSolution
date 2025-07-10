@@ -85,4 +85,17 @@
         WHERE memberId = #{memberId} AND paymentId IS NULL
     </update>
 
+    <select id="selectMembershipMembers" resultType="MembershipSalesDTO">
+        SELECT
+            m.name AS memberName,
+            p.name AS productName,
+            ms.price,
+            ms.startDate AS date
+        FROM membership ms
+                 JOIN member m ON ms.memberId = m.memberId
+                 JOIN product p ON ms.productId = p.productId
+        WHERE ms.startDate BETWEEN #{startDate} AND #{endDate}
+        ORDER BY ms.startDate
+    </select>
+
 </mapper>

@@ -3,9 +3,11 @@ package com.example.managesolution.mapper;
 import com.example.managesolution.data.domain.PtPackage;
 import com.example.managesolution.data.dto.PtCareDTO;
 import com.example.managesolution.data.dto.PtMemberDTO;
+import com.example.managesolution.data.dto.PtMemberSalesDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -33,5 +35,9 @@ public interface PtPackageMapper {
     PtPackage findByMemberId(Long memberId);
 
     void updatePaymentId(@Param("memberId") Long memberId, @Param("paymentId") Long paymentId);
+
+    List<PtMemberSalesDTO> selectPtMembers(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+
 
 }

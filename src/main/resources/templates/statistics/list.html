@@ -11,12 +11,13 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <main layout:fragment="content">
     <div class ="container">
-        <h4 class="fw-bold mb-4">매출 현황</h4>
+        <h4 class="fw-bold mb-4">통계</h4>
 
     <p class="mb-4 fw-bold" th:text="${today} + ' 기준 매출현황입니다.'">
         yyyy년 MM월 dd일
@@ -26,7 +27,7 @@
                 <div class="card shadow-sm text-dark">
                     <div class="card-body">
                         <h6 class="card-title text-muted">총 매출</h6>
-                        <h5 class="fw-bold" th:text="${totalSales}">334,197,202원</h5>
+                        <h5 class="fw-bold text-end" th:text="${#numbers.formatInteger(sales.totalSales, 0,'COMMA')} + '원'">334,197,202원</h5>
                     </div>
                 </div>
             </div>
@@ -34,7 +35,7 @@
                 <div class="card shadow-sm text-dark">
                     <div class="card-body">
                         <h6 class="card-title text-muted">월 매출</h6>
-                        <h5 class="fw-bold" th:text="${monthlySales}">11,924,500원</h5>
+                        <h5 class="fw-bold text-end" th:text="${#numbers.formatInteger(sales.monthlySales, 0,'COMMA')} + '원'">11,924,500원</h5>
                     </div>
                 </div>
             </div>
@@ -42,151 +43,264 @@
                 <div class="card shadow-sm text-dark">
                     <div class="card-body">
                         <h6 class="card-title text-muted">일 매출</h6>
-                        <h5 class="fw-bold" th:text="${dailySales}">0원</h5>
+                        <h5 class="fw-bold text-end" th:text="${#numbers.formatInteger(sales.dailySales, 0,'COMMA')} + '원'">0원</h5>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="p-3 mb-3 bg-light rounded border d-flex align-items-center gap-2 justify-content-between">
+        <!-- 기간 & 타입 선택 -->
+        <div class="p-3 mb-3 bg-light rounded border d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
-                <label class="fw-bold mb-0 mr-2">기간조회</label>
+                <label class="fw-bold mb-0">기간조회</label>
                 <input type="date" class="form-control form-control-sm w-auto" id="startDate">
                 <span>~</span>
                 <input type="date" class="form-control form-control-sm w-auto" id="endDate">
             </div>
 
             <div class="btn-group" role="group">
-                <a th:href="@{/products(type='ALL')}"
-                   class="btn"
-                   th:classappend="${type == 'ALL'} ? 'btn-primary' : 'btn-outline-secondary'">
-                    년
-                </a>
-                <a th:href="@{/products(type='MEMBERSHIP')}"
-                   class="btn"
-                   th:classappend="${type == 'MEMBERSHIP'} ? 'btn-primary' : 'btn-outline-secondary'">
-                    월
-                </a>
-                <a th:href="@{/products(type='PT')}"
-                   class="btn"
-                   th:classappend="${type == 'PT'} ? 'btn-primary' : 'btn-outline-secondary'">
-                    일
-                </a>
+                <button class="btn btn-outline-secondary" data-type="year">년</button>
+                <button class="btn btn-outline-secondary" data-type="month">월</button>
+                <button class="btn btn-outline-secondary" data-type="day">일</button>
             </div>
         </div>
 
-
+        <!--차트-->
         <div class="container m-4">
             <canvas id="salesChart" width="300" height="100"></canvas>
         </div>
 
-        <div class="row gx-4">
-            <div class="col-12 col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header fw-bold text-center">
-                        PT권 통계
-                    </div>
-
-                    <div class="card-body fixed-height">
-                        <div class="scroll-table">
-                            <table class="table table-bordered text-center align-middle mb-0">
-                                <thead class="table-light">
-                                <tr>
-                                    <th>회원명</th>
-                                    <th>횟수</th>
-                                    <th>금액</th>
-                                    <th>날짜</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="member : ${ptMembers}">
-                                    <td th:text="${member.memberName}"></td>
-                                    <td th:text="${member.count}"></td>
-                                    <td th:text="${member.price}"></td>
-                                    <td th:text="${#temporals.format(member.date, 'yyyy-MM-dd')}"></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ✅ 합계 박스 -->
-                <div class="bg-dark text-white text-center py-2 rounded mt-3 mb-3">
-                    총합: <span>2,516,000원</span> / 총 건수: <span>15개</span>
-                </div>
-
-            </div>
-
-            <!-- 오른쪽: 회원권 회원 -->
-            <div class="col-12 col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header fw-bold text-center">
-                        <span>회원권 통계</span>
-                    </div>
-
-                    <div class="card-body fixed-height">
-                        <div class="scroll-table">
-                            <table class="table table-bordered text-center align-middle mb-0">
-                                <thead class="table-light">
-                                <tr>
-                                    <th>이름</th>
-                                    <th>상품명</th>
-                                    <th>금액</th>
-                                    <th>날짜</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="member : ${membershipMembers}">
-                                    <td th:text="${member.memberName}"></td>
-                                    <td th:text="${member.productName}"></td>
-                                    <td th:text="${member.price}"></td>
-                                    <td th:text="${#temporals.format(member.date, 'yyyy-MM-dd')}"></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ✅ 합계 박스 -->
-                <div class="bg-dark text-white text-center py-2 rounded mt-3 mb-3">
-                    총합: <span>2,516,000원</span> / 총 건수: <span>15개</span>
-                </div>
-
-            </div>
+        <!-- 테이블 -->
+        <div class="row gx-4" id="tablesContainer">
+            <div class="col-12 col-md-6" id="ptTableContainer"></div>
+            <div class="col-12 col-md-6" id="membershipTableContainer"></div>
         </div>
+
     </div>
 
-    <script th:inline="javascript">
-        const labels = /*[[${labels}]]*/ [];
-        const sales = /*[[${sales}]]*/ [];
+    <script>
+        let chart = null;
 
-        console.log("labels:", labels);
-        console.log("sales:", sales);
+        // 🔹 차트 그리기
+        function renderChart(labels, salesData) {
+            console.log(labels); // 배열이어야 함
+            console.log(salesData); // 배열이어야 함
 
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '월별 매출',
-                    data: sales,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            if (chart) chart.destroy(); // 기존 차트 제거
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '매출',
+                        data: salesData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
+            });
+        }
+
+        // 🔹 테이블 그리기 (재사용)
+        function renderTable(containerId, title, members, summary, columns) {
+            const html = `
+        <div>
+            <div class="card shadow-sm h-100">
+                <div class="card-header fw-bold text-center">${title}</div>
+
+                <div class="card-body">
+                    <div class="table-responsive" style="height: 400px; max-height: 400px; overflow-y: auto;">
+                        <table class="table table-bordered text-center align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>${columns.map(c => `<th>${c}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${members.map(m => `
+                                    <tr>
+                                        ${Object.values(m).map(v =>
+                                            `<td>${typeof v === 'number' ? v.toLocaleString('ko-KR') : v}</td>`
+                                        ).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-dark text-white text-center py-2 rounded mt-3 mb-3">
+                    총합: <span>${summary.totalAmount.toLocaleString()}원</span> /
+                    총 건수: <span>${summary.count}개</span>
+            </div>
+        </div>
+         `;
+            document.getElementById(containerId).innerHTML = html;
+        }
+
+        function fillMissingDates(startDateStr, endDateStr, labels, salesData, type) {
+            const resultMap = {};
+            for (let i = 0; i < labels.length; i++) {
+                resultMap[labels[i]] = salesData[i];
             }
+
+            const completeLabels = [];
+            const completeSales = [];
+
+            const start = new Date(startDateStr);
+            const end = new Date(endDateStr);
+
+            const current = new Date(start);
+            const endCheck = new Date(end);
+
+            if (type === 'month') {
+                current.setDate(1);
+                endCheck.setDate(1);
+            }
+            if (type === 'year') {
+                current.setMonth(0);
+                current.setDate(1);
+                endCheck.setMonth(0);
+                endCheck.setDate(1);
+            }
+
+            while (current <= endCheck) {
+                let label;
+
+                if (type === 'year') {
+                    label = current.getFullYear().toString();
+                    current.setFullYear(current.getFullYear() + 1);
+                } else if (type === 'month') {
+                    label = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`;
+                    current.setMonth(current.getMonth() + 1);
+                } else {
+                    label = current.toISOString().slice(0, 10);
+                    current.setDate(current.getDate() + 1);
+                }
+
+                completeLabels.push(label);
+                completeSales.push(resultMap[label] ?? 0);
+            }
+
+            return {
+                labels: completeLabels,
+                salesData: completeSales
+            };
+        }
+
+
+        // 🔹 통계 로딩
+        function loadStatistics(type) {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert("조회할 날짜를 모두 선택하세요.");
+                return;
+            }
+
+            axios.get('/statistics/api', {
+                params: {
+                    start: startDate,
+                    end: endDate,
+                    type: type
+                }
+            })
+                .then(response => {
+                    const data = response.data;
+
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
+
+                    const completed = fillMissingDates(startDate, endDate, data.labels, data.salesData, type);
+
+                    renderChart(completed.labels, completed.salesData);
+
+                    renderTable(
+                        'ptTableContainer',
+                        'PT권 통계',
+                        data.ptMembers,
+                        data.ptSummary,
+                        ['회원명', '횟수', '금액', '날짜']
+                    );
+
+                    renderTable(
+                        'membershipTableContainer',
+                        '회원권 통계',
+                        data.membershipMembers,
+                        data.membershipSummary,
+                        ['이름', '상품명', '금액', '날짜']
+                    );
+                })
+                .catch(error => {
+                    console.error('❌ 통계 데이터 로드 실패:', error);
+                    alert("데이터를 불러오는 중 문제가 발생했습니다.");
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // 🔷 오늘과 6개월 전 날짜 계산
+            const today = new Date();
+            const endDateStr = today.toISOString().split('T')[0];
+
+            const sixMonthsAgo = new Date(today);
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+            sixMonthsAgo.setDate(1); // 해당 달의 1일
+            const startDateStr = sixMonthsAgo.toISOString().split('T')[0];
+
+            // 🔷 input에 초기값 세팅
+            document.getElementById('startDate').value = startDateStr;
+            document.getElementById('endDate').value = endDateStr;
+
+            // 🔷 버튼 중 '월' 버튼을 active 처리
+            const monthBtn = document.querySelector('.btn-group button[data-type="month"]');
+            if (monthBtn) {
+                monthBtn.classList.add('btn-primary');
+                monthBtn.style.color = 'white';
+            }
+
+            // 🔷 초기 로드
+            loadStatistics("month");
+
+            // 🔷 버튼 클릭 이벤트 연결
+            document.querySelectorAll('.btn-group button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 버튼 스타일 초기화
+                    document.querySelectorAll('.btn-group button').forEach(b => {
+                        b.classList.remove('btn-primary');
+                        b.style.color = ''; // 기본색
+                    });
+
+                    btn.classList.add('btn-primary');
+                    btn.style.color = 'white';
+
+                    const type = btn.getAttribute('data-type');
+                    loadStatistics(type);
+                });
+            });
         });
+        // 🔷 날짜 선택시에도 재조회
+        document.getElementById('startDate').addEventListener('change', () => {
+            loadStatistics(getCurrentType());
+        });
+        document.getElementById('endDate').addEventListener('change', () => {
+            loadStatistics(getCurrentType());
+        });
+
+        function getCurrentType() {
+            const activeBtn = document.querySelector('.btn-group .btn-primary');
+            return activeBtn ? activeBtn.getAttribute('data-type') : 'month';
+        }
+
     </script>
 
 </main>

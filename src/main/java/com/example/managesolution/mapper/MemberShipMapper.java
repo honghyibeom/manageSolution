@@ -2,9 +2,11 @@ package com.example.managesolution.mapper;
 
 import com.example.managesolution.data.domain.Membership;
 import com.example.managesolution.data.dto.MemberShipCareDTO;
+import com.example.managesolution.data.dto.MembershipSalesDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -25,4 +27,7 @@ public interface MemberShipMapper {
     Membership findByMemberId(Long memberId);
 
     void updatePaymentId(@Param("memberId") Long memberId, @Param("paymentId") Long paymentId);
+
+    List<MembershipSalesDTO> selectMembershipMembers(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate
+    );
 }

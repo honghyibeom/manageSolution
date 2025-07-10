@@ -93,18 +93,18 @@
 
     <select id="findUnpaidMembers" resultType="MemberUnpaidDTO">
         SELECT
-            m.memberId,
-            m.name AS memberName,
-            m.phone,
-            p.name AS productName,
-            p.type AS productType,
-            p.price AS amount,
-            p.productId
+        m.memberId,
+        m.name AS memberName,
+        m.phone,
+        p.name AS productName,
+        p.type AS productType,
+        COALESCE(ms.price, pp.price) AS amount,
+        p.productId
         FROM member m
-                 LEFT JOIN membership ms ON ms.memberId = m.memberId
-                 LEFT JOIN pt_package pp ON pp.memberId = m.memberId
-                 LEFT JOIN payment pay ON pay.memberId = m.memberId
-                 LEFT JOIN product p ON (ms.productId = p.productId OR pp.productId = p.productId)
+        LEFT JOIN membership ms ON ms.memberId = m.memberId
+        LEFT JOIN pt_package pp ON pp.memberId = m.memberId
+        LEFT JOIN payment pay ON pay.memberId = m.memberId
+        LEFT JOIN product p ON (ms.productId = p.productId OR pp.productId = p.productId)
         WHERE (ms.paymentId IS NULL AND pp.paymentId IS NULL)
         AND p.productId IS NOT NULL
         <if test="keyword != null and keyword != ''">
@@ -112,6 +112,7 @@
         </if>
         ORDER BY m.created_at DESC
     </select>
+
 
     <select id="findExpiredMembers" resultType="MemberExpiredDTO">
         SELECT
