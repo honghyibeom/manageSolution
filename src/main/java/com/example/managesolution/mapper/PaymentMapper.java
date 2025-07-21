@@ -12,7 +12,9 @@ import java.util.List;
 @Mapper
 public interface PaymentMapper {
 
-    List<PaymentHistoryDTO> findPaymentHistory(@Param("keyword") String keyword);
+    List<PaymentHistoryDTO> findPaymentHistory(@Param("keyword") String keyword,
+                                               @Param("limit")int limit,
+                                               @Param("offset")int offset);
 
     void insertPayment(Payment payment);
 
@@ -25,4 +27,6 @@ public interface PaymentMapper {
             @Param("endDate") LocalDate endDate,
             @Param("type") String type
     );
+
+    int countAll(@Param("keyword") String keyword);
 }

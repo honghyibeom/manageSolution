@@ -26,11 +26,20 @@ public class PaymentController {
     public String list(@RequestParam(value = "unpaidKeyword", required = false) String unpaidKeyword,
                        @RequestParam(value = "expiredKeyword", required = false) String expiredKeyword,
                        @RequestParam(value = "historyKeyword", required = false) String historyKeyword,
+                       @RequestParam(defaultValue = "1") int page,
                        Model model) {
+
+        int pageSize = 10;
+        int totalCount = paymentService.countAll(historyKeyword);
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+        System.out.println("totalCount: " + totalCount);
+        System.out.println("totalPages: " + totalPages);
         List<MemberExpiredDTO> memberExpiredDTO = paymentService.getExpiredMembers(expiredKeyword);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("unpaidMembers", paymentService.getUnpaidMembers(unpaidKeyword));
         model.addAttribute("expiredMembers", memberExpiredDTO);
-        model.addAttribute("paymentHistory", paymentService.getPaymentHistory(historyKeyword));
+        model.addAttribute("paymentHistory", paymentService.getPaymentHistory(historyKeyword, page, pageSize));
         return "payment/list";
     }
 

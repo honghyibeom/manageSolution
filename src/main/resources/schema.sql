@@ -40,7 +40,6 @@ CREATE TABLE membership (
                             startDate DATE NOT NULL,
                             endDate DATE NOT NULL,
                             price INT NOT NULL,                    -- 구매 당시 가격
-                            memo VARCHAR(255),
                             isActive BOOLEAN DEFAULT TRUE,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
@@ -60,7 +59,6 @@ CREATE TABLE pt_package (
                             totalCount INT NOT NULL,
                             remainingCount INT NOT NULL,
                             price INT NOT NULL,                    -- 구매 당시 가격
-                            memo VARCHAR(255),
                             isActive BOOLEAN DEFAULT TRUE,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,

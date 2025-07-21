@@ -205,6 +205,27 @@
                 </div>
             </div>
         </div>
+
+        <nav th:if="${totalPages > 1}" class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                <!-- 이전 -->
+                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/payment(page=${currentPage - 1})}">이전</a>
+                </li>
+
+                <!-- 번호 -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:href="@{/payment(page=${i})}" th:text="${i}">1</a>
+                </li>
+
+                <!-- 다음 -->
+                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{/payment(page=${currentPage + 1})}">다음</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 
     <script>

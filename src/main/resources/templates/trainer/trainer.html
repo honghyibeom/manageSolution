@@ -52,12 +52,12 @@
                                     class="clickable-row">
                                     <td th:text="${pt.name}"></td>
                                     <td th:text="${pt.phone}"></td>
-                                    <td th:text="${pt.gender == 'male'} ? '남' : '여'"></td>
+                                    <td th:text="${pt.gender}"></td>
                                     <td th:text="${#temporals.format(pt.birthDate, 'yyyy-MM-dd')}"></td>
                                     <td th:text="${pt.email}"></td>
-                                    <td th:text="${pt.careerYears}"></td>
-                                    <td th:text="${pt.payPerSession}"></td>
-                                    <td th:text="${pt.baseSalary}"></td>
+                                    <td th:text="${pt.careerYears} + '년'"></td>
+                                    <td th:text="${#numbers.formatInteger(pt.payPerSession, 3, 'COMMA')}"></td>
+                                    <td th:text="${#numbers.formatInteger(pt.baseSalary, 3, 'COMMA')}"></td>
                                     <td>
                                         <a th:href="@{'/trainer/' + ${pt.trainerId} + '/edit'}" class="btn btn-sm btn-outline-secondary">수정</a>
                                         <form th:action="@{'/trainer/' + ${pt.trainerId} + '/delete'}" method="post" style="display:inline;">

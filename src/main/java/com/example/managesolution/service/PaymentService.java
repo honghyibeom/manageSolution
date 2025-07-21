@@ -32,8 +32,9 @@ public class PaymentService {
         return memberMapper.findExpiredMembers(keyword);
     }
 
-    public List<PaymentHistoryDTO> getPaymentHistory(String keyword) {
-        return paymentMapper.findPaymentHistory(keyword);
+    public List<PaymentHistoryDTO> getPaymentHistory(String keyword, int page, int size) {
+        int offset = (page - 1) * size;
+        return paymentMapper.findPaymentHistory(keyword, size, offset);
     }
 
     @Transactional
@@ -138,5 +139,8 @@ public class PaymentService {
                 .membershipSummary(membershipSummary)
                 .ptSummary(ptSummary)
                 .build();
+    }
+    public int countAll(String keyword) {
+        return paymentMapper.countAll(keyword);
     }
 }

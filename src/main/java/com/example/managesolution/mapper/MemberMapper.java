@@ -13,6 +13,7 @@ import java.util.List;
 @Mapper
 public interface MemberMapper {
     List<MemberProductDTO> findPaged(@Param("limit") int limit, @Param("offset") int offset);
+
     int countAll();
 
     Member findById(Long id);

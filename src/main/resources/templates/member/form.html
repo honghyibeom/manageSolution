@@ -35,15 +35,12 @@
                         <div class="text-danger small" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label d-block"></label>
-                        <div class="btn-group" role="group" aria-label="성별 선택">
+                        <label class="form-label m-6">성별</label>
                             <input type="radio" class="btn-check" name="gender" id="male" value="남성" th:field="*{gender}">
                             <label class="btn btn-outline-primary" for="male">남성</label>
 
                             <input type="radio" class="btn-check" name="gender" id="female" value="여성" th:field="*{gender}">
                             <label class="btn btn-outline-danger" for="female">여성</label>
-                        </div>
-
                     </div>
                     <div class="mb-3">
                         <label class="form-label">메모</label>
