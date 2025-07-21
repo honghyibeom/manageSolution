@@ -22,22 +22,28 @@
                     <div class="mb-3">
                         <label class="form-label">이름</label>
                         <input type="text" th:field="*{name}" class="form-control" />
+                        <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">전화번호</label>
                         <input type="text" th:field="*{phone}" class="form-control" />
+                        <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">생년월일</label>
                         <input type="date" th:field="*{birthDate}" class="form-control" />
+                        <div class="text-danger small" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">성별</label>
-                        <select th:field="*{gender}" class="form-select">
-                            <option value="">선택</option>
-                            <option value="남성">남성</option>
-                            <option value="여성">여성</option>
-                        </select>
+                        <label class="form-label d-block"></label>
+                        <div class="btn-group" role="group" aria-label="성별 선택">
+                            <input type="radio" class="btn-check" name="gender" id="male" value="남성" th:field="*{gender}">
+                            <label class="btn btn-outline-primary" for="male">남성</label>
+
+                            <input type="radio" class="btn-check" name="gender" id="female" value="여성" th:field="*{gender}">
+                            <label class="btn btn-outline-danger" for="female">여성</label>
+                        </div>
+
                     </div>
                     <div class="mb-3">
                         <label class="form-label">메모</label>
@@ -68,10 +74,12 @@
                         <div class="mb-2">
                             <label class="form-label">시작일</label>
                             <input type="date" th:field="*{membershipStartDate}" id="membershipStartDate" onchange="recalculateMembershipEndDate()" class="form-control" />
+                            <div class="text-danger small" th:if="${#fields.hasErrors('membershipStartDate')}" th:errors="*{membershipStartDate}"></div>
                         </div>
                         <div class="mb-2">
                             <label class="form-label">종료일</label>
                             <input type="date" th:field="*{membershipEndDate}" id="membershipEndDate" class="form-control" />
+                            <div class="text-danger small" th:if="${#fields.hasErrors('membershipEndDate')}" th:errors="*{membershipEndDate}"></div>
                         </div>
                         <div class="mb-2">
                             <label class="form-label">가격</label>
@@ -97,10 +105,12 @@
                         <div class="mb-2">
                             <label class="form-label">시작일</label>
                             <input type="date" th:field="*{ptStartDate}" id="ptStartDate" onchange="recalculatePtEndDate()" class="form-control" />
+                            <div class="text-danger small" th:if="${#fields.hasErrors('ptStartDate')}" th:errors="*{ptStartDate}"></div>
                         </div>
                         <div class="mb-2">
                             <label class="form-label">종료일</label>
                             <input type="date" th:field="*{ptEndDate}" id="ptEndDate" class="form-control" />
+                            <div class="text-danger small" th:if="${#fields.hasErrors('ptEndDate')}" th:errors="*{ptEndDate}"></div>
                         </div>
                         <div class="mb-2">
                             <label class="form-label">총 횟수</label>

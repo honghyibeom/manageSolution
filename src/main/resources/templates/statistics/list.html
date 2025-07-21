@@ -230,7 +230,7 @@
                         'PT권 통계',
                         data.ptMembers,
                         data.ptSummary,
-                        ['회원명', '횟수', '금액', '날짜']
+                        ['상품명', '건수', '금액', '총 금액']
                     );
 
                     renderTable(
@@ -238,7 +238,7 @@
                         '회원권 통계',
                         data.membershipMembers,
                         data.membershipSummary,
-                        ['이름', '상품명', '금액', '날짜']
+                        ['상품명', '건수', '금액', '총 금액']
                     );
                 })
                 .catch(error => {

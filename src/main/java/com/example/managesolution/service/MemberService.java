@@ -3,8 +3,11 @@ package com.example.managesolution.service;
 import com.example.managesolution.data.domain.Member;
 import com.example.managesolution.data.domain.Membership;
 import com.example.managesolution.data.domain.PtPackage;
-import com.example.managesolution.data.dto.MemberFormDTO;
+import com.example.managesolution.data.dto.member.request.MemberFormDTO;
+import com.example.managesolution.data.dto.member.response.MemberProductDTO;
 import com.example.managesolution.data.enumerate.Status;
+import com.example.managesolution.exception.CustomException;
+import com.example.managesolution.exception.ErrorCode;
 import com.example.managesolution.mapper.MemberMapper;
 import com.example.managesolution.mapper.MemberShipMapper;
 import com.example.managesolution.mapper.PtPackageMapper;
@@ -12,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,16 +27,43 @@ public class MemberService {
     private final MembershipService membershipService;
     private final PtPackageService ptPackageService;
 
-    public List<Member> findPaged(int page, int size) {
+    public List<MemberProductDTO> findMembers(String status, String keyword, int page, int size) {
         int offset = (page - 1) * size;
-        return memberMapper.findPaged(size, offset);
+
+        boolean isNumeric = keyword != null && keyword.matches("\\d+");
+
+        if (status != null && !status.isBlank() && keyword != null && !keyword.isBlank()) {
+            // 상태 + 키워드
+            if (isNumeric) {
+                return memberMapper.findByStatusAndPhone(status, keyword, size, offset);
+            } else {
+                return memberMapper.findByStatusAndName(status, keyword, size, offset);
+            }
+        } else if (status != null && !status.isBlank()) {
+            // 상태만
+            return memberMapper.findByStatus(status, size, offset);
+        } else if (keyword != null && !keyword.isBlank()) {
+            // 키워드만
+            if (isNumeric) {
+                return memberMapper.findByPhoneContaining(keyword, size, offset);
+            } else {
+                return memberMapper.findByNameContaining(keyword, size, offset);
+            }
+        } else {
+            // 둘 다 없음
+            return memberMapper.findPaged(size, offset);
+        }
     }
 
     public int countAll() {
         return memberMapper.countAll();
     }
     public Member findById(Long id) {
-        return memberMapper.findById(id);
+        Member member = memberMapper.findById(id);
+        if (member == null) {
+            throw new CustomException(ErrorCode.NOT_EXIST_USER);
+        }
+        return member;
     }
 
     // 회원등록 로직
@@ -57,13 +86,9 @@ public class MemberService {
                     .startDate(dto.getMembershipStartDate())
                     .endDate(dto.getMembershipEndDate())
                     .price(dto.getMembershipPrice())
-                    .isActive(true)
+                    .isActive(false)
                     .createdAt(LocalDateTime.now())
                     .build();
-            if (LocalDate.now().isAfter(membership.getEndDate())) {
-                membership.setIsActive(false);
-            }
-
             memberShipMapper.saveMembership(membership);
 
         } else if ("PT".equals(dto.getProductType())) {
@@ -76,18 +101,20 @@ public class MemberService {
                     .totalCount(dto.getPtTotalCount())
                     .remainingCount(0)
                     .price(dto.getPtPrice())
+                    .isActive(false)
                     .createdAt(LocalDateTime.now())
                     .build();
-
-            if (LocalDate.now().isAfter(ptPackage.getEndDate())) {
-                ptPackage.setIsActive(false);
-            }
             ptPackageMapper.savePtPackage(ptPackage);
         }
     }
 
     @Transactional
     public void update(Long id,MemberFormDTO dto) {
+
+        Membership existingMembership = memberShipMapper.findByMemberId(id);
+        PtPackage existingPtPackage = ptPackageMapper.findByMemberId(id);
+
+
         Member member = Member.builder()
                 .memberId(id)
                 .name(dto.getName())
@@ -108,12 +135,13 @@ public class MemberService {
                     .endDate(dto.getMembershipEndDate())
                     .price(dto.getMembershipPrice())
                     .createdAt(LocalDateTime.now())
-                    .isActive(true)
                     .build();
-            if (LocalDate.now().isAfter(membership.getEndDate())) {
-                membership.setIsActive(false);
+            if (existingMembership == null) {
+                memberShipMapper.saveMembership(membership);
             }
-            memberShipMapper.updateMembership(membership);
+            else {
+                memberShipMapper.updateMembership(membership);
+            }
 
         } else if ("PT".equals(dto.getProductType())) {
             PtPackage ptPackage = PtPackage.builder()
@@ -127,8 +155,8 @@ public class MemberService {
                     .price(dto.getPtPrice())
                     .createdAt(LocalDateTime.now())
                     .build();
-            if (LocalDate.now().isAfter(ptPackage.getEndDate())) {
-                ptPackage.setIsActive(false);
+            if (existingPtPackage == null) {
+                ptPackageMapper.savePtPackage(ptPackage);
             }
             ptPackageMapper.updatePtPackage(ptPackage);
         }
@@ -137,38 +165,6 @@ public class MemberService {
     @Transactional
     public void delete(Long id) {
         memberMapper.delete(id);
-    }
-
-    public List<Member> findByNameContaining(String keyword, int page, int size) {
-        int offset = (page - 1) * size;
-
-        boolean isNumeric = keyword != null && keyword.matches("\\d+");
-
-        if (isNumeric) {
-            // 전화번호 검색
-            return memberMapper.findByPhoneContaining(keyword, size, offset);
-        } else {
-            // 이름 검색
-            return memberMapper.findByNameContaining(keyword, size, offset);
-        }
-    }
-
-    public List<Member> findByStatus(String status, int page, int size) {
-        int offset = (page - 1) * size;
-       return memberMapper.findByStatus(status, page, offset);
-    }
-    public List<Member> findByStatusAndKeyword(String status, String keyword, int page, int size) {
-        int offset = (page - 1) * size;
-
-        boolean isNumeric = keyword != null && keyword.matches("\\d+");
-
-        if (isNumeric) {
-            // 전화번호 검색
-            return memberMapper.findByStatusAndName(status, keyword, page, size);
-        } else {
-            // 이름 검색
-            return memberMapper.findByStatusAndPhone(status, keyword, page, size);
-        }
     }
 
     public void registerNewProduct(Long memberId, MemberFormDTO dto) {
@@ -180,7 +176,7 @@ public class MemberService {
                     .endDate(dto.getMembershipEndDate())
                     .price(dto.getMembershipPrice())
                     .createdAt(LocalDateTime.now())
-                    .isActive(true)
+                    .isActive(false)
                     .build();
             memberShipMapper.saveMembership(membership);
         } else if ("PT".equals(dto.getProductType())) {
@@ -194,11 +190,57 @@ public class MemberService {
                     .remainingCount(0)
                     .price(dto.getPtPrice())
                     .createdAt(LocalDateTime.now())
+                    .isActive(false)
                     .build();
             ptPackageMapper.savePtPackage(ptPackage);
         }
     }
 
+    public MemberFormDTO toFormDTO(Long memberId) {
+        Member member = findById(memberId);
+        Membership membership = membershipService.findByMemberId(memberId);
+        PtPackage ptPackage = ptPackageService.findByMemberId(memberId);
 
+        MemberFormDTO dto = new MemberFormDTO();
 
+        dto.setMemberId(member.getMemberId());
+        dto.setName(member.getName());
+        dto.setPhone(member.getPhone());
+        dto.setBirthDate(member.getBirthDate());
+        dto.setGender(member.getGender());
+        dto.setMemo(member.getMemo());
+
+        if (membership != null) {
+            dto.setProductType("MEMBERSHIP");
+            dto.setMembershipProductId(membership.getProductId());
+            dto.setMembershipStartDate(membership.getStartDate());
+            dto.setMembershipEndDate(membership.getEndDate());
+            dto.setMembershipPrice(membership.getPrice());
+        } else if (ptPackage != null) {
+            dto.setProductType("PT");
+            dto.setPtProductId(ptPackage.getProductId());
+            dto.setTrainerId(ptPackage.getTrainerId());
+            dto.setPtStartDate(ptPackage.getStartDate());
+            dto.setPtEndDate(ptPackage.getEndDate());
+            dto.setPtTotalCount(ptPackage.getTotalCount());
+            dto.setPtPrice(ptPackage.getPrice());
+        }
+
+        return dto;
+    }
+
+    public MemberFormDTO toBasicFormDTO(Long memberId) {
+        Member member = findById(memberId);
+
+        MemberFormDTO dto = new MemberFormDTO();
+        dto.setMemberId(member.getMemberId());
+        dto.setName(member.getName());
+        dto.setPhone(member.getPhone());
+        dto.setBirthDate(member.getBirthDate());
+        dto.setGender(member.getGender());
+        dto.setMemo(member.getMemo());
+        dto.setStatus(member.getStatus());
+
+        return dto;
+    }
 }

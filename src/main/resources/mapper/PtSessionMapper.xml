@@ -82,4 +82,17 @@
         DELETE FROM pt_session WHERE sessionId = #{id}
     </delete>
 
+    <select id="findTodaySessions" resultType="DashboardSessionDTO">
+        SELECT
+            au.name as trainerName,
+            m.name as memberName,
+            ps.sessionTime as sessionTime
+        FROM pt_session ps
+                LEFT OUTER JOIN app_user au
+                             ON ps.trainerId = au.userId
+                LEFT OUTER JOIN member m
+                             ON ps.memberId = m.memberId
+        WHERE CURRENT_DATE = sessionDate
+    </select>
+
 </mapper>

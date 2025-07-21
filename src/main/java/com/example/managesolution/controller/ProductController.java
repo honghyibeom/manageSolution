@@ -16,24 +16,15 @@ public class ProductController {
 
     private final ProductService productService;
 
-    /**
-     * 상품 목록 페이지
-     */
+    // 상품 목록 페이지
     @GetMapping
     public String index(@RequestParam(defaultValue = "ALL") String type, Model model) {
-        List<Product> products;
 
-        switch (type.toUpperCase()) {
-            case "MEMBERSHIP":
-                products = productService.getMembershipProducts();
-                break;
-            case "PT":
-                products = productService.getPtProducts();
-                break;
-            default:
-                products = productService.findAll();
-                break;
-        }
+        List<Product> products = switch (type.toUpperCase()) {
+            case "MEMBERSHIP" -> productService.getMembershipProducts();
+            case "PT" -> productService.getPtProducts();
+            default -> productService.findAll();
+        };
 
         model.addAttribute("products", products);
         model.addAttribute("type", type); // 어떤 버튼이 선택됐는지 판단용
@@ -63,6 +54,8 @@ public class ProductController {
         return "redirect:/products";
     }
 //---------------------------------------------RestAPI-----------------------------------------------------------//
+
+    // 상품 수정시 id 검색
     @GetMapping("/{id}/json")
     @ResponseBody
     public Product getProductJson(@PathVariable Long id) {

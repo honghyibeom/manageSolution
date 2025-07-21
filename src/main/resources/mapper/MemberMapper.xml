@@ -5,10 +5,25 @@
 
 <mapper namespace="com.example.managesolution.mapper.MemberMapper">
 <!--    회원 전체 조회-->
-    <select id="findPaged" resultType="Member">
-        SELECT memberId, name, phone, birthDate, gender, status, memo, created_at AS createdAt
-        FROM member
-        ORDER BY created_at DESC
+    <select id="findPaged" resultType="MemberProductDTO">
+        SELECT m.memberId,
+               m.name,
+               m.phone,
+               m.birthDate,
+               m.gender,
+               m.status,
+               COALESCE(p1.name, p2.name) AS productName,
+               m.created_at AS createdAt
+        FROM member m
+                LEFT JOIN membership ms
+                       ON m.memberId = ms.memberId
+                LEFT JOIN product p1
+                          ON ms.productId = p1.productId
+                LEFT JOIN pt_package pp
+                          ON m.memberId = pp.memberId
+                LEFT JOIN product p2
+                          ON pp.productId = p2.productId
+        ORDER BY m.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
@@ -47,7 +62,7 @@
     </delete>
 
 <!--   회원 이름 검색-->
-    <select id="findByNameContaining" resultType="Member">
+    <select id="findByNameContaining" resultType="MemberProductDTO">
         SELECT *
         FROM member
         WHERE name LIKE CONCAT(#{keyword}, '%')
@@ -56,38 +71,99 @@
     </select>
 
 <!-- 회원 폰 번호 검색-->
-    <select id="findByPhoneContaining" resultType="Member">
-        SELECT *
-        FROM member
-        WHERE phone LIKE CONCAT(#{keyword}, '%')
-        ORDER BY created_at DESC
+    <select id="findByPhoneContaining" resultType="MemberProductDTO">
+        SELECT m.memberId,
+               m.name,
+               m.phone,
+               m.birthDate,
+               m.gender,
+               m.status,
+               COALESCE(p1.name, p2.name) AS productName,
+               m.created_at AS createdAt
+        FROM member m
+                 LEFT JOIN membership ms
+                           ON m.memberId = ms.memberId
+                 LEFT JOIN product p1
+                           ON ms.productId = p1.productId
+                 LEFT JOIN pt_package pp
+                           ON m.memberId = pp.memberId
+                 LEFT JOIN product p2
+                           ON pp.productId = p2.productId
+        WHERE m.phone LIKE CONCAT(#{keyword}, '%')
+        ORDER BY m.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <!-- 상태 검색 -->
-    <select id="findByStatus" resultType="Member">
-        SELECT *
-        FROM member
-        WHERE status = #{status}
-        ORDER BY created_at DESC
+    <select id="findByStatus" resultType="MemberProductDTO">
+        SELECT m.memberId,
+               m.name,
+               m.phone,
+               m.birthDate,
+               m.gender,
+               m.status,
+               COALESCE(p1.name, p2.name) AS productName,
+               m.created_at AS createdAt
+        FROM member m
+                 LEFT JOIN membership ms
+                           ON m.memberId = ms.memberId
+                 LEFT JOIN product p1
+                           ON ms.productId = p1.productId
+                 LEFT JOIN pt_package pp
+                           ON m.memberId = pp.memberId
+                 LEFT JOIN product p2
+                           ON pp.productId = p2.productId
+        WHERE m.status = #{status}
+        ORDER BY m.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <select id="findByStatusAndPhone" resultType="Member">
-        SELECT *
-        FROM member
-        WHERE status = #{status}
-          AND phone LIKE CONCAT(#{keyword}, '%')
-        ORDER BY created_at DESC
+    <select id="findByStatusAndPhone" resultType="MemberProductDTO">
+        SELECT m.memberId,
+               m.name,
+               m.phone,
+               m.birthDate,
+               m.gender,
+               m.status,
+               COALESCE(p1.name, p2.name) AS productName,
+               m.created_at AS createdAt
+        FROM member m
+                 LEFT JOIN membership ms
+                           ON m.memberId = ms.memberId
+                 LEFT JOIN product p1
+                           ON ms.productId = p1.productId
+                 LEFT JOIN pt_package pp
+                           ON m.memberId = pp.memberId
+                 LEFT JOIN product p2
+                           ON pp.productId = p2.productId
+        WHERE m.status = #{status}
+          AND m.phone LIKE CONCAT(#{keyword}, '%')
+        ORDER BY m.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <select id="findByStatusAndName" resultType="Member">
-        SELECT *
-        FROM member
-        WHERE status = #{status}
-          AND name LIKE CONCAT(#{keyword}, '%')
-        ORDER BY created_at DESC
+    <select id="findByStatusAndName" resultType="MemberProductDTO">
+        SELECT m.memberId,
+               m.name,
+               m.phone,
+               m.birthDate,
+               m.gender,
+               m.status,
+               COALESCE(p1.name, p2.name) AS productName,
+               m.created_at AS createdAt
+        FROM member m
+                 LEFT JOIN membership ms
+                           ON m.memberId = ms.memberId
+                               AND ms.isActive = TRUE
+                 LEFT JOIN product p1
+                           ON ms.productId = p1.productId
+                 LEFT JOIN pt_package pp
+                           ON m.memberId = pp.memberId AND pp.isActive = TRUE
+                 LEFT JOIN product p2
+                           ON pp.productId = p2.productId
+        WHERE m.status = #{status}
+          AND m.name LIKE CONCAT(#{keyword}, '%')
+        ORDER BY m.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
@@ -140,17 +216,50 @@
             FROM pt_package pp2
             WHERE pp2.memberId = m.memberId AND pp2.isActive = TRUE
         )
+        AND (ms.paymentId IS NOT NULL OR pp.paymentId IS NOT NULL)
         <if test="keyword != null and keyword != ''">
             AND m.name LIKE CONCAT('%', #{keyword}, '%')
         </if>
         ORDER BY expiredDate ASC
     </select>
 
-
     <update id="updateStatusActive">
         UPDATE member
         SET status = 'ACTIVE'
         WHERE memberId = #{memberId}
     </update>
+
+    <select id="getMemberStats" resultType="MemberStatsDTO">
+        SELECT
+            count(*) as totalMembers,
+            sum(case when m.gender = '남성' then 1 else 0 end) as totalMale,
+            sum(case when m.gender = '여성' then 1 else 0 end) as totalFemale,
+            SUM(CASE WHEN m.status = 'INACTIVE' THEN 1 ELSE 0 END) AS expiredMembers,
+            SUM(CASE WHEN m.status = 'INACTIVE' AND m.gender = '남성' THEN 1 ELSE 0 END) AS expiredMale,
+            SUM(CASE WHEN m.status = 'INACTIVE' AND m.gender = '여성' THEN 1 ELSE 0 END) AS expiredFemale,
+            -- 신규 회원 (최근 7일 기준)
+            SUM(CASE WHEN m.created_at >= DATEADD('DAY', -7, CURRENT_DATE) THEN 1 ELSE 0 END) AS newMembers,
+            SUM(CASE WHEN m.created_at >= DATEADD('DAY', -7, CURRENT_DATE) AND m.gender = '남성' THEN 1 ELSE 0 END) AS newMale,
+            SUM(CASE WHEN m.created_at >= DATEADD('DAY', -7, CURRENT_DATE) AND m.gender = '여성' THEN 1 ELSE 0 END) AS newFemale,
+            (
+                SELECT COUNT(*)
+                FROM attendance a
+                WHERE a.attendedAt >= CURRENT_DATE
+                ) AS todayVisitedMembers,
+            (
+                SELECT COUNT(*)
+                FROM attendance a
+                         JOIN member m2 ON a.memberId = m2.memberId
+                WHERE a.attendedAt >= CURRENT_DATE AND m2.gender = '남성'
+                ) AS todayVisitedMale,
+            (
+                SELECT COUNT(*)
+                FROM attendance a
+                         JOIN member m2 ON a.memberId = m2.memberId
+                WHERE a.attendedAt >= CURRENT_DATE AND m2.gender = '여성'
+                ) AS todayVisitedFemale
+        FROM member m
+
+    </select>
 
 </mapper>

@@ -9,25 +9,18 @@
         VALUES (#{memberId}, #{productId}, #{startDate}, #{endDate}, #{price}, #{createdAt},#{isActive})
     </insert>
 
-    <select id="getAllCareMembers" resultType="MemberShipCareDTO">
-        SELECT  m.name,
-                m.phone,
-                p.name as productName,
-                ms.startDate,
-                ms.endDate
-        FROM membership ms
-                INNER JOIN member m
-                        ON ms.memberId = m.memberId
-                INNER JOIN product p
-                        ON ms.productId = p.productId
-        ORDER BY ms.endDate
-    </select>
-
     <update id="deactivateByMemberId" parameterType="long">
         UPDATE membership
         SET isActive = false
         WHERE memberId = #{memberId}
         AND isActive = true
+    </update>
+
+    <update id="activateByMemberId" parameterType="long">
+        UPDATE membership
+        SET isActive = true
+        WHERE memberId = #{memberId}
+          AND isActive = false
     </update>
 
 
@@ -39,38 +32,6 @@
             price           = #{price}
         WHERE memberId = #{memberId}
     </update>
-
-    <!--   회원 이름 검색-->
-    <select id="findByNameContaining" resultType="MemberShipCareDTO">
-        SELECT  m.name,
-                m.phone,
-                p.name as productName,
-                ms.startDate,
-                ms.endDate
-        FROM membership ms
-                 INNER JOIN member m
-                            ON ms.memberId = m.memberId
-                 INNER JOIN product p
-                            ON ms.productId = p.productId
-        WHERE m.name LIKE CONCAT(#{keyword}, '%')
-        ORDER BY ms.endDate
-    </select>
-
-    <!-- 회원 폰 번호 검색-->
-    <select id="findByPhoneContaining" resultType="MemberShipCareDTO">
-        SELECT  m.name,
-                m.phone,
-                p.name as productName,
-                ms.startDate,
-                ms.endDate
-        FROM membership ms
-                 INNER JOIN member m
-                            ON ms.memberId = m.memberId
-                 INNER JOIN product p
-                            ON ms.productId = p.productId
-        WHERE m.phone LIKE CONCAT(#{keyword}, '%')
-        ORDER BY ms.endDate
-    </select>
 
     <select id="findByMemberId" parameterType="long" resultType="Membership">
         SELECT top 1 memberId, productId, startDate, endDate, price
@@ -87,15 +48,120 @@
 
     <select id="selectMembershipMembers" resultType="MembershipSalesDTO">
         SELECT
-            m.name AS memberName,
             p.name AS productName,
-            ms.price,
-            ms.startDate AS date
+            COUNT(*) AS count,
+            ms.price AS unitPrice,
+            SUM(ms.price) AS totalAmount
+        FROM membership ms
+                 JOIN product p
+                      ON ms.productId = p.productId
+        WHERE ms.startDate BETWEEN #{startDate} AND #{endDate}
+        GROUP BY p.name, ms.price
+        ORDER BY p.name
+    </select>
+
+    <select id="findExpiringMemberAll" resultType="ImminentCareDTO">
+        SELECT
+            m.name AS memberName,
+            m.phone AS phone,
+            p.name AS productName,
+            '-' AS remainingCount,
+            ms.endDate AS endDate
         FROM membership ms
                  JOIN member m ON ms.memberId = m.memberId
                  JOIN product p ON ms.productId = p.productId
-        WHERE ms.startDate BETWEEN #{startDate} AND #{endDate}
-        ORDER BY ms.startDate
+        WHERE ms.isActive = TRUE
+          AND ms.endDate BETWEEN CURRENT_DATE AND DATEADD('DAY', 7, CURRENT_DATE)
+          AND ms.paymentId IS NOT NULL
+        UNION ALL
+        SELECT
+            m.name AS memberName,
+            m.phone AS phone,
+            p.name AS productName,
+            CAST(pp.totalCount - pp.remainingCount AS CHAR) AS remainingCount,
+            pp.endDate AS endDate
+        FROM pt_package pp
+                 JOIN member m ON pp.memberId = m.memberId
+                 JOIN product p ON pp.productId = p.productId
+        WHERE pp.isActive = TRUE
+          AND pp.endDate BETWEEN CURRENT_DATE AND DATEADD('DAY', 7, CURRENT_DATE)
+          AND pp.paymentId IS NOT NULL
+        ORDER BY endDate ASC
     </select>
+
+    <select id="findExpiringMemberByName" resultType="ImminentCareDTO">
+        SELECT
+            m.name AS memberName,
+            m.phone AS phone,
+            p.name AS productName,
+            '-' AS remainingCount,
+            ms.endDate AS endDate
+        FROM membership ms
+                 JOIN member m ON ms.memberId = m.memberId
+                 JOIN product p ON ms.productId = p.productId
+        WHERE ms.isActive = TRUE
+          AND ms.endDate BETWEEN CURRENT_DATE AND DATEADD('DAY', 7, CURRENT_DATE)
+          AND m.name LIKE CONCAT(#{keyword}, '%')
+          AND ms.paymentId IS NOT NULL
+        UNION ALL
+        SELECT
+            m.name AS memberName,
+            m.phone AS phone,
+            p.name AS productName,
+            (pp.totalCount - pp.remainingCount) AS remainingCount,
+            pp.endDate AS endDate
+        FROM pt_package pp
+                 JOIN member m ON pp.memberId = m.memberId
+                 JOIN product p ON pp.productId = p.productId
+        WHERE pp.isActive = TRUE
+          AND pp.endDate BETWEEN CURRENT_DATE AND DATEADD('DAY', 7, CURRENT_DATE)
+          AND m.name LIKE CONCAT(#{keyword}, '%')
+          AND pp.paymentId IS NOT NULL
+        ORDER BY endDate ASC
+    </select>
+
+    <select id="findExpiringMemberByPhone" resultType="ImminentCareDTO">
+        SELECT
+            m.name AS memberName,
+            m.phone AS phone,
+            p.name AS productName,
+            '-' AS remainingCount,
+            ms.endDate AS endDate
+        FROM membership ms
+                 JOIN member m ON ms.memberId = m.memberId
+                 JOIN product p ON ms.productId = p.productId
+        WHERE ms.isActive = TRUE
+          AND ms.endDate BETWEEN CURRENT_DATE AND DATEADD('DAY', 7, CURRENT_DATE)
+          AND m.phone LIKE CONCAT(#{keyword}, '%')
+          AND ms.paymentId IS NOT NULL
+        UNION ALL
+        SELECT
+            m.name AS memberName,
+            m.phone AS phone,
+            p.name AS productName,
+            (pp.totalCount - pp.remainingCount) AS remainingCount,
+            pp.endDate AS endDate
+        FROM pt_package pp
+                 JOIN member m ON pp.memberId = m.memberId
+                 JOIN product p ON pp.productId = p.productId
+        WHERE pp.isActive = TRUE
+          AND pp.endDate BETWEEN CURRENT_DATE AND DATEADD('DAY', 7, CURRENT_DATE)
+          AND m.phone LIKE CONCAT(#{keyword}, '%')
+          AND pp.paymentId IS NOT NULL
+        ORDER BY endDate ASC
+    </select>
+
+    <delete id="deleteUnpaidMembership">
+        DELETE FROM membership
+        WHERE memberId = #{memberId}
+          AND isActive = FALSE
+          AND paymentId IS NULL
+    </delete>
+
+    <delete id="deleteMemberShipByMemberId">
+        DELETE FROM membership
+        WHERE memberId = #{memberId}
+          AND isActive = FALSE
+    </delete>
 
 </mapper>

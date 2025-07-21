@@ -1,15 +1,15 @@
 package com.example.managesolution.mapper;
 
 import com.example.managesolution.data.domain.PtSession;
-import com.example.managesolution.data.dto.DayLessonDTO;
-import com.example.managesolution.data.dto.LessonDTO;
+import com.example.managesolution.data.dto.dashboard.response.DashboardSessionDTO;
+import com.example.managesolution.data.dto.ptSession.response.DayLessonDTO;
+import com.example.managesolution.data.dto.ptSession.response.LessonDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Mapper
 public interface PtSessionMapper {
@@ -31,4 +31,6 @@ public interface PtSessionMapper {
     void insert(PtSession session);
 
     void deleteById(@Param("id") Long sessionId);
+
+    List<DashboardSessionDTO> findTodaySessions();
 }

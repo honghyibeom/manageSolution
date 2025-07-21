@@ -1,9 +1,10 @@
 package com.example.managesolution.mapper;
 
 import com.example.managesolution.data.domain.Member;
-import com.example.managesolution.data.dto.MemberExpiredDTO;
-import com.example.managesolution.data.dto.MemberUnpaidDTO;
-import com.example.managesolution.data.dto.PaymentHistoryDTO;
+import com.example.managesolution.data.dto.dashboard.response.MemberStatsDTO;
+import com.example.managesolution.data.dto.member.response.MemberProductDTO;
+import com.example.managesolution.data.dto.payment.response.MemberExpiredDTO;
+import com.example.managesolution.data.dto.payment.response.MemberUnpaidDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Mapper
 public interface MemberMapper {
-    List<Member> findPaged(@Param("limit") int limit, @Param("offset") int offset);
+    List<MemberProductDTO> findPaged(@Param("limit") int limit, @Param("offset") int offset);
     int countAll();
 
     Member findById(Long id);
@@ -23,25 +24,25 @@ public interface MemberMapper {
     void delete(Long id);
 
     // 전화번호 검색
-    List<Member> findByPhoneContaining(@Param("keyword")String keyword,
+    List<MemberProductDTO> findByPhoneContaining(@Param("keyword")String keyword,
                                        @Param("limit")int limit,
                                        @Param("offset")int offset);
 
     // 폰 번호 검색
-    List<Member> findByNameContaining(@Param("keyword")String keyword,
+    List<MemberProductDTO> findByNameContaining(@Param("keyword")String keyword,
                                        @Param("limit")int limit,
                                        @Param("offset")int offset);
 
-    List<Member> findByStatus(@Param("status")String status,
+    List<MemberProductDTO> findByStatus(@Param("status")String status,
                               @Param("limit")int limit,
                               @Param("offset")int offset);
 
-    List<Member> findByStatusAndPhone(@Param("status")String status,
+    List<MemberProductDTO> findByStatusAndPhone(@Param("status")String status,
                                         @Param("keyword")String keyword,
                                         @Param("limit")int limit,
                                         @Param("offset")int offset);
 
-    List<Member> findByStatusAndName(@Param("status")String status,
+    List<MemberProductDTO> findByStatusAndName(@Param("status")String status,
                                       @Param("keyword")String keyword,
                                       @Param("limit")int limit,
                                       @Param("offset")int offset);
@@ -51,6 +52,8 @@ public interface MemberMapper {
     List<MemberExpiredDTO> findExpiredMembers(@Param("keyword") String keyword);
 
     void updateStatusActive(Long memberId);
+
+    MemberStatsDTO getMemberStats();
 
 
 }

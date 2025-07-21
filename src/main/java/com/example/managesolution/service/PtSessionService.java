@@ -1,20 +1,17 @@
 package com.example.managesolution.service;
 
 import com.example.managesolution.data.domain.PtSession;
-import com.example.managesolution.data.dto.DayLessonDTO;
-import com.example.managesolution.data.dto.LessonDTO;
-import com.example.managesolution.data.dto.PtSessionDTO;
-import com.example.managesolution.data.dto.TrainerFormDTO;
+import com.example.managesolution.data.dto.ptSession.response.DayLessonDTO;
+import com.example.managesolution.data.dto.ptSession.response.LessonDTO;
+import com.example.managesolution.data.dto.ptSession.request.PtSessionDTO;
 import com.example.managesolution.mapper.PtSessionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,40 +24,54 @@ public class PtSessionService {
 
 
     public List<DayLessonDTO> getLessonCalendar(int year, int month, Long trainerId) {
+
+        // 해당 월의 첫째 날을 생성
         LocalDate start = LocalDate.of(year, month, 1);
+
+        // 다음 달의 첫째 날을 구함
         LocalDate end = start.plusMonths(1);
 
-        // 🔷 트레이너 조건에 따라 Mapper 호출
+        // 🔷 트레이너 조건에 따라 Mapper 호출하여 DB에서 수업 건수를 조회
         List<DayLessonDTO> result;
         if (trainerId != null) {
             result = ptSessionMapper.getSessionCountByMonthAndTrainer(start, end, trainerId);
         } else {
+            // 트레이너 지정이 없는 경우 : 전체 일정 조회
             result = ptSessionMapper.getSessionCountByMonth(start, end);
         }
 
 
+        // 결과를 Day -> 수업 건수 형태의 Map으로 변환
         Map<Integer, Integer> dayCountMap = result.stream()
                 .collect(Collectors.toMap(DayLessonDTO::getDay, DayLessonDTO::getLessonCount));
 
+        //켈린더 폼
         List<DayLessonDTO> calendar = new ArrayList<>();
+        // 월의 첫 번째 날의 요일(1=월, 7=일)을 구함
         int firstDayOfWeek = start.getDayOfWeek().getValue();
 
+        // 달력 앞쪽 빈 칸(비어있는 셀) 추가
         for (int i = 1; i < firstDayOfWeek; i++) {
             calendar.add(new DayLessonDTO(0, 0, false));
         }
 
+        // 해당 월의 실제 일 수만큼 반복
         int daysInMonth = start.lengthOfMonth();
         for (int i = 1; i <= daysInMonth; i++) {
+            // day에 해당하는 수업건수 조회, 없으면 0
             int count = dayCountMap.getOrDefault(i, 0);
+            // 달력에 하루치 데이터 추가
             calendar.add(new DayLessonDTO(i, count, true));
         }
 
+        // 달력 마지막 주를 7의 배수로 맞추기 위해 뒷부분에 빈 칸을 추가
         while (calendar.size() % 7 != 0) {
             calendar.add(new DayLessonDTO(0, 0, false));
         }
 
         return calendar;
     }
+
 
     public List<LessonDTO> getLessonsByDate(LocalDate date, Long trainerId) {
         if (trainerId != null) {

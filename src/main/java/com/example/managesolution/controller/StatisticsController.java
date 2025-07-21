@@ -1,7 +1,6 @@
 package com.example.managesolution.controller;
 
-import com.example.managesolution.data.dto.SalesDTO;
-import com.example.managesolution.data.dto.StatisticsResponseDTO;
+import com.example.managesolution.data.dto.statistics.response.StatisticsResponseDTO;
 import com.example.managesolution.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
 
 @Controller
 @RequestMapping("/statistics")
@@ -22,6 +19,7 @@ public class StatisticsController {
 
     private final PaymentService paymentService;
 
+    // 매출 통계 조회
     @GetMapping("")
     public String statistics(Model model) {
 
@@ -33,6 +31,7 @@ public class StatisticsController {
     }
 
 //    ---------------------------------------restAPI-------------------------------------
+    //기간별 데이터 조회
     @GetMapping("/api")
     @ResponseBody
     public StatisticsResponseDTO statisticsData(@RequestParam String start,

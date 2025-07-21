@@ -31,8 +31,14 @@
             <input type="date" th:field="*{birthDate}" class="form-control" readonly />
           </div>
           <div class="mb-3">
-            <label class="form-label">성별</label>
-            <input type="text" th:value="${memberForm.gender}" class="form-control" readonly />
+            <label class="form-label d-block"></label>
+            <div class="btn-group" role="group" aria-label="성별 선택">
+              <input type="radio" class="btn-check" name="gender" id="male" value="남성" th:field="*{gender}" readonly>
+              <label class="btn btn-outline-primary" for="male">남성</label>
+
+              <input type="radio" class="btn-check" name="gender" id="female" value="여성" th:field="*{gender}" readonly>
+              <label class="btn btn-outline-danger" for="female">여성</label>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">메모</label>
@@ -112,7 +118,7 @@
 
     <div class="text-end mt-3">
       <button type="submit" class="btn btn-primary">저장</button>
-      <a th:href="@{/payment}" class="btn btn-secondary">취소</a>
+      <a href="#" onclick="history.back(); return false;" class="btn btn-secondary">취소</a>
     </div>
   </form>
 

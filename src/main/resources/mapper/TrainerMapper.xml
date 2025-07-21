@@ -25,4 +25,20 @@
         VALUES (#{trainerId}, #{phone}, #{gender}, #{birthDate}, #{baseSalary}, #{payPerSession},#{careerYears},#{createdAt})
     </insert>
 
+    <select id="findAllTrainerNames">
+        select a.name
+        from trainer t
+                 JOIN app_user a ON t.trainerId = a.userId
+    </select>
+
+    <select id="getMonthlyMemberCountsRaw" resultType="MonthCountDTO">
+        SELECT TO_CHAR(p.created_at, 'yyyy-MM') AS "month",
+               COUNT(*) AS count
+        FROM pt_package p
+                 JOIN app_user u ON p.trainerId = u.userId
+        WHERE u.name = #{trainerName}
+          AND p.created_at >= DATEADD('MONTH', -5, CURRENT_DATE)
+        GROUP BY TO_CHAR(p.created_at, 'yyyy-MM')
+        ORDER BY "month"
+    </select>
 </mapper>

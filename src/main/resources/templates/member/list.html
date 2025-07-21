@@ -43,7 +43,7 @@
                 <th>생년월일</th>
                 <th>성별</th>
                 <th>상태</th>
-                <th>메모</th>
+                <th>상품명</th>
                 <th>가입일</th>
                 <th>관리</th>
             </tr>
@@ -58,7 +58,14 @@
                     <span th:if="${member.status != null and member.status.name() == 'ACTIVE'}" class="badge bg-success">이용중</span>
                     <span th:if="${member.status != null and member.status.name() == 'INACTIVE'}" class="badge bg-danger">이용 안함</span>
                 </td>
-                <td th:text="${member.memo}"></td>
+                <td>
+                    <span th:if="${member.productName != null}" th:text="${member.productName}"></span>
+                    <a th:if="${member.productName == null}"
+                       th:href="@{/members/{id}/register/product(id=${member.memberId})}"
+                       class="btn btn-sm btn-outline-primary">
+                        상품 등록
+                    </a>
+                </td>
                 <td th:text="${#temporals.format(member.createdAt,'yyyy-MM-dd')}"></td>
                 <td>
                     <a th:href="@{/members/{id}/edit(id=${member.memberId})}" class="btn btn-sm btn-outline-secondary">수정</a>

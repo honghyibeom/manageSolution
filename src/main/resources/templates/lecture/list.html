@@ -157,7 +157,7 @@
             checkboxes.forEach(cb => cb.checked = source.checked);
         }
 
-        // 켈린더 날짜 생성
+        // 켈린더 날짜 생성 및 수업 건수 생성
         function loadCalendar(year, month) {
             const trainerId = document.getElementById("trainerId").value;
 
@@ -431,6 +431,7 @@
         // 페이지 로드할때
         document.addEventListener("DOMContentLoaded", () => {
             loadTrainerList("trainerId");
+
             const form = document.getElementById("registerForm");
 
             form.addEventListener("submit", function (e) {
@@ -466,6 +467,29 @@
                         alert("등록 실패: " + err.message);
                     });
             });
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadCalendar(currentYear, currentMonth);
+
+            // 오늘 날짜 선택
+            const today = new Date();
+            if (today.getFullYear() === currentYear && today.getMonth() + 1 === currentMonth) {
+                const todayStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                selectedDate = todayStr;
+
+                // 잠시 delay 주고 선택 클래스 부여
+                setTimeout(() => {
+                    const calendarCells = document.querySelectorAll(".calendar-box");
+                    calendarCells.forEach(cell => {
+                        if (cell.innerText.trim().startsWith(today.getDate())) {
+                            cell.classList.add("selected");
+                        }
+                    });
+                }, 100);
+
+                loadLessonList(todayStr);
+            }
         });
 
         // 트레이너 드롭다운 변경시

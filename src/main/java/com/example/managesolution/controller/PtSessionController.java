@@ -1,8 +1,11 @@
 package com.example.managesolution.controller;
 
-import com.example.managesolution.data.domain.AppUser;
-import com.example.managesolution.data.domain.PtSession;
-import com.example.managesolution.data.dto.*;
+import com.example.managesolution.data.dto.ptSession.request.AttendanceRequestDTO;
+import com.example.managesolution.data.dto.ptSession.request.PtSessionDTO;
+import com.example.managesolution.data.dto.ptSession.response.DayLessonDTO;
+import com.example.managesolution.data.dto.ptSession.response.LessonDTO;
+import com.example.managesolution.data.dto.ptSession.response.PtMemberDTO;
+import com.example.managesolution.data.dto.trainer.response.TrainerDTO;
 import com.example.managesolution.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,11 +25,11 @@ import java.util.Map;
 @RequestMapping("/lecture")
 public class PtSessionController {
     private final PtSessionService ptSessionService;
-    private final AppUserService appUserService;
     private final PtPackageService ptPackageService;
     private final AttendanceService attendanceService;
     private final TrainerService trainerService;
 
+    // 수업 관리 페이지 조회
     @GetMapping("")
     public String index(Model model) {
         model.addAttribute("year", LocalDate.now().getYear());
@@ -37,6 +39,8 @@ public class PtSessionController {
 
 
 //    --------------------------------------json----------------------------------------------------------
+
+    // 캘린더 폼 생성 및 수업 건수 조회
     @ResponseBody
     @GetMapping("/month")
     public List<DayLessonDTO> getMonthLessons(
@@ -48,6 +52,7 @@ public class PtSessionController {
     }
 
 
+    // 선택한 날짜 수업 일정 조회
     @ResponseBody
     @GetMapping("/day")
     public List<LessonDTO> getLessonsByDate(
@@ -57,13 +62,15 @@ public class PtSessionController {
         return ptSessionService.getLessonsByDate(date, trainerId);
     }
 
-    @ResponseBody // JSON 반환을 위함
+    // 수업 등록
+    @ResponseBody
     @PostMapping("/register")
     public ResponseEntity<?> registerLecture(@ModelAttribute PtSessionDTO form) {
         ptSessionService.register(form);
         return ResponseEntity.ok(Map.of("success", true));
     }
 
+    // 수업 삭제
     @ResponseBody
     @PostMapping("/delete")
     public Map<String, Object> deleteLessons(@RequestBody List<Long> sessionIds) {
@@ -78,18 +85,21 @@ public class PtSessionController {
         return response;
     }
 
+    // 트레이너들 조회
     @GetMapping("/trainers")
     @ResponseBody
     public List<TrainerDTO> getTrainerList() {
         return trainerService.getTrainerList(); // 트레이너 리스트 반환
     }
 
+    // 트레이너에 해당하는 회원들 조회
     @GetMapping("/members")
     @ResponseBody
     public List<PtMemberDTO> getMembersByTrainer(@RequestParam Long trainerId) {
         return ptPackageService.findByTrainerId(trainerId);
     }
 
+    // 회원 선택했을때 상품Id 반환 (PtSession 저장을 하기위해)
     @GetMapping("/package/active")
     @ResponseBody
     public Map<String, Long> getActivePackage(@RequestParam Long memberId) {
@@ -97,6 +107,7 @@ public class PtSessionController {
         return Map.of("packageId", packageId);
     }
 
+    // 출석 api
     @PostMapping("/attend")
     @ResponseBody
     public ResponseEntity<?> attend(@RequestBody AttendanceRequestDTO dto) {

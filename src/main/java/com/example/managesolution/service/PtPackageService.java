@@ -1,8 +1,8 @@
 package com.example.managesolution.service;
 
 import com.example.managesolution.data.domain.PtPackage;
-import com.example.managesolution.data.dto.PtCareDTO;
-import com.example.managesolution.data.dto.PtMemberDTO;
+import com.example.managesolution.data.dto.care.response.PtCareDTO;
+import com.example.managesolution.data.dto.ptSession.response.PtMemberDTO;
 import com.example.managesolution.mapper.PtPackageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,6 +49,10 @@ public class PtPackageService {
 
     public PtPackage findByMemberId(Long memberId) {
         return ptPackageMapper.findByMemberId(memberId);
+    }
+
+    public void deleteUnpaidPtPackages(Long memberId) {
+        ptPackageMapper.deleteUnpaidPtPackages(memberId);
     }
 
 }

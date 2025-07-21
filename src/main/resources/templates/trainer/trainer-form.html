@@ -20,90 +20,93 @@
         <h4 class="fw-bold mb-4" th:text="${trainer.trainerId != null} ? '강사 수정' : '강사 등록'">강사 등록</h4>
 
         <form th:action="${trainer.trainerId != null} ? @{'/trainer/' + ${trainer.trainerId} + '/edit'} : @{/trainer/register}"
-              method="post">
+              method="post" th:object="${trainer}">
 
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">이메일</label>
-              <input type="email" name="email" class="form-control"
-                     th:value="${trainer.email}" th:readonly="${trainer.trainerId != null}" required />
+              <input type="email" th:field="*{email}" class="form-control" th:readonly="${trainer.trainerId != null}" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
             </div>
 
             <div class="col-md-6 mb-3" th:if="${trainer.trainerId == null}">
               <label class="form-label">비밀번호</label>
-              <input type="password" name="password" class="form-control" required />
+              <input type="password" th:field="*{password}" class="form-control" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
             </div>
           </div>
 
           <div class="row" th:if="${trainer.trainerId == null}">
             <div class="col-md-6 mb-3">
               <label class="form-label">비밀번호 확인</label>
-              <input type="password" name="passwordConfirm" class="form-control" required />
+              <input type="password" th:field="*{passwordConfirm}" class="form-control" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"></div>
             </div>
-
-
           </div>
 
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">이름</label>
-              <input type="text" name="name" class="form-control" th:value="${trainer.name}" required />
+              <input type="text" th:field="*{name}" class="form-control" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
             </div>
 
             <div class="col-md-6 mb-3">
               <label class="form-label">전화번호</label>
-              <input type="text" name="phone" class="form-control" th:value="${trainer.phone}" required />
+              <input type="text" th:field="*{phone}" class="form-control" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">생년월일</label>
-              <input type="date" name="birthDate" class="form-control"
-                     th:value="${#temporals.format(trainer.birthDate, 'yyyy-MM-dd')}" />
+              <input type="date" th:field="*{birthDate}" class="form-control" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
             </div>
 
             <div class="col-md-6 mb-3">
-              <label class="form-label">성별</label>
-              <select name="gender" class="form-select">
-                <option value="male" th:selected="${trainer.gender == 'male'}">남성</option>
-                <option value="female" th:selected="${trainer.gender == 'female'}">여성</option>
-              </select>
+              <label class="form-label d-block">성별</label>
+              <div class="btn-group" role="group" aria-label="성별 선택">
+                <input type="radio" class="btn-check" th:field="*{gender}" id="male" value="남성" />
+                <label class="btn btn-outline-primary" for="male">남성</label>
+
+                <input type="radio" class="btn-check" th:field="*{gender}" id="female" value="여성" />
+                <label class="btn btn-outline-danger" for="female">여성</label>
+              </div>
+              <div class="text-danger small" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">경력(년)</label>
-              <input type="text" name="careerYears" class="form-control"
-                     th:value="${trainer.careerYears}" />
-              </select>
+              <input type="text" th:field="*{careerYears}" class="form-control" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('careerYears')}" th:errors="*{careerYears}"></div>
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">기본급</label>
-              <input type="text" name="baseSalary" class="form-control"
-                     th:value="${trainer.baseSalary}" />
-              </select>
+              <input type="text" th:field="*{baseSalary}" class="form-control" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('baseSalary')}" th:errors="*{baseSalary}"></div>
             </div>
 
             <div class="col-md-6 mb-3">
               <label class="form-label">수당</label>
-              <input type="text" name="payPerSession" class="form-control"
-                     th:value="${trainer.payPerSession}" />
-              </select>
+              <input type="text" th:field="*{payPerSession}" class="form-control" />
+              <div class="text-danger small" th:if="${#fields.hasErrors('payPerSession')}" th:errors="*{payPerSession}"></div>
             </div>
           </div>
 
-
-          <input type="hidden" name="role" value="trainer" />
+          <input type="hidden" th:field="*{role}" value="TRAINER" />
 
           <div class="text-end">
             <button type="submit" class="btn btn-primary" th:text="${trainer.trainerId != null} ? '수정' : '등록'">등록</button>
             <a th:href="@{/trainer}" class="btn btn-secondary">취소</a>
           </div>
+
         </form>
       </div>
     </div>

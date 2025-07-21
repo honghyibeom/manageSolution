@@ -60,4 +60,15 @@
         AND isActive = true
     </select>
 
+<!--    상품 랭킹 3등까지-->
+    <select id="findProductRankings" resultType="ProductRankingDTO">
+        SELECT TOP 3
+            ROW_NUMBER() OVER (ORDER BY COUNT(p.paymentId) DESC) AS rank,
+            pr.name AS productName,
+            COUNT(p.paymentId) AS count
+        FROM product pr
+                 LEFT OUTER JOIN payment p ON pr.productId = p.productId
+        GROUP BY pr.productId, pr.name
+        ORDER BY rank;
+    </select>
 </mapper>

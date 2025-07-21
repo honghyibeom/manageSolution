@@ -23,7 +23,8 @@
             margin-bottom: 1rem;
         }
         .scroll-table {
-            max-height: 400px;
+            height: 500px;
+            max-height: 500px;
             overflow-y: auto;
         }
     </style>
@@ -46,29 +47,29 @@
             <!-- 첫 수업 CARE -->
             <div class="col-md-6">
                 <div class="table-container">
-                    <div class="table-title">PT 수업 CARE</div>
-                    <div class="table-description">🩺 마감순으로 PT 수업을 수강한 회원님들 입니다.</div>
+                    <div class="table-title">첫 수업 CARE</div>
+                    <div class="table-description">🩺 첫 수업을 예약한 회원님들입니다.</div>
 
                     <div class="scroll-table">
                         <table class="table table-bordered text-center align-middle">
                             <thead class="table-light">
                             <tr>
                                 <th>이름</th>
-                                <th>전화번호</th>
-                                <th>사용 횟수</th>
+                                <th>연락처</th>
+                                <th>회차</th>
                                 <th>총 횟수</th>
-                                <th>시작일</th>
-                                <th>종료일</th>
+                                <th>예약일자</th>
+                                <th>예약시간</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="pt : ${ptMembers}">
-                                <td th:text="${pt.name}"></td>
-                                <td th:text="${pt.phone}"></td>
-                                <td th:text="${pt.remainingCount}"></td>
+                                <td th:text="${pt.memberName}"></td>
+                                <td th:text="${pt.memberPhone}"></td>
+                                <td th:text="${pt.count}"></td>
                                 <td th:text="${pt.totalCount}"></td>
-                                <td th:text="${#temporals.format(pt.startDate, 'yyyy-MM-dd')}"></td>
-                                <td th:text="${#temporals.format(pt.endDate, 'yyyy-MM-dd')}"></td>
+                                <td th:text="${#temporals.format(pt.sessionDate, 'yyyy-MM-dd')}"></td>
+                                <td th:text="${#temporals.format(pt.sessionTime, 'HH:mm')}"></td>
                             </tr>
                             </tbody>
                         </table>
@@ -79,26 +80,26 @@
             <!-- 수업 관리 CARE -->
             <div class="col-md-6">
                 <div class="table-container">
-                    <div class="table-title">회원 CARE</div>
-                    <div class="table-description">📆 마감 순으로 나열된 회원님들 입니다.</div>
+                    <div class="table-title">마감 CARE</div>
+                    <div class="table-description">📆 마감 임박한 회원님들 입니다.</div>
 
                     <div class="scroll-table">
                         <table class="table table-bordered text-center align-middle">
                             <thead class="table-light">
                             <tr>
                                 <th>이름</th>
-                                <th>전화번호</th>
-                                <th>회원권</th>
-                                <th>시작일</th>
+                                <th>연락처</th>
+                                <th>상품명</th>
+                                <th>잔여횟수</th>
                                 <th>종료일</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="membership : ${membershipMembers}">
-                                <td th:text="${membership.name}"></td>
+                                <td th:text="${membership.memberName}"></td>
                                 <td th:text="${membership.phone}"></td>
                                 <td th:text="${membership.productName}"></td>
-                                <td th:text="${#temporals.format(membership.startDate, 'yyyy-MM-dd')}"></td>
+                                <td th:text="${membership.remainingCount}"></td>
                                 <td th:text="${#temporals.format(membership.endDate, 'yyyy-MM-dd')}"></td>
                             </tr>
                             </tbody>

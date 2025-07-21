@@ -5,6 +5,7 @@
 
 <mapper namespace="com.example.managesolution.mapper.AttendanceMapper">
 
+<!--   출석 -->
     <insert id="insertAttendance" parameterType="Attendance">
         INSERT INTO attendance (memberId, sessionId, status)
         VALUES (#{memberId}, #{sessionId}, #{status})

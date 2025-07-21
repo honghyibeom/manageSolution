@@ -1,6 +1,7 @@
 package com.example.managesolution.mapper;
 
 import com.example.managesolution.data.domain.Product;
+import com.example.managesolution.data.dto.dashboard.response.ProductRankingDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -20,5 +21,7 @@ public interface ProductMapper {
     List<Product> findMembershipProducts();
 
     List<Product> findPtProducts();
+
+    List<ProductRankingDTO> findProductRankings();
 
 }

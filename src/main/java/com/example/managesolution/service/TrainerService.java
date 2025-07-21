@@ -2,8 +2,8 @@ package com.example.managesolution.service;
 
 import com.example.managesolution.data.domain.AppUser;
 import com.example.managesolution.data.domain.Trainer;
-import com.example.managesolution.data.dto.TrainerDTO;
-import com.example.managesolution.data.dto.TrainerFormDTO;
+import com.example.managesolution.data.dto.trainer.response.TrainerDTO;
+import com.example.managesolution.data.dto.trainer.request.TrainerFormDTO;
 import com.example.managesolution.mapper.AppUserMapper;
 import com.example.managesolution.mapper.TrainerMapper;
 import lombok.RequiredArgsConstructor;
