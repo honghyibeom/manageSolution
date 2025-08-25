@@ -31,9 +31,11 @@ public interface PtPackageMapper {
 
     Long findPackageIdByMemberId(Long memberId);
 
-    int increaseRemainingCount(@Param("packageId") Long packageId);
+    int decreaseRemainingCount(@Param("packageId") Long packageId);
 
     PtPackage findByMemberId(Long memberId);
+
+    PtPackage findByPackageId(Long packageId);
 
     void updatePaymentId(@Param("memberId") Long memberId, @Param("paymentId") Long paymentId);
 

@@ -51,6 +51,7 @@ public class PtPackageService {
         return ptPackageMapper.findByMemberId(memberId);
     }
 
+    @Transactional
     public void deleteUnpaidPtPackages(Long memberId) {
         ptPackageMapper.deleteUnpaidPtPackages(memberId);
     }

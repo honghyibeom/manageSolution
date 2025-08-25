@@ -99,7 +99,7 @@ public class MemberService {
                     .startDate(dto.getPtStartDate())
                     .endDate(dto.getPtEndDate())
                     .totalCount(dto.getPtTotalCount())
-                    .remainingCount(0)
+                    .remainingCount(dto.getPtTotalCount())
                     .price(dto.getPtPrice())
                     .isActive(false)
                     .createdAt(LocalDateTime.now())
@@ -151,7 +151,7 @@ public class MemberService {
                     .startDate(dto.getPtStartDate())
                     .endDate(dto.getPtEndDate())
                     .totalCount(dto.getPtTotalCount())
-                    .remainingCount(0)
+                    .remainingCount(dto.getPtTotalCount())
                     .price(dto.getPtPrice())
                     .createdAt(LocalDateTime.now())
                     .build();
@@ -167,6 +167,7 @@ public class MemberService {
         memberMapper.delete(id);
     }
 
+    @Transactional
     public void registerNewProduct(Long memberId, MemberFormDTO dto) {
         if ("MEMBERSHIP".equals(dto.getProductType())) {
             Membership membership = Membership.builder()
@@ -187,7 +188,7 @@ public class MemberService {
                     .startDate(dto.getPtStartDate())
                     .endDate(dto.getPtEndDate())
                     .totalCount(dto.getPtTotalCount())
-                    .remainingCount(0)
+                    .remainingCount(dto.getPtTotalCount())
                     .price(dto.getPtPrice())
                     .createdAt(LocalDateTime.now())
                     .isActive(false)
@@ -196,6 +197,7 @@ public class MemberService {
         }
     }
 
+    @Transactional
     public MemberFormDTO toFormDTO(Long memberId) {
         Member member = findById(memberId);
         Membership membership = membershipService.findByMemberId(memberId);

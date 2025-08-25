@@ -1,5 +1,6 @@
 package com.example.managesolution.data.domain;
 
+import com.example.managesolution.data.enumerate.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class AppUser {
     private String email;
     private String password;
     private String name;
-    private String role; // ADMIN or Trainer
+    private Role role; // ADMIN or Trainer
     private LocalDateTime createdAt;
 
 }

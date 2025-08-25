@@ -95,4 +95,131 @@
         WHERE CURRENT_DATE = sessionDate
     </select>
 
+    <select id="findBusySlots" resultType="BusySlotDTO">
+        SELECT
+            sessionDate,
+            sessionTime
+        FROM pt_session
+        WHERE trainerId = #{trainerId}
+          AND sessionDate BETWEEN #{start} AND #{end}
+        ORDER BY sessionDate, sessionTime
+    </select>
+
+    <select id="existsTrainerExact" resultType="int">
+        SELECT CASE WHEN EXISTS (
+            SELECT 1
+            FROM pt_session
+            WHERE trainerId = #{trainerId}
+              AND sessionDate = #{date}
+              AND sessionTime = #{time}
+        ) THEN 1 ELSE 0 END
+    </select>
+
+    <select id="existsMemberExact" resultType="int">
+        SELECT CASE WHEN EXISTS (
+            SELECT 1
+            FROM pt_session
+              WHERE memberId  = #{memberId}
+              AND sessionDate = #{date}
+              AND sessionTime = #{time}
+        ) THEN 1 ELSE 0 END
+    </select>
+
+    <select id="ptSessionViews" resultType="SessionViewDTO">
+        SELECT
+        s.sessionId AS sessionId,
+        m.memberId AS memberId,
+        pp.packageId AS packageId,
+        t.trainerId AS trainerId,
+
+        -- 임박 여부: 현재 시각 기준 30분 이내 시작이면 true
+        CASE
+        WHEN TIMESTAMPDIFF(
+        MINUTE,
+        NOW(),
+        CAST(CONCAT(s.sessionDate, ' ', s.sessionTime) AS DATETIME)
+        ) BETWEEN 0 AND 30
+        THEN TRUE
+        ELSE FALSE
+        END AS imminent,
+        m.name AS memberName,
+        RIGHT(m.phone, 4) AS phone,
+        a.name AS trainerName,
+        p.name AS productName,
+        pp.remainingCount AS remainingCount,
+
+        -- 상태 색상
+        CASE s.status
+        WHEN 'BOOKED'   THEN '#6c757d'
+        WHEN 'ATTENDED' THEN '#198754'
+        WHEN 'NO_SHOW'  THEN '#ffc107'
+        ELSE '#6c757d'
+        END AS statusColor,
+
+        -- 상태 라벨
+        CASE s.status
+        WHEN 'BOOKED'   THEN '예약'
+        WHEN 'ATTENDED' THEN '출석'
+        WHEN 'NO_SHOW'  THEN '결석'
+        ELSE s.status
+        END AS label,
+
+        s.sessionTime AS sessionTime,
+        s.sessionDate AS sessionDate
+
+        FROM pt_session s
+        JOIN member m   ON s.memberId = m.memberId
+        JOIN trainer t  ON s.trainerId = t.trainerId
+                LEFT JOIN app_user a ON t.trainerId = a.userId
+        LEFT JOIN pt_package pp ON s.packageId = pp.packageId
+                LEFT JOIN product p  ON pp.productId = p.productId
+
+        WHERE 1=1
+        <!-- 날짜 범위 필터 -->
+        <if test="cond.startDate != null">
+            AND s.sessionDate &gt;= #{cond.startDate}
+        </if>
+        <if test="cond.endDate != null">
+            AND s.sessionDate &lt;= #{cond.endDate}
+        </if>
+
+        <!-- 트레이너 필터 -->
+        <if test="cond.trainerId != null">
+            AND s.trainerId = #{cond.trainerId}
+        </if>
+
+        <!-- 상태 필터 -->
+        <if test="cond.status != null and cond.status.size > 0">
+            AND s.status IN
+            <foreach collection="cond.status" item="st" open="(" separator="," close=")">
+                #{st}
+            </foreach>
+        </if>
+
+        ORDER BY s.sessionDate ASC, s.sessionTime ASC
+        <!-- MySQL -->
+        <!-- LIMIT #{offset}, #{limit} -->
+        <!-- H2 -->
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE pt_session
+        SET status = #{status}
+        WHERE sessionId = #{id}
+    </update>
+
+    <select id="getStatus" parameterType="long" resultType="String">
+        SELECT status
+        FROM pt_session
+        WHERE sessionId = #{sessionId}
+    </select>
+    <update id="updateSession">
+        UPDATE pt_session
+        SET sessionDate = #{sessionDate},
+            sessionTime = #{sessionTime},
+            trainerId   = #{trainerId}
+        WHERE sessionId = #{sessionId}
+    </update>
+
 </mapper>

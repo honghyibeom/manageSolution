@@ -7,5 +7,5 @@ public class AttendanceRequestDTO {
     private Long memberId;
     private Long sessionId;
     private Long packageId;
-    private String status; //"ATTENDED" or "NOSHOW"
+    private String status; //"ATTENDED" or "NO_SHOW"
 }

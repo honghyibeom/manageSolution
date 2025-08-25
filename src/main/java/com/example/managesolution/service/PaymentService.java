@@ -10,6 +10,7 @@ import com.example.managesolution.mapper.PtPackageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -99,8 +100,6 @@ public class PaymentService {
         for (LabelAndAmountDTO dto : chartData) {
             labels.add(dto.getLabel());
             salesData.add(dto.getAmount());
-            System.out.println(dto.getAmount());
-            System.out.println(dto.getLabel());
         }
 
         // 🔷 PT권 테이블 데이터 조회
@@ -113,7 +112,12 @@ public class PaymentService {
         long ptTotalAmount = ptMembers.stream()
                 .mapToLong(PtMemberSalesDTO::getTotalAmount)
                 .sum();
-        int ptCount = ptMembers.size();
+
+        int ptCount = 0;
+        for (PtMemberSalesDTO ptMember : ptMembers) {
+            ptCount = ptCount + ptMember.getCount();
+        }
+
 
         SummaryDTO ptSummary = SummaryDTO.builder()
                 .totalAmount(ptTotalAmount)
@@ -124,7 +128,11 @@ public class PaymentService {
         long membershipTotalAmount = membershipMembers.stream()
                 .mapToLong(MembershipSalesDTO::getTotalAmount)
                 .sum();
-        int membershipCount = membershipMembers.size();
+
+        int membershipCount = 0;
+        for (MembershipSalesDTO membership : membershipMembers) {
+            membershipCount = membershipCount + membership.getCount();
+        }
 
         SummaryDTO membershipSummary = SummaryDTO.builder()
                 .totalAmount(membershipTotalAmount)
@@ -142,5 +150,9 @@ public class PaymentService {
     }
     public int countAll(String keyword) {
         return paymentMapper.countAll(keyword);
+    }
+
+    public List<DetailStatisticsDTO> findDetails(String category, String name, LocalDate start, LocalDate end) {
+        return paymentMapper.findStatisticsDetails(category, name, start, end);
     }
 }

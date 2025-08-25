@@ -49,14 +49,15 @@
     <select id="selectMembershipMembers" resultType="MembershipSalesDTO">
         SELECT
             p.name AS productName,
-            COUNT(*) AS count,
-            ms.price AS unitPrice,
-            SUM(ms.price) AS totalAmount
-        FROM membership ms
-                 JOIN product p
-                      ON ms.productId = p.productId
-        WHERE ms.startDate BETWEEN #{startDate} AND #{endDate}
-        GROUP BY p.name, ms.price
+            COUNT(ms.membershipId) AS count,
+            COALESCE(p.price, 0) AS unitPrice,
+            COALESCE(SUM(ms.price), 0) AS totalAmount
+        FROM product p
+                 LEFT JOIN membership ms
+                           ON ms.productId = p.productId
+                               AND ms.startDate BETWEEN #{startDate} AND #{endDate}
+        WHERE p.type = 'MEMBERSHIP'
+        GROUP BY p.name, p.price
         ORDER BY p.name
     </select>
 

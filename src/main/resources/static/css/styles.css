@@ -10825,11 +10825,13 @@ textarea.form-control-lg {
   }
 }
 #wrapper {
+  min-height: 100%;
   overflow-x: hidden;
 }
 
 #sidebar-wrapper {
-  min-height: 100vh;
+  min-height: 100%;
+  height: 100%;
   margin-left: -16rem;
   transition: margin 0.25s ease-out;
 }

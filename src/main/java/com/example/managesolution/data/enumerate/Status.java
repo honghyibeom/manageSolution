@@ -9,7 +9,10 @@ public enum Status {
     ACTIVE("ACTIVE"),
     INACTIVE("INACTIVE"),
     UNPAID("UNPAID"),
-    NOMEMBERSHIP("NOMEMBERSHIP");
+    NOMEMBERSHIP("NOMEMBERSHIP"),
+    BOOKED("BOOKED"),
+    ATTENDED("ATTENDED"),
+    NO_SHOW("NO_SHOW");
 
     private final String status;
 }

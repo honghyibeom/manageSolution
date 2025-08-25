@@ -10,4 +10,8 @@ public interface AppUserMapper {
 
     void insert(AppUser appUser);
 
+    void update(AppUser appUser);
+
+    void deleteById(Long id);
+
 }

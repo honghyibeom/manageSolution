@@ -9,6 +9,11 @@
             </a>
         </div>
         <div class="list-group list-group-flush">
+
+            <!-- 🔻 구분선 -->
+            <div class="border-top my-2"></div>
+            <div class="text-muted small text-uppercase px-3">관리 메뉴</div>
+
             <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/members}">
                 <i class="bi bi-person-lines-fill me-2"></i> 회원 관리
             </a>
@@ -26,19 +31,30 @@
             </a>
 
             <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/lecture}">
-                <i class="bi bi-calendar-event me-2"></i> 수업 관리
+                <i class="bi bi-calendar-event me-2"></i> 수업 관리 (old)
             </a>
 
-            <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/statistics}">
-                <i class="bi bi-bar-chart-line me-2"></i> 매출 통계
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/lecture/new}">
+                <i class="bi bi-calendar-event me-2"></i> 수업 관리 (Migration)
             </a>
+
+            <!-- 🔻 구분선 -->
+            <div class="border-top my-2"></div>
+
+
+            <!-- 📊 리포트/분석 영역 -->
+            <div class="text-muted small text-uppercase px-3">리포트</div>
 
             <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/care}">
                 <i class="bi bi-heart-pulse me-2"></i> 회원 CARE
             </a>
 
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/statistics}">
+                <i class="bi bi-bar-chart-line me-2"></i> 매출 현황
+            </a>
+
 <!--            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">-->
-<!--                <i class="bi bi-clipboard-check me-2"></i> 리포트 추가 예정-->
+<!--                <i class="bi bi-clipboard-check me-2"></i> 매출 집계-->
 <!--            </a>-->
 
         </div>

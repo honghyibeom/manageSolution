@@ -26,7 +26,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">전화번호</label>
-                        <input type="text" th:field="*{phone}" class="form-control" />
+                        <input type="text" th:field="*{phone}" class="form-control" id="phoneInput" maxlength="13" />
                         <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
                     </div>
                     <div class="mb-3">
@@ -221,6 +221,26 @@
                 document.getElementById("ptEndDate").value = addDays(new Date(start), duration);
             }
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const phoneInput = document.getElementById("phoneInput");
+
+            phoneInput.addEventListener("input", function (e) {
+                let value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 남김
+
+                // 전화번호 패턴 맞게 하이픈 삽입
+                if (value.length <= 3) {
+                    // 010
+                    e.target.value = value;
+                } else if (value.length <= 7) {
+                    // 010-1234
+                    e.target.value = value.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+                } else {
+                    // 010-1234-5678
+                    e.target.value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
+                }
+            });
+        });
     </script>
 </main>
 </body>

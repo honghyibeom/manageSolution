@@ -115,8 +115,6 @@ public DashboardTimeLineDTO getTodayTimeline() {
             dataset.setBackgroundColor(getRandomColorForTrainer(trainerName));
 
             datasets.add(dataset);
-            System.out.println(dataset.getData());
-            System.out.println(dataset.getLabel());
         }
         stats.setDatasets(datasets);
         return stats;
@@ -131,6 +129,11 @@ public DashboardTimeLineDTO getTodayTimeline() {
                 YearMonth ym = current.minusMonths(i);
                 months.add(ym.toString()); // yyyy-MM
             }
+            double temp = 3222;
+            int total = 3;
+            String str = String.valueOf(temp);
+
+            int i = (int) str.charAt(0);
 
             return months;
         }

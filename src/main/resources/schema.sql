@@ -43,7 +43,7 @@ CREATE TABLE membership (
                             isActive BOOLEAN DEFAULT TRUE,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
-                            FOREIGN KEY (productId) REFERENCES product(productId)
+                            FOREIGN KEY (productId) REFERENCES product(productId) ON DELETE SET NULL
 );
 
 
@@ -51,7 +51,7 @@ CREATE TABLE membership (
 CREATE TABLE pt_package (
                             packageId BIGINT AUTO_INCREMENT PRIMARY KEY,
                             memberId BIGINT NOT NULL,
-                            trainerId BIGINT NOT NULL,             -- 로그인 가능한 트레이너
+                            trainerId BIGINT,             -- 로그인 가능한 트레이너
                             productId BIGINT NOT NULL,             -- product.type = 'PT'
                             paymentId BIGINT,
                             startDate DATE NOT NULL,
@@ -62,22 +62,23 @@ CREATE TABLE pt_package (
                             isActive BOOLEAN DEFAULT TRUE,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
-                            FOREIGN KEY (trainerId) REFERENCES app_user(userId),
-                            FOREIGN KEY (productId) REFERENCES product(productId)
+                            FOREIGN KEY (trainerId) REFERENCES app_user(userId) ON DELETE SET NULL,
+                            FOREIGN KEY (productId) REFERENCES product(productId) ON DELETE SET NULL
 );
 
 -- PT 세션 테이블
 CREATE TABLE pt_session (
                             sessionId BIGINT AUTO_INCREMENT PRIMARY KEY,
                             packageId BIGINT NOT NULL,
-                            trainerId BIGINT NOT NULL,
+                            trainerId BIGINT,
                             memberId BIGINT NOT NULL,
                             sessionDate DATE NOT NULL,
                             sessionTime TIME NOT NULL,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            status VARCHAR(10) NOT NULL DEFAULT 'BOOKED',
                             FOREIGN KEY (packageId) REFERENCES pt_package(packageId) ON DELETE CASCADE,
-                            FOREIGN KEY (trainerId) REFERENCES app_user(userId),
-                            FOREIGN KEY (memberId) REFERENCES member(memberId)
+                            FOREIGN KEY (trainerId) REFERENCES app_user(userId) ON DELETE SET NULL,
+                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE
 );
 
 -- 출석 테이블
@@ -102,7 +103,7 @@ CREATE TABLE trainer (
                          careerYears INT,                      -- 경력 (연수)
                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                         FOREIGN KEY (trainerId) REFERENCES app_user(userId)
+                         FOREIGN KEY (trainerId) REFERENCES app_user(userId) ON DELETE CASCADE
 );
 
 -- 💳 결제 테이블 (이용권 또는 PT 패키지 결제 정보 기록)

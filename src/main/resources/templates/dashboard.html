@@ -4,149 +4,155 @@
       layout:decorate="~{layout}">
 <head>
     <title>대시보드</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .timeline-container {
-            width: 100%;
+        /* 📊 공통 카드 */
+        .stat-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
         }
-
-        .timeline-header {
-            display: flex;
-            margin-bottom: 10px;
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
-
-        .trainer-name-header {
-            width: 100px;
+        .stat-card .title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .stat-card .value {
+            font-size: 1.3rem;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-bottom: 0.5rem;
         }
 
-        .timeline-track-header {
-            flex: 1;
-            position: relative;
-            height: 24px;
-            border-bottom: 1px solid #ccc;
-            box-sizing: border-box;
-
+        /* 📌 상품 순위 테이블 */
+        .product-table th, .product-table td {
+            vertical-align: middle;
+        }
+        .product-table tbody tr:first-child {
+            background: #fff7e6;
+            font-weight: bold;
         }
 
+        /* 📅 타임라인 */
+        .timeline-container { width: 100%; }
+        .timeline-header { display: flex; margin-bottom: 10px; }
+        .trainer-name-header { width: 100px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        .timeline-track-header { flex: 1; position: relative; height: 24px; border-bottom: 1px solid #ddd; }
         .time-label {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             transform: translateX(-50%);
-            width: max-content;
+            font-size: 11px;
+            color: #aaa;
             white-space: nowrap;
-            font-size: 14px;
-            color: #888;
         }
-
         .time-label::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: -10px;
-            width: 1px;
-            height: 8px;
-            background: #ccc;
-            transform: translateX(-50%);
+            content: ''; position: absolute; left: 50%; bottom: -10px;
+            width: 1px; height: 8px; background: #ccc; transform: translateX(-50%);
         }
-
-        .trainer-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .trainer-name {
-            width: 100px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
+        .trainer-row { display: flex; align-items: center; margin-bottom: 10px; }
+        .trainer-name { width: 100px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .timeline-track {
-            flex: 1;
-            position: relative;
-            min-height: 40px;
-            background: #f8f8f8;
-            border: 1px solid #ddd;
-            box-sizing: border-box;
+            flex: 1; position: relative;
+            min-height: 40px; background: #f9fafb;
+            border: 1px solid #eee; border-radius: 6px;
         }
-
         .session-marker {
             position: absolute;
             width: 6.25%;
-            height: 20px;
-            text-align: center;
-            font-size: 11px;
-            color: #fff;
+            height: 30px;
+            font-size: 12px;
         }
-
         .session-marker .session-time {
-            background-color: #4B2354;
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-size: 14px;
+            background: #6f42c1;
+            color: #fff;
+            padding: 3px 6px;
+            border-radius: 6px;
+            font-size: 12px;
             line-height: 1.2;
-            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        .session-marker:hover .session-time {
+            background: #8540f5;
+            transform: scale(1.05);
         }
 
+        /* 데스크탑: 타임라인 보이기 */
+        @media (min-width: 992px) {
+            .timeline-container { display: block; }
+            .timeline-mobile { display: none; }
+        }
+
+        /* 모바일: 카드 보이기 */
+        @media (max-width: 991.98px) {
+            .timeline-container { display: none; }
+            .timeline-mobile { display: block; }
+        }
     </style>
 </head>
 <body>
 <main layout:fragment="content">
-
     <div class="container my-4">
 
-        <!-- 🟥 회원통계 & PT 일정 한 줄 -->
+        <!-- 👥 회원 통계 + 📦 상품 순위 -->
         <div class="row gx-4 gy-3 align-items-stretch">
             <div class="col-12 col-lg-8">
-                <h5 class="fw-bold mb-3">회원 통계</h5>
-                <div class="row gx-2 gy-3 mb-5">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-people-fill text-primary me-2"></i> 회원 통계
+                </h5>
+                <div class="row gx-3 gy-3 mb-5">
                     <div class="col-6 col-md-3">
-                        <div class="p-3 bg-white rounded shadow-sm border border-dark">
-                            <div class="fw-bold text-secondary mb-2">전체 유효 회원</div>
-                            <div class="fs-5 fw-bold text-danger mb-3" th:text="${memberStats.totalMembers} + '명'">0명</div>
+                        <div class="stat-card">
+                            <div class="title">전체 유효 회원</div>
+                            <div class="value text-danger" th:text="${memberStats.totalMembers} + '명'">0명</div>
                             <div class="small d-flex justify-content-between"><span>남성</span><span th:text="${memberStats.totalMale} + '명'">0명</span></div>
                             <div class="small d-flex justify-content-between"><span>여성</span><span th:text="${memberStats.totalFemale} + '명'">0명</span></div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="p-3 bg-white rounded shadow-sm border border-dark">
-                            <div class="fw-bold text-secondary mb-2">만기 회원</div>
-                            <div class="fs-5 fw-bold mb-3" th:text="${memberStats.expiredMembers} + '명'">0명</div>
+                        <div class="stat-card">
+                            <div class="title">만기 회원</div>
+                            <div class="value" th:text="${memberStats.expiredMembers} + '명'">0명</div>
                             <div class="small d-flex justify-content-between"><span>남성</span><span th:text="${memberStats.expiredMale} + '명'">0명</span></div>
                             <div class="small d-flex justify-content-between"><span>여성</span><span th:text="${memberStats.expiredFemale} + '명'">0명</span></div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="p-3 bg-white rounded shadow-sm border border-dark">
-                            <div class="fw-bold text-secondary mb-2">신규 가입</div>
-                            <div class="fs-5 fw-bold mb-3" th:text="${memberStats.newMembers} + '명'">0명</div>
+                        <div class="stat-card">
+                            <div class="title">신규 가입</div>
+                            <div class="value text-success" th:text="${memberStats.newMembers} + '명'">0명</div>
                             <div class="small d-flex justify-content-between"><span>남성</span><span th:text="${memberStats.newMale} + '명'">0명</span></div>
                             <div class="small d-flex justify-content-between"><span>여성</span><span th:text="${memberStats.newFemale} + '명'">0명</span></div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="p-3 bg-white rounded shadow-sm border border-dark">
-                            <div class="fw-bold text-secondary mb-2">오늘 방문</div>
-                            <div class="fs-5 fw-bold mb-3" th:text="${memberStats.todayVisitedMembers} + '명'">0명</div>
+                        <div class="stat-card">
+                            <div class="title">오늘 방문</div>
+                            <div class="value text-primary" th:text="${memberStats.todayVisitedMembers} + '명'">0명</div>
                             <div class="small d-flex justify-content-between"><span>남성</span><span th:text="${memberStats.todayVisitedMale} + '명'">0명</span></div>
                             <div class="small d-flex justify-content-between"><span>여성</span><span th:text="${memberStats.todayVisitedFemale} + '명'">0명</span></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- 🟥 오른쪽 상품 순위 -->
+
+            <!-- 📦 상품 순위 -->
             <div class="col-lg-4 d-flex flex-column">
-                <h5 class="fw-bold">상품 순위</h5>
-                <div class="p-3 rounded shadow-sm border ">
-                    <table class="table table-sm table-bordered text-center mb-0 ">
-                        <thead class="table-light ">
+                <h5 class="fw-bold">
+                    <i class="bi bi-bar-chart-fill text-success me-2"></i> 상품 순위
+                </h5>
+                <div class="p-3 rounded shadow-sm border bg-white">
+                    <table class="table table-sm table-bordered text-center mb-0 product-table">
+                        <thead class="table-light">
                         <tr>
                             <th>순위</th>
                             <th>상품명</th>
@@ -163,35 +169,34 @@
                     </table>
                 </div>
             </div>
+        </div>
 
-            <!-- 오늘 PT 일정 -->
-            <h5 class="fw-bold mb-3 text-start">오늘 PT 일정</h5>
-            <div class="timeline-container">
-                <div class="timeline-header">
-                    <div class="trainer-name-header"></div>
-                    <div class="timeline-track-header">
-                        <div th:each="i,iterStat : ${#numbers.sequence(0,16)}"
-                             class="time-label"
-                             th:style="|left: ${i * 6.25}%;|"
-                             th:text="${timeLabels[i]}">
-                        </div>
+        <!-- 🏋️ 오늘 PT 일정 -->
+        <h5 class="fw-bold mb-3 mt-4">
+            <i class="bi bi-calendar-event-fill text-warning me-2"></i> 오늘 PT 일정
+        </h5>
+        <!-- ✅ 데스크탑 전용: 타임라인 -->
+        <div class="timeline-container">
+            <div class="timeline-header">
+                <div class="trainer-name-header"></div>
+                <div class="timeline-track-header">
+                    <div th:each="i,iterStat : ${#numbers.sequence(0,16)}"
+                         class="time-label"
+                         th:style="|left: ${i * 6.25}%;|"
+                         th:text="${timeLabels[i]}">
                     </div>
                 </div>
-
-                <div th:each="entry : ${todaySessionsByTrainer}">
-                    <div class="trainer-row">
-                        <!-- 트레이너 이름 -->
-                        <div class="trainer-name" th:text="${entry.key}">트레이너 A</div>
-
-                        <!-- 타임라인 -->
-                        <div class="timeline-track">
-                            <div th:each="s : ${entry.value}"
-                                 class="session-marker"
-                                 th:style="|left: ${s.left}%; top: ${s.overlapIndex * 38}px;|">
-                                <div class="session-time">
-                                    <div th:text="${#temporals.format(s.sessionTime, 'HH:mm')}"></div>
-                                    <div th:text="${s.memberName}"></div>
-                                </div>
+            </div>
+            <div th:each="entry : ${todaySessionsByTrainer}">
+                <div class="trainer-row">
+                    <div class="trainer-name" th:text="${entry.key}">트레이너 A</div>
+                    <div class="timeline-track">
+                        <div th:each="s : ${entry.value}"
+                             class="session-marker"
+                             th:style="|left: ${s.left}%; top: ${s.overlapIndex * 38}px;|">
+                            <div class="session-time">
+                                <div th:text="${#temporals.format(s.sessionTime, 'HH:mm')}"></div>
+                                <div th:text="${s.memberName}"></div>
                             </div>
                         </div>
                     </div>
@@ -199,12 +204,37 @@
             </div>
         </div>
 
-        <!-- 🟥 강사 담당 회원 통계 -->
-        <h5 class="fw-bold mt-5">트레이너 담당 회원 통계</h5>
-        <div class="container m-4">
-            <canvas id="ptTrainerChart" width="300" height="100"></canvas>
+        <!-- ✅ 모바일 전용: 카드 리스트 -->
+        <div class="timeline-mobile">
+            <div class="row row-cols-1 g-3">
+                <div class="col" th:each="entry : ${todaySessionsByTrainer}">
+                    <div class="card shadow-sm border">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-2">
+                                <i class="bi bi-person-badge me-2 text-primary"></i>
+                                <span th:text="${entry.key}">트레이너 이름</span>
+                            </h6>
+                            <div th:each="s : ${entry.value}" class="border-top pt-2 mt-2">
+                                <p class="mb-1"><i class="bi bi-clock me-2 text-secondary"></i>
+                                    <span th:text="${#temporals.format(s.sessionTime, 'HH:mm')}"></span>
+                                </p>
+                                <p class="mb-1"><i class="bi bi-person-fill me-2 text-secondary"></i>
+                                    <span th:text="${s.memberName}"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!-- 📊 트레이너 담당 회원 실적 -->
+        <h5 class="fw-bold mt-5">
+            <i class="bi bi-graph-up-arrow text-info me-2"></i> 트레이너 담당 회원 실적
+        </h5>
+        <div class="container m-4 bg-white p-3 rounded shadow-sm border">
+            <canvas id="ptTrainerChart" height="300"></canvas>
+        </div>
     </div>
 
     <script th:inline="javascript">
@@ -218,20 +248,19 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'top' },
                     title: {
                         display: true,
-                        text: '최근 6개월 트레이너별 PT 회원 수'
+                        text: '최근 6개월 트레이너별 PT 회원 수',
+                        font: { size: 16, weight: 'bold' }
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        stepSize: 1,
-                        ticks: {
-                          precision: 0,
-                        },
+                        ticks: { precision: 0 },
                         title: { display: true, text: 'PT 회원 수' }
                     },
                     x: {
@@ -239,6 +268,23 @@
                     }
                 }
             }
+        });
+
+        // 타임라인 트랙 높이 자동 조정
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".trainer-row").forEach(row => {
+                const markers = row.querySelectorAll(".session-marker");
+                let maxOverlap = 0;
+                markers.forEach(m => {
+                    const top = parseInt(m.style.top.replace("px", ""), 10) || 0;
+                    const overlapIndex = top / 38;
+                    maxOverlap = Math.max(maxOverlap, overlapIndex);
+                });
+                const track = row.querySelector(".timeline-track");
+                if (track) {
+                    track.style.minHeight = ((maxOverlap + 1) * 40) + "px";
+                }
+            });
         });
     </script>
 </main>

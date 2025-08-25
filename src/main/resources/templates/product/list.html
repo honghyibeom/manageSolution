@@ -6,6 +6,22 @@
 <head>
   <meta charset="UTF-8">
   <title>상품 목록</title>
+  <style>
+    .fab-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1050; /* 모달, 네비보다 위 */
+    }
+  </style>
 </head>
 <body>
 <main layout:fragment="content">
@@ -40,11 +56,20 @@
             </li>
           </ul>
 
-          <button type="button" class="btn btn-primary"
+          <!-- 데스크탑 전용 -->
+          <button type="button" class="btn btn-primary d-none d-lg-inline"
                   data-bs-toggle="modal"
                   data-bs-target="#productModal"
                   onclick="openRegisterModal()">
             + 상품 등록
+          </button>
+
+          <button
+             class="btn btn-primary rounded-circle d-md-none position-fixed fab-btn"
+             data-bs-toggle="modal"
+             data-bs-target="#productModal"
+             onclick="openRegisterModal()">
+            <i class="bi bi-plus"></i>
           </button>
         </div>
 

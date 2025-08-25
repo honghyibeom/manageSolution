@@ -136,11 +136,13 @@
             p.totalCount,
             p.remainingCount,
             p.startDate,
-            p.endDate
+            p.endDate,
+            p.packageId
         FROM pt_package p
                  INNER JOIN member m
                             ON p.memberId = m.memberId
         WHERE p.trainerId = #{trainerId}
+        AND   p.endDate &gt; NOW()
         ORDER BY m.name
     </select>
 
@@ -157,17 +159,24 @@
         WHERE memberId = #{memberId}
     </update>
 
-    <update id="increaseRemainingCount">
+    <update id="decreaseRemainingCount">
         UPDATE pt_package
-        SET remainingCount = remainingCount + 1
+        SET remainingCount = remainingCount - 1
         WHERE packageId = #{packageId}
-          AND remainingCount &lt; totalCount
+          AND remainingCount &gt; 0
     </update>
 
     <select id="findByMemberId" parameterType="long" resultType="PtPackage">
         SELECT top 1 memberId, trainerId, productId, totalCount, remainingCount, startDate, endDate, price
         FROM pt_package
         WHERE memberId = #{memberId}
+        ORDER BY endDate DESC
+    </select>
+
+    <select id="findByPackageId" parameterType="long" resultType="PtPackage">
+        SELECT top 1 memberId, trainerId, productId, totalCount, remainingCount, startDate, endDate, price
+        FROM pt_package
+        WHERE packageId = #{packageId}
         ORDER BY endDate DESC
     </select>
 
@@ -180,14 +189,15 @@
     <select id="selectPtMembers" resultType="PtMemberSalesDTO">
         SELECT
             p.name AS productName,
-            COUNT(*) AS count,
-            pp.price AS unitPrice,
-            SUM(pp.price) AS totalAmount
-        FROM pt_package pp
-                 JOIN product p
-                      ON pp.productId = p.productId
-        WHERE pp.startDate BETWEEN #{startDate} AND #{endDate}
-        GROUP BY p.name, pp.price
+            COUNT(pp.packageId) AS count,
+            COALESCE(p.price, 0) AS unitPrice,
+            COALESCE(SUM(pp.price), 0) AS totalAmount
+        FROM product p
+                 LEFT JOIN pt_package pp
+                           ON pp.productId = p.productId
+                               AND pp.startDate BETWEEN #{startDate} AND #{endDate}
+        WHERE p.type = 'PT'
+        GROUP BY p.name, p.price
         ORDER BY p.name
     </select>
 

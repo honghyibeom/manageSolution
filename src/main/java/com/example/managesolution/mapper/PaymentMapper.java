@@ -3,6 +3,7 @@ package com.example.managesolution.mapper;
 import com.example.managesolution.data.domain.Payment;
 import com.example.managesolution.data.dto.payment.response.LabelAndAmountDTO;
 import com.example.managesolution.data.dto.payment.response.PaymentHistoryDTO;
+import com.example.managesolution.data.dto.statistics.response.DetailStatisticsDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -29,4 +30,6 @@ public interface PaymentMapper {
     );
 
     int countAll(@Param("keyword") String keyword);
+
+    List<DetailStatisticsDTO> findStatisticsDetails(String category, String name, LocalDate startDate, LocalDate endDate);
 }

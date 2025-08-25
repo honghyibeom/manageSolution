@@ -5,25 +5,90 @@
 <head>
     <meta charset="UTF-8">
     <title>통계</title>
-    <style>
-        .no-bg {
-            background-color: transparent !important;
-        }
-    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .clickable-row {
+            cursor: pointer;
+        }
+        .clickable-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 카드 레이아웃 (데스크톱: 좌우 / 모바일: 상하) */
+        .fixed-height-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .fixed-height-container .card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .scrollable-body {
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        #salesChart {
+            width: 100% !important;
+            height: 300px !important; /* 원하는 높이 (예: 250px) */
+        }
+
+        /* 기본(데스크톱): 가로 배치 */
+        .date-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-label {
+            white-space: nowrap;
+        }
+
+        /* 날짜 input 가로 배치 */
+        .date-inputs {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            .fixed-height-container {
+                flex-direction: column;  /* 모바일에서는 세로 배치 */
+            }
+            #salesChart {
+                height: 220px !important; /* 모바일에서 조금 더 작게 */
+            }
+            .p-3.mb-3.bg-light.rounded.border.d-flex {
+                flex-direction: column; /* 기간조회 + 버튼 세로 배치 */
+                gap: 10px;
+            }
+            /* 라벨만 위로 */
+            .date-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .date-label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
 <main layout:fragment="content">
-    <div class ="container">
+    <div class="container">
         <h4 class="fw-bold mb-4">통계</h4>
 
-    <p class="mb-4 fw-bold" th:text="${today} + ' 기준 매출현황입니다.'">
-        yyyy년 MM월 dd일
-    </p>
-        <div class="row g-3 mb-4 p-3 rounded " style="background:#e6f7ff">
-            <div class="col-md-4 mb-3">
+        <p class="mb-4 fw-bold" th:text="${today} + ' 기준 매출현황입니다.'">
+            yyyy년 MM월 dd일
+        </p>
+
+        <!-- 요약 카드 (데스크톱: 가로 3등분, 모바일: 세로) -->
+        <div class="row g-3 mb-4 p-3 rounded" style="background:#e6f7ff">
+            <div class="col-md-4 col-12">
                 <div class="card shadow-sm text-dark">
                     <div class="card-body">
                         <h6 class="card-title text-muted">총 매출</h6>
@@ -31,7 +96,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-4 col-12">
                 <div class="card shadow-sm text-dark">
                     <div class="card-body">
                         <h6 class="card-title text-muted">월 매출</h6>
@@ -39,7 +104,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
+            <div class="col-md-4 col-12">
                 <div class="card shadow-sm text-dark">
                     <div class="card-body">
                         <h6 class="card-title text-muted">일 매출</h6>
@@ -49,35 +114,77 @@
             </div>
         </div>
 
-        <!-- 기간 & 타입 선택 -->
         <div class="p-3 mb-3 bg-light rounded border d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-2">
-                <label class="fw-bold mb-0">기간조회</label>
-                <input type="date" class="form-control form-control-sm w-auto" id="startDate">
-                <span>~</span>
-                <input type="date" class="form-control form-control-sm w-auto" id="endDate">
+
+            <!-- 날짜 그룹 -->
+            <div class="date-group">
+                <label for="startDate" class="fw-bold date-label">기간조회</label>
+                <div class="date-inputs">
+                    <input type="date" class="form-control form-control-sm w-auto" id="startDate">
+                    <span>~</span>
+                    <input type="date" class="form-control form-control-sm w-auto" id="endDate">
+                </div>
             </div>
 
-            <div class="btn-group" role="group">
-                <button class="btn btn-outline-secondary" data-type="year">년</button>
-                <button class="btn btn-outline-secondary" data-type="month">월</button>
-                <button class="btn btn-outline-secondary" data-type="day">일</button>
+            <!-- 버튼 그룹 -->
+            <div class="btn-group w-auto" role="group">
+                <button class="btn btn-outline-secondary px-4 py-2" data-type="year">년</button>
+                <button class="btn btn-outline-secondary px-4 py-2" data-type="month">월</button>
+                <button class="btn btn-outline-secondary px-4 py-2" data-type="day">일</button>
             </div>
         </div>
 
-        <!--차트-->
-        <div class="container m-4">
-            <canvas id="salesChart" width="300" height="100"></canvas>
+        <!-- 차트 -->
+        <div class="m-4">
+            <canvas id="salesChart"></canvas>
         </div>
 
-        <!-- 테이블 -->
-        <div class="row gx-4" id="tablesContainer">
-            <div class="col-12 col-md-6" id="ptTableContainer"></div>
-            <div class="col-12 col-md-6" id="membershipTableContainer"></div>
-        </div>
+        <!-- 통계 카드 (데스크톱: 좌우 / 모바일: 상하) -->
+        <div class="row mt-4 fixed-height-container">
+            <!-- 왼쪽 카드 -->
+            <div class="col-md-5 col-12 mb-3 mb-md-0">
+                <div class="card shadow-sm" id="leftCard">
+                    <div class="card-header fw-bold text-center">📊 매출 통계 요약</div>
+                    <div class="card-body" id="statisticsCardBody"></div>
+                </div>
+            </div>
 
+            <!-- 오른쪽 카드 -->
+            <div class="col-md-7 col-12">
+                <div class="card shadow-sm" id="rightCard">
+                    <div class="card-header fw-bold text-center">🎯 요약 정보</div>
+                    <div class="card-body scrollable-body" id="rightCardBody">
+
+                        <!-- 🖥️ 데스크톱용: 테이블 -->
+                        <div class="d-none d-md-block">
+                            <div class="table-responsive">
+                                <table class="table table-bordered text-center align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>회원명</th>
+                                        <th>상품명</th>
+                                        <th>일자</th>
+                                        <th>금액</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="detailTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 📱 모바일용: 카드 -->
+                        <div class="d-block d-md-none">
+                            <div id="detailCardBody" class="d-flex flex-column gap-3">
+                                <!-- JS에서 카드 추가 -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
     <script>
         let chart = null;
 
@@ -94,15 +201,16 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: '매출',
+                        label: ['총 매출'],
                         data: salesData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: ['rgba(21, 162, 235, 0.5)'],
+                        borderColor: ['rgba(21, 162, 235, 1)'],
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true
@@ -112,39 +220,110 @@
             });
         }
 
-        // 🔹 테이블 그리기 (재사용)
-        function renderTable(containerId, title, members, summary, columns) {
-            const html = `
-        <div>
-            <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold text-center">${title}</div>
+        function renderCombinedStatistics(data) {
+            const ptRows = data.ptMembers.map(m => `
+        <tr class="clickable-row" data-category="PT" data-name="${m.productName}">
+            ${Object.values(m).map(v => `<td>${typeof v === 'number' ? v.toLocaleString('ko-KR') : v}</td>`).join('')}
+        </tr>`).join('');
 
+            const membershipRows = data.membershipMembers.map(m => `
+        <tr class="clickable-row" data-category="MEMBERSHIP" data-name="${m.productName}">
+            ${Object.values(m).map(v => `<td>${typeof v === 'number' ? v.toLocaleString('ko-KR') : v}</td>`).join('')}
+        </tr>`).join('');
+
+            document.getElementById("statisticsCardBody").innerHTML = `
+    <h6 class="fw-bold">📌 PT 통계</h6>
+    <hr>
+    <div class="table-responsive mb-3" style="max-height: 300px; overflow-y: auto;">
+        <table class="table table-bordered text-center align-middle mb-0 table-hover">
+            <thead class="table-light">
+                <tr><th>상품명</th><th>건수</th><th>금액</th><th>총 금액</th></tr>
+            </thead>
+            <tbody>${ptRows}</tbody>
+        </table>
+    </div>
+    <div class="bg-primary text-white text-center py-2 rounded mb-4">
+        총합: <span>${data.ptSummary.totalAmount.toLocaleString()}원</span> / 총 건수: <span>${data.ptSummary.count}개</span>
+    </div>
+
+    <h6 class="fw-bold">📌 회원권 통계</h6>
+    <hr>
+    <div class="table-responsive mb-3" style="max-height: 300px; overflow-y: auto;">
+        <table class="table table-bordered text-center align-middle mb-0 table-hover">
+            <thead class="table-light">
+                <tr><th>상품명</th><th>건수</th><th>금액</th><th>총 금액</th></tr>
+            </thead>
+            <tbody>${membershipRows}</tbody>
+        </table>
+    </div>
+    <div class="bg-success text-white text-center py-2 rounded">
+        총합: <span>${data.membershipSummary.totalAmount.toLocaleString()}원</span> / 총 건수: <span>${data.membershipSummary.count}개</span>
+    </div>
+    `;
+
+            // ✅ 동적으로 생성된 행 클릭 이벤트 바인딩
+            document.querySelectorAll('.clickable-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    // ✅ 모든 행에서 선택 클래스 제거
+                    document.querySelectorAll('.clickable-row').forEach(r => r.classList.remove('table-primary'));
+
+                    // ✅ 클릭한 행만 강조
+                    row.classList.add('table-primary');
+
+                    const category = row.dataset.category;
+                    const productName = row.dataset.name;
+                    loadDetailSummary(category, productName);
+                });
+            });
+
+            // ✅ 이 줄 추가!
+            adjustRightCardHeight();
+        }
+
+
+        function loadDetailSummary(category, productName) {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            axios.get('/statistics/detail', {
+                params: { category, name: productName, start: startDate, end: endDate }
+            }).then(response => {
+                // 🖥️ 테이블 데이터 반영
+                const tbody = document.getElementById('detailTableBody');
+                tbody.innerHTML = '';
+
+                // 📱 카드 데이터 반영
+                const container = document.getElementById('detailCardBody');
+                container.innerHTML = '';
+
+                response.data.forEach(detail => {
+                    // 테이블 행 추가
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                <td>${detail.memberName}</td>
+                <td>${detail.productName}</td>
+                <td>${detail.date}</td>
+                <td>${detail.amount.toLocaleString('ko-KR')}원</td>
+            `;
+                    tbody.appendChild(row);
+
+                    // 카드 추가
+                    const card = document.createElement('div');
+                    card.classList.add('card', 'shadow-sm', 'p-2');
+                    card.innerHTML = `
                 <div class="card-body">
-                    <div class="table-responsive" style="height: 400px; max-height: 400px; overflow-y: auto;">
-                        <table class="table table-bordered text-center align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>${columns.map(c => `<th>${c}</th>`).join('')}</tr>
-                            </thead>
-                            <tbody>
-                                ${members.map(m => `
-                                    <tr>
-                                        ${Object.values(m).map(v =>
-                                            `<td>${typeof v === 'number' ? v.toLocaleString('ko-KR') : v}</td>`
-                                        ).join('')}
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+                    <h6 class="card-title fw-bold mb-2">${detail.memberName}</h6>
+                    <p class="mb-1"><span class="text-muted">상품명:</span> ${detail.productName}</p>
+                    <p class="mb-1"><span class="text-muted">일자:</span> ${detail.date}</p>
+                    <p class="mb-0"><span class="text-muted">금액:</span> ${detail.amount.toLocaleString('ko-KR')}원</p>
                 </div>
-            </div>
-            <div class="bg-dark text-white text-center py-2 rounded mt-3 mb-3">
-                    총합: <span>${summary.totalAmount.toLocaleString()}원</span> /
-                    총 건수: <span>${summary.count}개</span>
-            </div>
-        </div>
-         `;
-            document.getElementById(containerId).innerHTML = html;
+            `;
+                    container.appendChild(card);
+                });
+            }).catch(error => {
+                console.error("❌ 세부 정보 불러오기 실패:", error);
+                alert("세부 정보를 불러오는 중 문제가 발생했습니다.");
+            });
         }
 
         function fillMissingDates(startDateStr, endDateStr, labels, salesData, type) {
@@ -225,21 +404,8 @@
 
                     renderChart(completed.labels, completed.salesData);
 
-                    renderTable(
-                        'ptTableContainer',
-                        'PT권 통계',
-                        data.ptMembers,
-                        data.ptSummary,
-                        ['상품명', '건수', '금액', '총 금액']
-                    );
+                    renderCombinedStatistics(data);
 
-                    renderTable(
-                        'membershipTableContainer',
-                        '회원권 통계',
-                        data.membershipMembers,
-                        data.membershipSummary,
-                        ['상품명', '건수', '금액', '총 금액']
-                    );
                 })
                 .catch(error => {
                     console.error('❌ 통계 데이터 로드 실패:', error);
@@ -255,10 +421,8 @@
             const sixMonthsAgo = new Date(today);
             sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
             sixMonthsAgo.setDate(1); // 해당 달의 1일
-            const startDateStr = sixMonthsAgo.toISOString().split('T')[0];
-
             // 🔷 input에 초기값 세팅
-            document.getElementById('startDate').value = startDateStr;
+            document.getElementById('startDate').value = sixMonthsAgo.toISOString().split('T')[0];
             document.getElementById('endDate').value = endDateStr;
 
             // 🔷 버튼 중 '월' 버튼을 active 처리
@@ -288,6 +452,7 @@
                 });
             });
         });
+
         // 🔷 날짜 선택시에도 재조회
         document.getElementById('startDate').addEventListener('change', () => {
             loadStatistics(getCurrentType());
@@ -300,6 +465,34 @@
             const activeBtn = document.querySelector('.btn-group .btn-primary');
             return activeBtn ? activeBtn.getAttribute('data-type') : 'month';
         }
+
+        // 클릭 이벤트 바인딩
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', () => {
+                const category = row.dataset.category;
+                const productName = row.dataset.name;
+                loadDetailSummary(category, productName);
+            });
+        });
+
+        function adjustRightCardHeight() {
+            const leftCard = document.getElementById('leftCard');
+            const rightCard = document.getElementById('rightCard');
+            const rightCardBody = document.getElementById('rightCardBody');
+
+            if (!leftCard || !rightCard || !rightCardBody) return;
+
+            const leftHeight = leftCard.offsetHeight;
+            rightCard.style.height = `${leftHeight}px`;
+
+            const headerHeight = rightCard.querySelector('.card-header').offsetHeight;
+            rightCardBody.style.height = `${leftHeight - headerHeight}px`;
+        }
+
+        // 페이지 로드 및 리사이즈, 통계 재로딩 후 호출
+        window.addEventListener('load', adjustRightCardHeight);
+        window.addEventListener('resize', adjustRightCardHeight);
+
 
     </script>
 

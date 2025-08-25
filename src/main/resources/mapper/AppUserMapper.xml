@@ -10,7 +10,6 @@
             email,
             password,
             name,
-            phone,
             role,
             created_at
         FROM app_user
@@ -21,5 +20,17 @@
         INSERT INTO app_user (email, password, name, role, created_at)
         VALUES (#{email}, #{password}, #{name}, #{role}, #{createdAt})
     </insert>
+
+    <update id="update" parameterType="AppUser">
+        UPDATE app_user
+        SET email = #{email},
+            password = #{password},
+            name = #{name}
+        WHERE userId = #{userId}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM app_user WHERE userId = #{id}
+    </delete>
 
 </mapper>

@@ -12,29 +12,26 @@
                 </svg>
             </button>
 
-            <!-- 중앙 로고 -->
-<!--            <div class="position-absolute start-50 translate-middle-x">-->
-<!--                <span class="navbar-brand mb-0 h4">THE NEW FIT</span>-->
-<!--            </div>-->
+            <!-- 중앙 로고 (원하면 활성화) -->
+            <!-- <div class="position-absolute start-50 translate-middle-x">
+                <span class="navbar-brand mb-0 h4">THE NEW FIT</span>
+            </div> -->
 
-            <!-- 우측 드롭다운 버튼 -->
-            <div class="d-flex align-items-center ms-auto ">
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary border-0 dropdown-toggle" type="button"
-                            id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-                        </svg>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#">프로필</a></li>
-                        <li><a class="dropdown-item" href="#">설정</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">로그아웃</a></li>
-                    </ul>
-                </div>
+            <!-- 우측 상태 표시 -->
+            <div class="d-flex align-items-center ms-auto gap-2 me-2">
+
+                <!-- 로그아웃 -->
+                <a href="/logout" class="btn btn-outline-secondary d-flex align-items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                              d="M6.146 11.354a.5.5 0 0 1 .708 0L10 8.207l-3.146-3.147a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708 0z"/>
+                        <path fill-rule="evenodd"
+                              d="M10 8a.5.5 0 0 1-.5.5H1.5v-1H9.5a.5.5 0 0 1 .5.5z"/>
+                    </svg>
+                    <span>로그아웃</span>
+                </a>
             </div>
-
         </div>
     </nav>
 </div>

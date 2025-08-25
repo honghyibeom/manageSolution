@@ -4,98 +4,223 @@
       layout:decorate="~{layout}">
 <head>
     <title>회원 목록</title>
+    <style>
+        /* 검색창 */
+        .search-group {
+            position: relative;
+            flex-grow: 1;
+        }
+        .search-group i {
+            position: absolute;
+            left: 10px;
+            top: 9px;
+            color: #aaa;
+        }
+        .search-compact {
+            padding-left: 2rem;
+            border-radius: 20px;
+        }
+
+        /* 테이블 */
+        .table thead {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f6faff;
+            transition: 0.2s;
+        }
+
+        /* 모바일 카드 */
+        .card-mobile .card {
+            border-radius: 12px;
+            border: 1px solid #eee;
+            transition: transform 0.2s;
+        }
+        .card-mobile .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+        }
+        .card-mobile .icon-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .fab-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 1050;
+        }
+        /* 모바일 & 태블릿: 카드만 보이기 */
+        @media (max-width: 991.98px) {
+            .table-desktop {
+                display: none !important;
+            }
+            .card-mobile {
+                display: block !important;
+            }
+        }
+
+        /* 데스크탑: 테이블만 보이기 */
+        @media (min-width: 992px) {
+            .table-desktop {
+                display: table !important;  /* table 요소니까 block 대신 table */
+            }
+            .card-mobile {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
 <main layout:fragment="content">
     <div class="container">
-        <h4 class="fw-bold mb-4">회원 목록</h4>
+        <h4 class="fw-bold mb-4">
+            <i class="bi bi-people-fill text-primary me-2"></i> 회원 목록
+        </h4>
 
-        <!-- 상단 검색 + 등록 버튼 영역 -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <form class="d-flex align-items-center gap-2" th:action="@{/members}" method="get">
-                <!-- ✅ 상태 필터 추가 -->
-                <select class="form-select" name="status" style="width: 120px;">
-                    <option value="">전체</option>
-                    <option value="ACTIVE" th:selected="${status} == 'ACTIVE'">이용중</option>
-                    <option value="INACTIVE" th:selected="${status} == 'INACTIVE'">마감</option>
-                </select>
+        <div class="container">
+            <div class="row mb-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
 
-                <!-- 검색어 입력창 -->
-                <input type="text" class="form-control" name="keyword"
-                       placeholder="이름 또는 전화번호를 입력하세요."
-                       th:value="${keyword}" style="width: 300px;" />
+                    <!-- 🔍 검색 폼 -->
+                    <form class="d-flex flex-column flex-md-row align-items-start gap-2" th:action="@{/members}" method="get">
+                        <select class="form-select d-none d-lg-inline" name="status" style="width: 120px;">
+                            <option value="">전체</option>
+                            <option value="ACTIVE" th:selected="${status} == 'ACTIVE'">이용중</option>
+                            <option value="INACTIVE" th:selected="${status} == 'INACTIVE'">마감</option>
+                        </select>
 
-                <!-- 검색 버튼 -->
-                <button type="submit" class="btn btn-outline-secondary">검색</button>
-            </form>
+                        <div class="search-group">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="form-control search-compact" name="keyword"
+                                   placeholder="이름 또는 전화번호 입력"
+                                   th:value="${keyword}">
+                        </div>
+                    </form>
 
-            <!-- 회원 등록 버튼 -->
-            <a th:href="@{/members/new}" class="btn btn-primary">+ 회원 등록</a>
+                    <a th:href="@{/members/new}" class="btn btn-primary d-none d-sm-inline">
+                        + 회원 등록
+                    </a>
+
+                    <!-- ✅ 모바일 전용 Floating Action Button -->
+                    <a th:href="@{/members/new}"
+                       class="btn btn-primary fab-btn d-lg-none">
+                        <i class="bi bi-plus"></i>
+                    </a>
+                </div>
+            </div>
         </div>
 
 
-        <!-- 회원 테이블 -->
-        <table class="table text-center align-middle table-hover ">
-            <thead class="table-light">
-            <tr class="text-center">
-                <th>이름</th>
-                <th>전화번호</th>
-                <th>생년월일</th>
-                <th>성별</th>
-                <th>상태</th>
-                <th>상품명</th>
-                <th>가입일</th>
-                <th>관리</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr class="text-center" th:each="member : ${members}">
-                <td th:text="${member.name}"></td>
-                <td th:text="${member.phone}"></td>
-                <td th:text="${member.birthDate}"></td>
-                <td th:text="${member.gender}"></td>
-                <td class="text-center">
-                    <span th:if="${member.status != null and member.status.name() == 'ACTIVE'}" class="badge bg-success">이용중</span>
-                    <span th:if="${member.status != null and member.status.name() == 'INACTIVE'}" class="badge bg-danger">이용 안함</span>
-                </td>
-                <td>
-                    <span th:if="${member.productName != null}" th:text="${member.productName}"></span>
-                    <a th:if="${member.productName == null}"
-                       th:href="@{/members/{id}/register/product(id=${member.memberId})}"
-                       class="btn btn-sm btn-outline-primary">
-                        상품 등록
-                    </a>
-                </td>
-                <td th:text="${#temporals.format(member.createdAt,'yyyy-MM-dd')}"></td>
-                <td>
-                    <a th:href="@{/members/{id}/edit(id=${member.memberId})}" class="btn btn-sm btn-outline-secondary">수정</a>
-                    <form th:action="@{/members/{id}/delete(id=${member.memberId})}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <nav th:if="${totalPages > 1}" class="mt-4">
-            <ul class="pagination justify-content-center">
 
-                <!-- 이전 -->
-                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                    <a class="page-link" th:href="@{/members(page=${currentPage - 1})}">이전</a>
-                </li>
+            <!-- 회원 테이블 -->
+            <table class="table text-center align-middle table-hover table-desktop">
+                <thead class="table-light">
+                <tr class="text-center">
+                    <th>이름</th>
+                    <th>연락처</th>
+                    <th>생일</th>
+                    <th>성별</th>
+                    <th>상태</th>
+                    <th>상품명</th>
+                    <th>가입일</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="text-center" th:each="member : ${members}">
+                    <td th:text="${member.name}"></td>
+                    <td th:text="${member.phone}"></td>
+                    <td th:text="${member.birthDate}"></td>
+                    <td th:text="${member.gender}"></td>
+                    <td class="text-center">
+                        <span th:if="${member.status != null and member.status.name() == 'ACTIVE'}" class="badge bg-success">이용중</span>
+                        <span th:if="${member.status != null and member.status.name() == 'INACTIVE'}" class="badge bg-danger">이용 안함</span>
+                    </td>
+                    <td>
+                        <span th:if="${member.productName != null}" th:text="${member.productName}"></span>
+                        <a th:if="${member.productName == null}"
+                           th:href="@{/members/{id}/register/product(id=${member.memberId})}"
+                           class="btn btn-sm btn-outline-primary">
+                            상품 등록
+                        </a>
+                    </td>
+                    <td th:text="${#temporals.format(member.createdAt,'yyyy-MM-dd')}"></td>
+                    <td>
+                        <a th:href="@{/members/{id}/edit(id=${member.memberId})}" class="btn btn-sm btn-outline-secondary">수정</a>
+                        <form th:action="@{/members/{id}/delete(id=${member.memberId})}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
-                <!-- 번호 -->
-                <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
-                    th:classappend="${currentPage == i} ? 'active'">
-                    <a class="page-link" th:href="@{/members(page=${i})}" th:text="${i}">1</a>
-                </li>
+            <!-- 모바일 카드 목록 -->
+            <div class="card-mobile row">
+                <div class="row row-cols-1 row-cols-md-3 g-2" th:each="member : ${members}">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="fw-bold mb-0" th:text="${member.name}">회원 이름</h5>
+                                <span th:if="${member.status != null and member.status.name() == 'ACTIVE'}" class="badge bg-success">이용중</span>
+                                <span th:if="${member.status != null and member.status.name() == 'INACTIVE'}" class="badge bg-danger">이용 안함</span>
+                            </div>
+                            <p class="icon-label"><i class="bi bi-telephone me-1"></i><span th:text="${member.phone}"></span></p>
+                            <p class="icon-label"><i class="bi bi-calendar-event me-1"></i><span th:text="${member.birthDate}"></span></p>
+                            <p class="icon-label"><i class="bi bi-gender-ambiguous me-1"></i><span th:text="${member.gender}"></span></p>
+                            <p class="icon-label"><i class="bi bi-box-seam me-1"></i>
+                                <span th:if="${member.productName != null}" th:text="${member.productName}"></span>
+                                <a th:if="${member.productName == null}"
+                                   th:href="@{/members/{id}/register/product(id=${member.memberId})}"
+                                   class="btn btn-sm btn-outline-primary ms-1">상품 등록</a>
+                            </p>
+                            <p class="icon-label"><i class="bi bi-person-plus me-1"></i><span th:text="${#temporals.format(member.createdAt,'yyyy-MM-dd')}"></span></p>
 
-                <!-- 다음 -->
-                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                    <a class="page-link" th:href="@{/members(page=${currentPage + 1})}">다음</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+                            <div class="mt-3 d-flex justify-content-end gap-2">
+                                <a th:href="@{/members/{id}/edit(id=${member.memberId})}" class="btn btn-sm btn-outline-secondary">수정</a>
+                                <form th:action="@{/members/{id}/delete(id=${member.memberId})}" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <nav th:if="${totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+
+                    <!-- 이전 -->
+                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/members(page=${currentPage - 1})}">이전</a>
+                    </li>
+
+                    <!-- 번호 -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:href="@{/members(page=${i})}" th:text="${i}">1</a>
+                    </li>
+
+                    <!-- 다음 -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/members(page=${currentPage + 1})}">다음</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
 </main>
 </html>

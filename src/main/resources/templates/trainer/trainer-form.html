@@ -25,18 +25,18 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">이메일</label>
-              <input type="email" th:field="*{email}" class="form-control" th:readonly="${trainer.trainerId != null}" />
+              <input type="email" th:field="*{email}" class="form-control" />
               <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
             </div>
 
-            <div class="col-md-6 mb-3" th:if="${trainer.trainerId == null}">
+            <div class="col-md-6 mb-3">
               <label class="form-label">비밀번호</label>
               <input type="password" th:field="*{password}" class="form-control" />
               <div class="text-danger small" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
             </div>
           </div>
 
-          <div class="row" th:if="${trainer.trainerId == null}">
+          <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">비밀번호 확인</label>
               <input type="password" th:field="*{passwordConfirm}" class="form-control" />
@@ -53,7 +53,7 @@
 
             <div class="col-md-6 mb-3">
               <label class="form-label">전화번호</label>
-              <input type="text" th:field="*{phone}" class="form-control" />
+              <input type="text" th:field="*{phone}" class="form-control" id="phoneInput" maxlength="13"  />
               <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
             </div>
           </div>
@@ -111,5 +111,26 @@
       </div>
     </div>
   </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const phoneInput = document.getElementById("phoneInput");
+
+      phoneInput.addEventListener("input", function (e) {
+        let value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 남김
+
+        // 전화번호 패턴 맞게 하이픈 삽입
+        if (value.length <= 3) {
+          // 010
+          e.target.value = value;
+        } else if (value.length <= 7) {
+          // 010-1234
+          e.target.value = value.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+        } else {
+          // 010-1234-5678
+          e.target.value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
+        }
+      });
+    });
+  </script>
 </main>
 </html>

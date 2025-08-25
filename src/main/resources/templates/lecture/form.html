@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>수업 등록</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <style>
+        .clickable-row { cursor: pointer; }
+        .clickable-row:hover { background-color: #f8f9fa; }
+
+        /* 왼쪽 카드 영역 */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 800px;
+        }
+        .left-column .card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .left-column .card-body.scroll-table {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* 오른쪽 달력 영역 */
+        .calendar-container {
+            min-height: 700px;
+            display: flex;
+            flex-direction: column;
+        }
+        .calendar-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* daterangepicker를 카드 안에 꽉 채우기 */
+        #calendarInline .daterangepicker {
+            position: static !important;
+            transform: none !important;
+            box-shadow: none !important;
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+
+        /* 날짜 버튼 크기 키우기 */
+        #calendarInline .daterangepicker td,
+        #calendarInline .daterangepicker th {
+            padding: 12px 14px;
+            font-size: 18px;
+        }
+
+        #calendarInline .daterangepicker .drp-calendar.left {
+            margin-right: 100px !important; /* 기본은 20px */
+        }
+        #calendarInline .daterangepicker .drp-buttons {
+            display: none !important;
+        }
+
+        .time-btn {
+            min-width:80px;
+            height: 40px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .member-row.selected { background-color: #e7f1ff; }
+        .dow-disabled { opacity: .5; }
+
+        .member-row.selected {
+            background-color: #e7f1ff; /* 선택 효과 */
+        }
+    </style>
+</head>
+
+<main layout:fragment="content">
+    <div class="container">
+        <h4 class="fw-bold mb-4">수업 등록</h4>
+
+        <div class="row">
+            <!-- 왼쪽 영역 (그대로) -->
+            <div class="col-12 col-md-5">
+                <div class="left-column">
+                    <!-- 트레이너 목록 카드 -->
+                    <div class="card shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="text-black fw-bold">강사 목록</span>
+                        </div>
+                        <div class="card-body scroll-table">
+                            <table class="table table-striped table-hover text-center align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>이름</th>
+                                    <th>성별</th>
+                                    <th>생일</th>
+                                    <th>경력(년)</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="pt : ${trainers}"
+                                    th:attr="data-href=@{'/lecture/' + ${pt.trainerId}}"
+                                    th:classappend="${selectedTrainerId == pt.trainerId} ? 'table-primary'"
+                                    class="clickable-row">
+                                    <td th:text="${pt.name}"></td>
+                                    <td th:text="${pt.gender}"></td>
+                                    <td th:text="${#temporals.format(pt.birthDate, 'yyyy-MM-dd')}"></td>
+                                    <td th:text="${pt.careerYears} + '년'"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 해당 트레이너 회원 목록 카드 -->
+                    <div class="card shadow-sm">
+                        <div class="card-header fw-bold">
+                            <span th:if="${selectedTrainerId != null}">강사 회원 목록</span>
+                            <span th:if="${selectedTrainerId == null}" class="text-muted">강사를 선택해주세요</span>
+                        </div>
+                        <div class="card-body scroll-table d-none d-md-block">
+                            <table class="table table-striped table-hover text-center align-middle"
+                                   th:if="${ptMembers != null and !ptMembers.isEmpty()}">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>이름</th>
+                                    <th>남은 횟수</th>
+                                    <th>총 횟수</th>
+                                    <th>시작일</th>
+                                    <th>종료일</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="pm : ${ptMembers}"
+                                    class="member-row"
+                                    th:attr="data-member-id=${pm.memberId},
+                                                data-package-id=${pm.packageId},
+                                                data-remaining=${pm.remainingCount},
+                                                data-start=${#temporals.format(pm.startDate, 'yyyy-MM-dd')},
+                                                data-end=${#temporals.format(pm.endDate, 'yyyy-MM-dd')}">
+                                    <td th:text="${pm.name}"></td>
+                                    <td th:text="${pm.remainingCount}"></td>
+                                    <td th:text="${pm.totalCount}"></td>
+                                    <td th:text="${#temporals.format(pm.startDate, 'yyyy-MM-dd')}"></td>
+                                    <td th:text="${#temporals.format(pm.endDate, 'yyyy-MM-dd')}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <p class="text-muted" th:if="${ptMembers == null or ptMembers.isEmpty()}">등록된 회원이 없습니다.</p>
+                        </div>
+
+                        <!-- 모바일 카드 뷰 -->
+                        <div class="d-md-none">
+                            <div th:if="${ptMembers != null and !ptMembers.isEmpty()}">
+                                <div th:each="pm : ${ptMembers}"
+                                     class="card mb-2 shadow-sm member-row"
+                                     th:attr="data-member-id=${pm.memberId},
+                                              data-package-id=${pm.packageId},
+                                              data-remaining=${pm.remainingCount},
+                                              data-start=${#temporals.format(pm.startDate, 'yyyy-MM-dd')},
+                                              data-end=${#temporals.format(pm.endDate, 'yyyy-MM-dd')}">
+                                    <div class="card-body p-2">
+                                        <!-- 이름 + 잔여횟수 -->
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold" th:text="${pm.name}">홍길동</span>
+                                            <span class="badge bg-primary"
+                                                  th:text="'잔여 ' + ${pm.remainingCount} + '회'">잔여 10회</span>
+                                        </div>
+
+                                        <!-- 총 횟수 -->
+                                        <div class="mb-1 small text-muted">
+                                            총 <span th:text="${pm.totalCount}">30</span> 회
+                                        </div>
+
+                                        <!-- 기간 -->
+                                        <div class="small">
+                                            <span th:text="${#temporals.format(pm.startDate, 'yyyy-MM-dd')}">2025-08-01</span>
+                                            ~
+                                            <span th:text="${#temporals.format(pm.endDate, 'yyyy-MM-dd')}">2025-12-01</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-muted" th:if="${ptMembers == null or ptMembers.isEmpty()}">등록된 회원이 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 오른쪽 영역 -->
+            <div class="col-12 col-md-7">
+                <form>
+                    <div class="calendar-container">
+                        <!-- 기간 선택 -->
+                        <div class="card shadow-sm mb-2 calendar-box" style="height: 700px;">
+                            <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <span>기간 선택</span>
+                            </div>
+                            <div class="card-body p-2">
+                                <!-- 안내 문구: 초기 표시 -->
+                                <div id="calendarPlaceholder"
+                                     class="d-flex align-items-center justify-content-center border rounded h-100 text-muted"
+                                     style="min-height: 360px;">
+                                    회원을 먼저 선택해주세요
+                                </div>
+
+                                <!-- 실제 달력 영역: 초기에는 숨김 -->
+                                <div id="calendarArea" class="d-none">
+                                    <input type="text" id="selectedRange" class="form-control mb-2" readonly>
+                                    <div id="calendarInline" style="width: 100%; height: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 요일 선택 -->
+                        <div class="card shadow-sm mb-2">
+                            <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <span>요일 선택 (반복)</span>
+                                <!-- 선택된 트레이너 ID 보관 -->
+                                <div id="pageMeta" th:attr="data-trainer-id=${selectedTrainerId}"></div>
+
+                                <div class="d-flex align-items-center flex-wrap gap-3">
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="월"> 월
+                                    </label>
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="화"> 화
+                                    </label>
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="수"> 수
+                                    </label>
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="목"> 목
+                                    </label>
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="금"> 금
+                                    </label>
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="토"> 토
+                                    </label>
+                                    <label class="form-check-label">
+                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="일"> 일
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 시간 선택 -->
+                        <div class="card shadow-sm">
+                            <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                <span>시간 선택</span>
+                            </div>
+                            <div class="card-body">
+                                <!-- 오전 -->
+                                <div class="mb-3">
+                                    <h6 class="fw-bold mb-2">오전</h6>
+                                    <div id="amButtons" class="d-flex flex-wrap gap-2"></div>
+                                </div>
+
+                                <!-- 오후 -->
+                                <div>
+                                    <h6 class="fw-bold mb-2">오후</h6>
+                                    <div id="pmButtons" class="d-flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 버튼 영역 -->
+                        <div class="mt-4 text-end">
+                            <a th:href="@{/lecture/new}"  class="btn btn-secondary">취소</a>
+                            <button type="button" id="registerBtn" class="btn btn-primary">등록</button>
+                        </div>
+                    </div>
+                </form>
+                <!-- ✅ 폼 끝 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <script>
+        let picker;                  // daterangepicker 인스턴스
+        let isCalendarInitialized = false;
+
+        // 달력 최초 1회 초기화
+        function initCalendarOnce() {
+            if (isCalendarInitialized) return;
+
+            $('#calendarInline').daterangepicker({
+                parentEl: '#calendarInline',
+                startDate: moment(),
+                endDate: moment().add(1, 'days'),
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    separator: ' ~ ',
+                    daysOfWeek: ['일','월','화','수','목','금','토'],
+                    monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+                    firstDay: 0
+                },
+                opens: 'center',
+                drops: 'down',
+                alwaysShowCalendars: true,
+                autoApply: true,
+                singleDatePicker: false,
+                autoUpdateInput: false
+            });
+
+            picker = $('#calendarInline').data('daterangepicker');
+
+            // 인풋 업데이트 + 요일/시간 버튼 갱신
+            $('#calendarInline').on('apply.daterangepicker', function (ev, p) {
+                $('#selectedRange').val(
+                    p.startDate.format('YYYY-MM-DD') + ' ~ ' + p.endDate.format('YYYY-MM-DD')
+                );
+                updateDayOfWeekCheckboxes(p.startDate, p.endDate);
+
+                // ✅ 달력에서 범위를 바꿨을 때도 시간 버튼 갱신
+                const trainerId = getSelectedTrainerId();
+                if (trainerId) {
+                    refreshTimeButtons(trainerId, p.startDate, p.endDate, getAllowedDowSet());
+                }
+            });
+
+            // 팝오버 동작 제거하고 상시 표시
+            picker.hide = function(){};
+            picker.show();
+
+            // 초기 1회: 인풋/요일 갱신
+            $('#selectedRange').val(
+                picker.startDate.format('YYYY-MM-DD') + ' ~ ' + picker.endDate.format('YYYY-MM-DD')
+            );
+            updateDayOfWeekCheckboxes(picker.startDate, picker.endDate);
+
+            isCalendarInitialized = true;
+        }
+
+        // 범위 보정 유틸
+        function clampDate(d, min, max) {
+            if (d.isBefore(min, 'day')) return min.clone();
+            if (d.isAfter(max, 'day'))  return max.clone();
+            return d.clone();
+        }
+
+        // 회원기간 제한 + 오늘 이전 블라인드 + start를 오늘로 맞춤
+        function lockCalendarToRangeKeepSelection(memberStart, memberEnd, opts = { startToday: true, blockPast: true }) {
+            const memberMin = moment(memberStart, 'YYYY-MM-DD').startOf('day');
+            const memberMax = moment(memberEnd,   'YYYY-MM-DD').endOf('day');
+            const today     = moment().startOf('day');
+
+            const minAllowed = opts.blockPast ? moment.max(memberMin, today) : memberMin;
+            const maxAllowed = memberMax;
+
+            if (minAllowed.isAfter(maxAllowed, 'day')) {
+                picker.minDate = maxAllowed.clone();
+                picker.maxDate = maxAllowed.clone();
+                picker.isInvalidDate = () => true;
+                picker.setStartDate(maxAllowed);
+                picker.setEndDate(maxAllowed);
+                $('#selectedRange').val(`${maxAllowed.format('YYYY-MM-DD')} ~ ${maxAllowed.format('YYYY-MM-DD')}`);
+                picker.updateView();
+                picker.updateCalendars();
+                return;
+            }
+
+            picker.minDate = minAllowed;
+            picker.maxDate = maxAllowed;
+            picker.isInvalidDate = (date) => date.isBefore(minAllowed, 'day') || date.isAfter(maxAllowed, 'day');
+
+            const prevStart = picker.startDate.clone();
+            const prevEnd   = picker.endDate.clone();
+
+            let newStart = opts.startToday ? clampDate(today, minAllowed, maxAllowed)
+                : clampDate(prevStart, minAllowed, maxAllowed);
+            let newEnd   = clampDate(prevEnd,   minAllowed, maxAllowed);
+            if (newEnd.isBefore(newStart, 'day')) newEnd = newStart.clone();
+
+            picker.setStartDate(newStart);
+            picker.setEndDate(newEnd);
+
+            $('#selectedRange').val(
+                `${picker.startDate.format('YYYY-MM-DD')} ~ ${picker.endDate.format('YYYY-MM-DD')}`
+            );
+
+            picker.updateView();
+            picker.updateCalendars();
+        }
+
+        let selectedMemberId = null;
+
+        // 회원 클릭 시: placeholder 숨기고 달력 보이기 + 초기화 + 기간 제한
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".member-row").forEach(function (row) {
+                row.addEventListener("click", function () {
+                    selectedMemberId = Number(this.dataset.memberId || 0); // ← 선택 회원 보관
+                    document.querySelectorAll(".member-row").forEach(r => r.classList.remove('selected'));
+                    this.classList.add('selected');
+
+                    document.getElementById('calendarPlaceholder').classList.add('d-none');
+                    document.getElementById('calendarArea').classList.remove('d-none');
+
+                    initCalendarOnce();
+
+                    const memberStart = this.dataset.start;  // 'YYYY-MM-DD'
+                    const memberEnd   = this.dataset.end;
+
+                    // 오늘 이전 블라인드 + start를 오늘로
+                    lockCalendarToRangeKeepSelection(memberStart, memberEnd, { startToday: true, blockPast: true });
+
+                    // ✅ 시간 버튼 블라인드 호출 (회원 선택 직후 초기 상태 세팅)
+                    const trainerId = getSelectedTrainerId();
+                    if (trainerId) {
+                        refreshTimeButtons(trainerId, picker.startDate, picker.endDate, getAllowedDowSet());
+                    }
+                });
+            });
+        });
+
+        // 요일 체크박스 활성/비활성 업데이트
+        function updateDayOfWeekCheckboxes(startMoment, endMoment) {
+            if (!startMoment || !endMoment) return;
+
+            const included = new Set();
+            let cur = startMoment.clone().startOf('day');
+            const last = endMoment.clone().startOf('day');
+            while (cur.isSameOrBefore(last, 'day')) {
+                included.add(cur.day());
+                cur.add(1, 'day');
+            }
+
+            const map = { '일':0, '월':1, '화':2, '수':3, '목':4, '금':5, '토':6 };
+
+            document.querySelectorAll('input[name="dayOfWeek"]').forEach(cb => {
+                const dow = map[cb.value];
+                const enable = included.has(dow);
+                cb.disabled = !enable;
+                if (!enable) cb.checked = false;
+                cb.parentElement.classList.toggle('dow-disabled', !enable);
+            });
+        }
+
+        // 행 클릭 이벤트(트레이너 목록 이동)
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".clickable-row").forEach(function (row) {
+                row.addEventListener("click", function (e) {
+                    if (e.target.closest('a') || e.target.closest('button') || e.target.type === 'checkbox') return;
+                    window.location = this.dataset.href;
+                });
+            });
+        });
+
+        // 시간 버튼 생성
+        document.addEventListener("DOMContentLoaded", function () {
+            const amContainer = document.getElementById("amButtons");
+            const pmContainer = document.getElementById("pmButtons");
+
+            for (let hour = 8; hour <= 11; hour++) amContainer.appendChild(createTimeButton(hour));
+            for (let hour = 12; hour <= 23; hour++) pmContainer.appendChild(createTimeButton(hour));
+
+            function createTimeButton(hour) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "btn btn-outline-dark time-btn";
+                const hhmm = hour.toString().padStart(2, "0") + ":00";
+                button.dataset.time = hhmm;
+                button.textContent = hhmm;
+
+                // 라디오처럼 한 개만 선택
+                button.addEventListener("click", function () {
+                    if (button.disabled) return; // ❌ 비활성화면 클릭 무시
+                    document.querySelectorAll(".time-btn").forEach(btn => {
+                        btn.classList.remove("btn-dark");
+                        btn.classList.add("btn-outline-dark");
+                    });
+                    this.classList.remove("btn-outline-dark");
+                    this.classList.add("btn-dark");
+                });
+
+                return button;
+            }
+        });
+
+        // ✅ 오늘 날짜일 경우 현재 시간 이전 시간대는 disable 처리
+        function disablePastTimesIfToday(startDateStr, endDateStr) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, "0");
+            const dd = String(today.getDate()).padStart(2, "0");
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+
+            // start와 end가 같고, 오늘일 경우만 체크
+            if (startDateStr === endDateStr && startDateStr === todayStr) {
+                const nowHour = today.getHours();
+                const nowMinute = today.getMinutes();
+
+                document.querySelectorAll(".time-btn").forEach(btn => {
+                    const [h, m] = btn.dataset.time.split(":").map(Number);
+
+                    // 현재시각보다 과거면 비활성화
+                    if (h < nowHour || (h === nowHour && m <= nowMinute)) {
+                        btn.disabled = true;
+                        btn.classList.add("btn-secondary");
+                        btn.classList.remove("btn-outline-dark", "btn-dark");
+                    } else {
+                        btn.disabled = false;
+                        btn.classList.remove("btn-secondary");
+                    }
+                });
+            } else {
+                // 오늘이 아니거나 기간 선택 → 전체 활성화
+                document.querySelectorAll(".time-btn").forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove("btn-secondary");
+                });
+            }
+        }
+
+        // 📌 daterangepicker 선택 시마다 실행
+        $('#calendarInline').on('apply.daterangepicker', function (ev, p) {
+            const startDate = p.startDate.format('YYYY-MM-DD');
+            const endDate = p.endDate.format('YYYY-MM-DD');
+            disablePastTimesIfToday(startDate, endDate);
+        });
+
+        // 체크된 요일셋 (0=일~6=토)
+        function getAllowedDowSet() {
+            const map = {'일':0,'월':1,'화':2,'수':3,'목':4,'금':5,'토':6};
+            const checked = Array.from(document.querySelectorAll('input[name="dayOfWeek"]:checked'));
+            return new Set(checked.map(cb => map[cb.value])); // 비었으면 size=0
+        }
+
+        // start~end 사이에서 요일 필터로 날짜 리스트 생성
+        function buildDates(startMoment, endMoment, allowedDowSet) {
+            const dates = [];
+            let cur = startMoment.clone().startOf('day');
+            while (cur.isSameOrBefore(endMoment, 'day')) {
+                if (allowedDowSet.has(cur.day())) dates.push(cur.format('YYYY-MM-DD'));
+                cur.add(1, 'day');
+            }
+            return dates;
+        }
+
+        // 백엔드 호출: { "YYYY-MM-DD": ["HH:mm", ...] }
+        async function fetchBusyMap(trainerId, startDate, endDate) {
+            try {
+                const res = await $.getJSON(`/lecture/trainers/${trainerId}/busy`, { start: startDate, end: endDate });
+                return res || {};
+            } catch (e) {
+                console.error('busy fetch failed', e);
+                return {};
+            }
+        }
+
+        // busyMap: { "YYYY-MM-DD": ["HH:mm", ...] }, dates: ["YYYY-MM-DD", ...]
+        async function buildConflictInfoByTime(trainerId, busyMap, dates) {
+            const byTime = {}; // { "HH:mm": [{date, name}, ...] }
+
+            for (const d of dates) {
+                const busyTimes = (busyMap[d] || []).map(t => t.slice(0,5)); // "HH:mm"로 정규화
+                if (!busyTimes.length) continue;
+
+                const lessons = await fetchLessonsByDate(trainerId, d);
+                // 레슨도 "HH:mm"로 정규화
+                const norm = lessons.map(x => ({
+                    time: (x.sessionTime || '').slice(0,5),
+                    name: x.memberName || x.name || ''
+                }));
+
+                for (const t of busyTimes) {
+                    const same = norm.filter(x => x.time === t);
+                    if (!same.length) continue;
+                    if (!byTime[t]) byTime[t] = [];
+                    same.forEach(x => byTime[t].push({ date: d, name: x.name }));
+                }
+            }
+            return byTime; // 예: { "10:00": [{date:"2025-08-12", name:"김영희"}, ...] }
+        }
+
+        // 날짜별 레슨 캐시: key = `${trainerId}:${YYYY-MM-DD}` → [{sessionTime, memberName}, ...]
+        const dayLessonsCache = new Map();
+
+        async function fetchLessonsByDate(trainerId, date) {
+            const key = `${trainerId}:${date}`;
+            if (dayLessonsCache.has(key)) return dayLessonsCache.get(key);
+
+            const url = `/lecture/day?date=${encodeURIComponent(date)}&trainerId=${encodeURIComponent(trainerId)}`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' }});
+            if (!res.ok) { console.error('day fetch failed', date, res.status); dayLessonsCache.set(key, []); return []; }
+
+            const list = await res.json(); // [{sessionTime:"HH:mm[:ss]", memberName:"..."}, ...]
+            dayLessonsCache.set(key, list || []);
+            return list || [];
+        }
+
+        // 경고 초기화/리셋(비활성화는 하지 않음)
+        function resetTimeButtonsState() {
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                const hhmm = (btn.dataset.time || btn.textContent.trim()).slice(0,5);
+                btn.textContent = hhmm;
+                btn.removeAttribute('title');
+                btn.classList.remove('border','border-warning','btn-outline-secondary');
+                // 선택 안 된 버튼은 outline-dark 유지
+                if (!btn.classList.contains('btn-dark')) {
+                    btn.classList.add('btn-outline-dark');
+                }
+            });
+        }
+
+        // 경고 적용: 노란 테두리 + 툴팁(“YYYY-MM-DD 이름” 줄바꿈)
+        function applyWarningUI(conflictInfoByTime) {
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                const hhmm = (btn.dataset.time || btn.textContent.trim()).slice(0,5);
+                btn.textContent = hhmm;
+
+                const items = conflictInfoByTime[hhmm] || [];
+
+                // 기본 리셋
+                btn.classList.remove('border','border-warning','btn-outline-secondary');
+                btn.removeAttribute('title');
+
+                if (items.length > 0) {
+                    btn.classList.add('border','border-warning');
+                    const tip = items.map(x => `${x.date} ${x.name}`.trim()).join('\n'); // 줄바꿈 툴팁
+                    btn.setAttribute('title', tip);
+                    btn.dataset.conflictInfo = tip; // (등록 시 참고하려면 유지)
+                } else {
+                    delete btn.dataset.conflictInfo;
+                }
+
+                // 선택 상태/outline-dark 유지 (disable 제거)
+                if (!btn.classList.contains('btn-dark')) {
+                    btn.classList.add('btn-outline-dark');
+                }
+            });
+        }
+        // 전체 오케스트레이션
+        async function refreshTimeButtons(trainerId, startMoment, endMoment, allowedDowSet) {
+            // 요일 하나도 체크 안 했거나, 교집합이 없으면 경고만 리셋(비활성화 없음)
+            if (!allowedDowSet || allowedDowSet.size === 0) {
+                resetTimeButtonsState();
+                return;
+            }
+
+            const dates = buildDates(startMoment, endMoment, allowedDowSet);
+            if (dates.length === 0) {
+                resetTimeButtonsState();
+                return;
+            }
+
+            // busy 맵 (범위 최소~최대)
+            const busyMap = await fetchBusyMap(trainerId, dates[0], dates[dates.length - 1]);
+
+            // 시간별 경고 정보(날짜+이름)
+            const conflictInfoByTime = await buildConflictInfoByTime(trainerId, busyMap, dates);
+
+            // 경고만 UI 반영
+            applyWarningUI(conflictInfoByTime);
+        }
+
+        // ✅ 요일 체크박스 변화 시마다 호출
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[name="dayOfWeek"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const trainerId = getSelectedTrainerId();
+                    if (!trainerId || !picker) return;
+                    refreshTimeButtons(trainerId, picker.startDate, picker.endDate, getAllowedDowSet());
+                });
+            });
+        });
+
+        // 요일 맵(월=1 … 일=7)
+        const DOW_MAP = { '월':1, '화':2, '수':3, '목':4, '금':5, '토':6, '일':7 };
+        const DOW_MAP_MOMENT = { '일':0,'월':1,'화':2,'수':3,'목':4,'금':5,'토':6 }; // moment 용
+
+        // 트레이너 ID 읽기 (pageMeta 또는 URL)
+        function getSelectedTrainerId() {
+            const el = document.getElementById('pageMeta');
+            if (el && el.dataset.trainerId) return Number(el.dataset.trainerId);
+            const m = location.pathname.match(/\/lecture\/(\d+)/);
+            return m ? Number(m[1]) : null;
+        }
+
+        // 등록 클릭
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            try{
+                const trainerId = getSelectedTrainerId();
+                if (!trainerId) return alert('강사를 먼저 선택하세요.');
+
+                const memberRow = document.querySelector('.member-row.selected');
+                if (!memberRow) return alert('회원을 먼저 선택하세요.');
+                const memberId = Number(memberRow.dataset.memberId || 0);
+                if (!memberId) return alert('회원 정보가 올바르지 않습니다.');
+
+                const packageId = Number(memberRow.dataset.packageId);
+
+                // 시간 선택
+                const timeBtn = document.querySelector('.time-btn.btn-dark');
+                if (!timeBtn) return alert('시간을 선택하세요.');
+                const time = (timeBtn.dataset.time || timeBtn.textContent.trim()).slice(0, 5); // "HH:mm"
+
+                // 기간 (daterangepicker)
+                if (!picker) return alert('기간을 선택하세요.');
+                const startDate = picker.startDate.format('YYYY-MM-DD');
+                const endDate   = picker.endDate.format('YYYY-MM-DD');
+
+                // 요일(체크 없으면 전체 요일 전송해서 서버 NPE 방지)
+                const checked = Array.from(document.querySelectorAll('input[name="dayOfWeek"]:checked'));
+                const repeatDays = (checked.length ? checked : Array.from(document.querySelectorAll('input[name="dayOfWeek"]')))
+                    .map(cb => DOW_MAP[cb.value])
+                    .filter(Boolean);
+
+                // 👉 요청 세션 수 계산 (picker 범위 내에서 repeatDays 적용)
+                const allowedMomentDows = new Set(
+                    (checked.length
+                        ? checked.map(cb => DOW_MAP_MOMENT[cb.value])
+                        : [0,1,2,3,4,5,6]) // 체크가 없으면 전 요일
+                );
+                let requestedCount = 0;
+                let cur = picker.startDate.clone().startOf('day');
+                const last = picker.endDate.clone().startOf('day');
+                while (cur.isSameOrBefore(last, 'day')) {
+                    if (allowedMomentDows.has(cur.day())) requestedCount++;
+                    cur.add(1, 'day');
+                }
+
+                const remaining  = Number(memberRow.dataset.remaining || 0);
+                // ✅ 초과 시 프론트에서만 경고/확인
+                if (requestedCount > remaining) {
+                    const ok = confirm(
+                        `PT 횟수 초과 입니다. 계속 진행하시겠습니까?\n요청: ${requestedCount}회 / 잔여: ${remaining}회\n(진행 시 잔여는 0이 됩니다)`
+                    );
+                    if (!ok) return; // "아니요"면 서버 호출 안 함
+                }
+
+                // 페이로드 (서비스가 기대하는 필드명 그대로)
+                const payload = {
+                    trainerId,
+                    memberId,
+                    packageId,
+                    startDate,   // "YYYY-MM-DD"
+                    endDate,     // "YYYY-MM-DD"
+                    time,        // "HH:mm"
+                    repeatDays   // [1..7]
+                };
+
+                const res = await fetch('/lecture/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // ResponseDTO {message, body}
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    // 예외가 Advice에서 감싸지 않았다면 message가 없을 수 있음
+                    return alert(data?.body?.error || data?.message || '등록 실패');
+                }
+
+                // 성공
+                alert(data.message || '저장 성공');
+                window.location.href = '/lecture/new';
+
+            } catch (e) {
+                console.error(e);
+                alert(e.message || '네트워크 오류');
+            }
+        });
+
+    </script>
+</main>
+</html>

@@ -17,12 +17,13 @@ import java.util.List;
 public class AppUserController {
     private final DashboardService dashboardService;
 
-
+    //로그인
     @GetMapping("/login")
     public String login() {
         return "login";
     }
 
+    //대시보드 조회
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         // ✅ 회원 통계

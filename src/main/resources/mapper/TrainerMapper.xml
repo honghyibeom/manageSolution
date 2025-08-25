@@ -37,8 +37,42 @@
         FROM pt_package p
                  JOIN app_user u ON p.trainerId = u.userId
         WHERE u.name = #{trainerName}
-          AND p.created_at >= DATEADD('MONTH', -5, CURRENT_DATE)
+          AND p.created_at >= DATEADD('MONTH', -6, CURRENT_DATE)
         GROUP BY TO_CHAR(p.created_at, 'yyyy-MM')
         ORDER BY "month"
     </select>
+
+    <select id="findTrainerById" parameterType="long" resultType="TrainerFormDTO">
+        SELECT
+            t.trainerId as trainerId,
+            u.email as email,
+            u.password as password,
+            u.name as name,
+            t.phone as phone,
+            u.role as role,
+            t.birthDate as birthDate,
+            t.gender as gender,
+            t.payPerSession as payPerSession,
+            t.baseSalary as baseSalary,
+            t.careerYears as careerYears,
+            t.updated_at as updatedAt,
+            t.created_at as createdAt
+        FROM trainer t
+                JOIN app_user u
+                  ON t.trainerId = u.userId
+        WHERE t.trainerId = #{trainerId}
+    </select>
+
+    <update id="update" parameterType="Trainer">
+        UPDATE trainer
+        SET birthDate = #{birthDate},
+            gender = #{gender},
+            phone = #{phone},
+            payPerSession = #{payPerSession},
+            baseSalary = #{baseSalary},
+            careerYears = #{careerYears},
+            updated_at = #{updatedAt}
+        WHERE trainerId = #{trainerId}
+    </update>
+
 </mapper>

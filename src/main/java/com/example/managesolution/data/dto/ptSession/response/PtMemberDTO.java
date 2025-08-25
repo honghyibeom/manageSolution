@@ -16,4 +16,5 @@ public class PtMemberDTO {
     private int totalCount;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Long packageId;
 }

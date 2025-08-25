@@ -99,7 +99,19 @@
         ORDER BY label
     </select>
 
-
-
+    <select id="findStatisticsDetails" resultType="DetailStatisticsDTO">
+        SELECT
+            m.name AS memberName,
+            pd.name AS productName,
+            pm.paidAt AS date,
+            pm.amount AS amount
+        FROM payment pm
+                LEFT OUTER JOIN member m
+                             ON pm.memberId = m.memberId
+                LEFT OUTER JOIN product pd
+                             ON pm.productId = pd.productId
+        WHERE paidAt BETWEEN #{startDate} AND #{endDate}
+        AND pd.name = #{name}
+    </select>
 
 </mapper>

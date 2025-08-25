@@ -8,11 +8,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 @RequiredArgsConstructor
 public class AppUserDetails implements UserDetails {
-
     private final AppUser appUser;
 
     @Override

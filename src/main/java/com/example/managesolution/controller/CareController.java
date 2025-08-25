@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.*;
+import java.util.stream.Collector;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/care")
 public class CareController {
     private final CareService careService;
-
     // 회원 care 페이지 조회
     @GetMapping("")
     public String careDashboard(@RequestParam(required = false) String keyword, Model model) {

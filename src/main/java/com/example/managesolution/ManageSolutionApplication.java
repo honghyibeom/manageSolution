@@ -12,6 +12,10 @@ public class ManageSolutionApplication {
     public static void main(String[] args) {
         SpringApplication.run(ManageSolutionApplication.class, args);
         System.out.println("http://localhost:8080/dashboard");
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String rawPassword = "admin123";
+        String encodedPassword = encoder.encode(rawPassword);
+        System.out.println(encodedPassword);
 
     }
 

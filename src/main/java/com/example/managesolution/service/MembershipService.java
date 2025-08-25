@@ -6,6 +6,7 @@ import com.example.managesolution.mapper.MemberShipMapper;
 import com.example.managesolution.mapper.PtPackageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,10 +36,12 @@ public class MembershipService {
         }
     }
 
+    @Transactional
     public void deleteUnpaidMemberShip(Long memberId) {
         membershipMapper.deleteUnpaidMembership(memberId);
     }
 
+    @Transactional
     public void deleteExpiredMembershipAndPtPackage(Long memberId) {
         membershipMapper.deleteMemberShipByMemberId(memberId);
         ptPackageMapper.deletePtPackagesByMemberId(memberId);
