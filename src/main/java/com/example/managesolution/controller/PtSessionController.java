@@ -200,4 +200,18 @@ public class PtSessionController {
         return ResponseEntity.ok(attendanceService.attend(request));
     }
 
+    // new 수업 일괄 삭제
+    @PostMapping("/sessions/group/delete/{batchId}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> deleteGroup(@PathVariable("batchId") String batchId) {
+        return ResponseEntity.ok(ptSessionService.deleteGroupSession(batchId));
+    }
+
+    // new 수업 그룹 조회
+    @GetMapping("/sessions/group/{batchId}")
+    @ResponseBody
+    public ResponseEntity<ResponseDTO> getGroup(@PathVariable("batchId") String batchId) {
+        return ResponseEntity.ok(ptSessionService.getGroupSession(batchId));
+    }
+
 }

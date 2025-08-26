@@ -76,6 +76,7 @@ CREATE TABLE pt_session (
                             sessionTime TIME NOT NULL,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             status VARCHAR(10) NOT NULL DEFAULT 'BOOKED',
+                            batchId varchar(36),
                             FOREIGN KEY (packageId) REFERENCES pt_package(packageId) ON DELETE CASCADE,
                             FOREIGN KEY (trainerId) REFERENCES app_user(userId) ON DELETE SET NULL,
                             FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE

@@ -74,8 +74,8 @@
     </select>
 
     <insert id="insert" parameterType="PtSession" useGeneratedKeys="true" keyProperty="ptSessionId">
-        INSERT INTO pt_session (memberId, trainerId, packageId, sessionDate, sessionTime)
-        VALUES ( #{memberId}, #{trainerId},#{packageId}, #{sessionDate}, #{sessionTime} )
+        INSERT INTO pt_session (memberId, trainerId, packageId, sessionDate, sessionTime, batchId)
+        VALUES ( #{memberId}, #{trainerId},#{packageId}, #{sessionDate}, #{sessionTime}, #{batchId} )
     </insert>
 
     <delete id="deleteById" parameterType="long">
@@ -131,6 +131,7 @@
         m.memberId AS memberId,
         pp.packageId AS packageId,
         t.trainerId AS trainerId,
+        s.batchId AS batchId,
 
         -- 임박 여부: 현재 시각 기준 30분 이내 시작이면 true
         CASE
@@ -221,5 +222,33 @@
             trainerId   = #{trainerId}
         WHERE sessionId = #{sessionId}
     </update>
+
+    <delete id="deleteByBatchId" parameterType="String" >
+        DELETE
+        FROM pt_session
+        WHERE batchId = #{batchId}
+    </delete>
+
+    <select id="findSessionIdByBatchId" parameterType="String" resultType="PtSession">
+        SELECT *
+        FROM pt_session
+        WHERE batchId = #{batchId}
+    </select>
+
+    <select id="findSessionViewByBatchId" parameterType="String" resultType="SessionGroupDTO">
+        SELECT s.sessionDate AS sessionDate,
+               s.sessionTime AS sessionTime,
+               m.name        AS memberName,
+               a.name        AS trainerName,
+               p.name        AS productName
+        FROM pt_session s
+                 JOIN member m ON s.memberId = m.memberId
+                 JOIN trainer t ON s.trainerId = t.trainerId
+                        LEFT JOIN app_user a ON t.trainerId = a.userId
+                 LEFT JOIN pt_package pp ON s.packageId = pp.packageId
+                        LEFT JOIN product p ON pp.productId = p.productId
+        WHERE batchId = #{batchId}
+        ORDER BY s.sessionDate
+    </select>
 
 </mapper>

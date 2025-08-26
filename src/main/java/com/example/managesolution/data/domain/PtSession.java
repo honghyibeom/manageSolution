@@ -22,4 +22,5 @@ public class PtSession {
     private LocalDate sessionDate;
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime sessionTime;
+    private String batchId;
 }

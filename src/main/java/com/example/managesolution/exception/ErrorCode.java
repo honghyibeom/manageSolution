@@ -11,9 +11,8 @@ public enum ErrorCode {
     END_DATE_BEFORE("endDate 가 startDate 이전입니다.", HttpStatus.BAD_REQUEST),
     NOT_EXIST_FIELD("필수 필드가 없습니다.", HttpStatus.BAD_REQUEST),
     NOT_EXIST_DATES("선택된 기간/요일에 해당하는 날짜가 없습니다.", HttpStatus.BAD_REQUEST),
-    EXIST_SESSION("해당 회원의 수업이 이미 존재합니다.", HttpStatus.BAD_REQUEST);
-
-
+    EXIST_SESSION("해당 회원의 수업이 이미 존재합니다.", HttpStatus.BAD_REQUEST),
+    NOT_EXIST_BATCH_ID("수업의 그룹이 없습니다.", HttpStatus.BAD_REQUEST);
     private final HttpStatus httpStatus;
     private final String errorMessage;
     ErrorCode(String errorMessage, HttpStatus httpStatus) {

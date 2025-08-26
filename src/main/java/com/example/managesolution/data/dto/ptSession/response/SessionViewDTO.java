@@ -17,6 +17,7 @@ public class SessionViewDTO {
     private Long memberId;
     private Long packageId;
     private Long trainerId;
+    private String batchId;
     private Boolean imminent;
     private String memberName;
     private String phone; //마지막 4자리만

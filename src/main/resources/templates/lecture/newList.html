@@ -10,22 +10,87 @@
   <link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css}">
 
   <style>
-    .sticky-group { position: sticky; top: 0; z-index: 1020; }
-    .session-row.imminent { border-left: 4px solid #0dcaf0; }
-    .status-badge { min-width: 56px; }
-    .summary-card .display-6 { line-height: 1; }
+    /* ✅ 날짜 그룹 (sticky header) */
+    .sticky-group {
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+      background: #f8f9fa;
+    }
+
+    /* ✅ 임박 수업 강조 */
+    .session-row.imminent {
+      border-left: 4px solid #0dcaf0;
+      background: #fdfdfe;
+    }
+
+    /* ✅ 상태 뱃지 */
+    .status-badge {
+      min-width: 70px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border-radius: 6px;
+      padding: 4px 6px;
+    }
+    .status-booked { background: #6c757d; color: #fff; }   /* 예약 */
+    .status-attended { background: #198754; color: #fff; } /* 출석 */
+    .status-noshow { background: #ffc107; color: #000; }   /* 결석 */
+
+    /* ✅ 요약 카드 hover 효과 */
+    .summary-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .summary-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+    .summary-card .display-6 {
+      line-height: 1;
+    }
+
+    /* ✅ 모바일 전환 */
     @media (max-width: 768px) {
       .table-desktop { display:none; }
       .card-mobile { display:block; }
-      .filterbar { flex-direction: column !important; align-items: stretch !important; }
+
+      .filterbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.75rem;
+      }
       .filterbar > * { width: 100% !important; }
     }
-    @media (min-width: 768px) { .card-mobile { display:none; } }
-    .input-icon { position: relative; }
-    .input-icon input { padding-right: 35px; }
-    .input-icon i { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6c757d; z-index: 2; }
-    .daterangepicker { z-index: 2050 !important; }
+    @media (min-width: 768px) {
+      .card-mobile { display:none; }
+    }
 
+    /* ✅ 검색 input 아이콘 */
+    .input-icon {
+      position: relative;
+    }
+    .input-icon input {
+      padding-right: 35px;
+    }
+    .input-icon i {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #6c757d;
+      z-index: 2;
+    }
+
+    /* ✅ datepicker */
+    .daterangepicker {
+      z-index: 2050 !important;
+    }
+
+    /* ✅ Floating Action Button */
     .fab-btn {
       position: fixed;
       bottom: 20px;
@@ -38,7 +103,94 @@
       justify-content: center;
       font-size: 24px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      z-index: 1050; /* 모달, 네비보다 위 */
+      z-index: 1050;
+    }
+
+    /* ✅ 테이블 */
+    table.table {
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    table.table thead th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+    table.table tbody tr:hover {
+      background: #f9fcff;
+    }
+
+    /* ✅ 모바일 카드 뷰 */
+    .card-mobile .card {
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+    }
+    .card-mobile .card-body {
+      padding: 1rem 1.25rem;
+    }
+    .card-mobile hr {
+      margin: 0.75rem 0;
+      border-color: #e9ecef;
+    }
+
+    /* ✅ 관리 버튼 (모바일 카드) */
+    .card-mobile .btn {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.5rem;
+    }
+
+    /* 상태 필터 버튼 */
+    .filterbar .btn-group .btn {
+      min-width: 100px;     /* 가로 크기 */
+      height: 44px;         /* 세로 크기 */
+      font-size: 1rem;      /* 글자 크기 */
+      font-weight: 600;     /* 글자 두께 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;             /* 아이콘과 글자 간격 */
+      transition: all 0.2s ease-in-out;
+    }
+
+    /* hover & active 효과 */
+    .filterbar .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+
+    /* 선택된 상태 강조 */
+    .filterbar .btn-check:checked + .btn {
+      color: #fff;
+      font-weight: 700;
+    }
+    .btn-light-success {
+      background-color: #a3cfbb; /* 더 진한 연두/초록 */
+      color: #0f5132;
+      font-weight: 600;     /* 글자 두께 */
+      border: none;
+    }
+    .btn-light-warning {
+      background-color: #ffe69c; /* 더 진한 연노랑 */
+      font-weight: 600;     /* 글자 두께 */
+      color: #664d03;
+      border: none;
+    }
+    .btn-light-secondary {
+      background-color: #cfd4da; /* 진한 회색 */
+      font-weight: 600;     /* 글자 두께 */
+      color: #212529;
+      border: none;
+    }
+    .btn-light-danger {
+      background-color: #f1aeb5; /* 조금 더 진한 핑크/빨강 */
+      font-weight: 600;     /* 글자 두께 */
+      color: #58151c;
+      border: none;
+    }
+    /* 그룹 보기: 파랑 */
+    .btn-light-info {
+      background-color: #9eeaf9; /* 연한 파랑 */
+      color: #055160;
+      border: none;
     }
   </style>
 </head>
@@ -46,7 +198,9 @@
   <div class="container py-4">
     <!-- 상단: 필터바 -->
     <div class="mb-4">
-      <h4 class="fw-bold mb-4">수업 관리</h4>
+      <h4 class="fw-bold mb-4">
+        <i class="bi bi-journal-text me-2 text-primary"></i>수업 관리
+      </h4>
       <div class="d-flex align-items-center justify-content-between">
 
         <!-- ✅ GET 폼 -->
@@ -58,56 +212,61 @@
             <input class="btn-check" type="checkbox" id="stBooked"
                    name="status" value="BOOKED"
                    th:checked="${#lists.contains(cond.status, 'BOOKED')}">
-            <label class="btn btn-outline-secondary" for="stBooked" style="min-width:60px;">예약</label>
+            <label class="btn btn-outline-secondary" for="stBooked">
+              <i class="bi bi-calendar-check"></i> 예약
+            </label>
 
             <input class="btn-check" type="checkbox" id="stAtt"
                    name="status" value="ATTENDED"
                    th:checked="${#lists.contains(cond.status, 'ATTENDED')}">
-            <label class="btn btn-outline-success" for="stAtt" style="min-width:60px;">출석</label>
+            <label class="btn btn-outline-success" for="stAtt">
+              <i class="bi bi-check-circle"></i> 출석
+            </label>
 
             <input class="btn-check" type="checkbox" id="stNo"
                    name="status" value="NO_SHOW"
                    th:checked="${#lists.contains(cond.status, 'NO_SHOW')}">
-            <label class="btn btn-outline-warning" for="stNo" style="min-width:60px;">결석</label>
+            <label class="btn btn-outline-warning" for="stNo">
+              <i class="bi bi-x-circle"></i> 결석
+            </label>
           </div>
 
           <!-- 날짜 범위 -->
-          <div class="input-icon" style="max-width:250px; min-width:250px; width:250px;">
-            <!-- dateRange는 서버로 보내지 않음 -->
+          <div class="input-icon" style="min-width:250px;">
             <input type="text" id="dateRange" class="form-control" readonly />
             <i class="bi bi-calendar3" id="datePickerIcon"></i>
           </div>
-          <!-- 서버 전송용 hidden 필드 -->
           <input type="hidden" name="startDate" id="startDate" th:value="${cond.startDate}">
           <input type="hidden" name="endDate" id="endDate" th:value="${cond.endDate}">
 
           <!-- 트레이너 -->
           <select class="form-select" name="trainerId"
-                  style="max-width:180px; min-width:150px;"
+                  style="min-width:250px;"
                   th:value="${cond.trainerId}">
             <option th:value="${null}">전체 트레이너</option>
             <option th:each="t : ${trainers}"
                     th:value="${t.trainerId}"
-                    th:text="${t.name}">
-            </option>
+                    th:text="${t.name}"></option>
           </select>
 
           <!-- 키워드 -->
           <input type="text" class="form-control" name="keyword"
-                 style="max-width:220px; min-width:150px; width:150px"
+                 style="min-width:250px;"
                  placeholder="회원명/전화 검색" th:value="${cond.keyword}" />
 
           <!-- 검색 버튼 -->
-          <button type="submit" class="btn btn-outline-secondary" style="min-width:60px;">검색</button>
+          <button type="submit" class="btn btn-outline-secondary">
+            <i class="bi bi-search"></i>
+          </button>
+          <!-- 데스크톱: 오른쪽 큰 버튼 -->
+          <a th:href="@{/lecture/form}" style="min-width:150px"
+             class="btn btn-primary px-4 d-none d-md-inline-block">
+            <i class="bi bi-plus-lg me-1"></i>수업 등록
+          </a>
+
         </form>
 
-        <!-- 데스크톱: 오른쪽에 큰 버튼 -->
-        <a th:href="@{/lecture/form}"
-           class="btn btn-primary px-4 d-none d-md-inline-block">
-          + 수업 등록
-        </a>
-
-        <!-- 데스크톱에서는 숨기고, 모바일에서만 보이도록 -->
+        <!-- 모바일 FAB -->
         <a th:href="@{/lecture/form}"
            class="btn btn-primary fab-btn d-md-none">
           <i class="bi bi-plus"></i>
@@ -119,9 +278,9 @@
     <div class="row g-3 mb-4">
       <div class="col-6 col-md-3" th:each="summary : ${summaryList}">
         <div class="card summary-card shadow-sm border-0">
-          <div class="card-body">
-            <div class="small text-muted" th:text="${summary.label}">라벨</div>
-            <div class="display-6 fw-bold"
+          <div class="card-body text-center">
+            <div class="small text-muted mb-1" th:text="${summary.label}">라벨</div>
+            <div class="display-6 fw-bold text-primary"
                  th:text="${summary.isPercent} ? ${summary.value} + '%' : ${summary.value}">
               0
             </div>
@@ -135,25 +294,28 @@
       <!-- 날짜 헤더 -->
       <div class="bg-light border rounded px-3 py-2 mb-2 sticky-group">
         <div class="d-flex justify-content-between align-items-center">
-          <span class="fw-semibold" th:text="${#temporals.format(group.date, 'MM/dd(E)')}"></span>
+          <span class="fw-semibold">
+            <i class="bi bi-calendar-week me-1"></i>
+            <span th:text="${#temporals.format(group.date, 'MM/dd(E)')}"></span>
+          </span>
           <small class="text-muted"
                  th:text="'총 ' + ${group.total} + ' · 예약 ' + ${group.booked} + ' · 출석 ' + ${group.attended} + ' · 노쇼 ' + ${group.noShow} + ' · ' + ${group.rate} + '%'">
-            총 0 · 예약 0 · 출석 0 · 노쇼 0 · 0%
           </small>
         </div>
       </div>
 
-      <!-- 테이블 -->
+      <!-- ✅ 데스크톱 테이블 -->
       <div class="table-responsive table-desktop">
-        <table class="table text-center align-middle bg-white rounded shadow-sm overflow-hidden">
-          <thead class="table-light position-sticky top-0" style="z-index:1010">
+        <table class="table text-center align-middle bg-white shadow-sm overflow-hidden">
+          <thead class="table-light position-sticky top-0">
           <tr>
-            <th>시간</th>
-            <th>회원</th>
-            <th>트레이너</th>
-            <th>상품</th>
-            <th>상태</th>
-            <th>관리</th>
+            <th><i class="bi bi-clock me-1"></i>시간</th>
+            <th><i class="bi bi-person me-1"></i>회원</th>
+            <th><i class="bi bi-person-badge me-1"></i>트레이너</th>
+            <th><i class="bi bi-box me-1"></i>상품</th>
+            <th><i class="bi bi-clipboard-check me-1"></i>상태</th>
+            <th><i class="bi bi-check2-square me-1"></i>출석/결석</th>
+            <th><i class="bi bi-gear me-1"></i>관리</th>
           </tr>
           </thead>
           <tbody>
@@ -161,85 +323,163 @@
               th:classappend="${sess.imminent} ? ' imminent' : ''"
               class="session-row">
             <td>
-              <span class="fw-semibold" th:text="${sess.sessionTime}">09:00~09:50</span>
+              <span class="fw-semibold" th:text="${sess.sessionTime}"></span>
               <span class="badge text-bg-info ms-1" th:if="${sess.imminent}">임박</span>
             </td>
             <td>
-              <span th:text="${sess.memberName}">홍길동</span>
-              <small class="text-muted">· <span th:text="${sess.phone}">1234</span></small>
+              <span th:text="${sess.memberName}"></span>
+              <small class="text-muted">· <span th:text="${sess.phone}"></span></small>
             </td>
-            <td th:text="${sess.trainerName}">트레이너 김</td>
+            <td th:text="${sess.trainerName}"></td>
             <td>
-              <span class="badge text-bg-secondary" th:text="${sess.productName}">PT 30회</span>
-              <span class="badge text-bg-light border" th:text="'잔여 ' + ${sess.remainingCount} + '회'">잔여 10회</span>
+              <span class="badge text-bg-secondary" th:text="${sess.productName}"></span>
+              <span class="badge text-bg-light border" th:text="'잔여 ' + ${sess.remainingCount} + '회'"></span>
             </td>
             <td>
-                <span class="badge status-badge"
-                      th:style="'background-color:' + ${sess.statusColor} + '; color:white;'"
-                      th:text="${sess.label}">예약</span>
+        <span class="status-badge"
+              th:style="'background-color:' + ${sess.statusColor} + '; color:white;'"
+              th:text="${sess.label}">
+        </span>
             </td>
-            <td class="text-nowrap">
-              <button type="button" class="btn btn-sm btn-success"
-                      th:attr="data-member-id=${sess.memberId},
-                 data-session-id=${sess.sessionId},
-                 data-package-id=${sess.packageId},
-                 data-status='ATTENDED'">
-                O
-              </button>
-
-              <button type="button" class="btn btn-sm btn-warning"
-                      th:attr="data-member-id=${sess.memberId},
-                 data-session-id=${sess.sessionId},
-                 data-package-id=${sess.packageId},
-                 data-status='NO_SHOW'">
-                X
-              </button>
-
-              <button type="button"
-                      class="btn btn-outline-secondary btn-sm edit-btn"
-                      th:data-session-id="${sess.sessionId}"
-                      th:data-date="${#temporals.format(sess.sessionTime, 'yyyy-MM-dd')}"
-                      th:data-time="${#temporals.format(sess.sessionTime, 'HH:mm')}"
-                      th:data-trainer-id="${sess.trainerId}"
-                      data-bs-toggle="modal"
-                      data-bs-target="#editSessionModal">
-                수정
-              </button>
-
-              <form th:action="@{/lecture/sessions/delete}" method="post" style="display:inline;">
-                <input type="hidden" name="sessionId" th:value="${sess.sessionId}">
-                <button type="submit" class="btn btn-sm btn-outline-danger"
-                        onclick="return confirm('정말 이 수업을 취소하시겠습니까?');">
-                  취소
+            <!-- 출석/결석 전용 컬럼 -->
+            <td>
+              <div class="btn-group" role="group">
+                <!-- 출석 -->
+                <button type="button" class="btn btn-light-success"
+                        th:attr="data-member-id=${sess.memberId},
+                     data-session-id=${sess.sessionId},
+                     data-package-id=${sess.packageId},
+                     data-status='ATTENDED'">
+                  O
                 </button>
-              </form>
+
+                <!-- 결석 -->
+                <button type="button" class="btn btn-light-warning"
+                        th:attr="data-member-id=${sess.memberId},
+                     data-session-id=${sess.sessionId},
+                     data-package-id=${sess.packageId},
+                     data-status='NO_SHOW'">
+                  X
+                </button>
+              </div>
+            </td>
+            <!-- 관리 전용 컬럼 -->
+            <td>
+              <div class="btn-group">
+                <!-- 수정 -->
+                <button type="button" class="btn btn-light-secondary edit-btn"
+                        th:data-session-id="${sess.sessionId}"
+                        th:data-date="${#temporals.format(sess.sessionTime, 'yyyy-MM-dd')}"
+                        th:data-time="${#temporals.format(sess.sessionTime, 'HH:mm')}"
+                        th:data-trainer-id="${sess.trainerId}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editSessionModal">
+                  <i class="bi bi-pencil"></i>
+                </button>
+
+                <!-- 개별 삭제 -->
+                <form th:action="@{/lecture/sessions/delete}" method="post" style="display:inline;">
+                  <input type="hidden" name="sessionId" th:value="${sess.sessionId}">
+                  <button type="submit" class="btn btn-light-danger rounded-0"
+                          onclick="return confirm('정말 이 수업을 취소하시겠습니까?');">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+
+                <!-- 그룹 보기 -->
+                <button type="button"
+                        class="btn btn-light-info group-view-btn"
+                        th:data-batch-id="${sess.batchId}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#groupModal">
+                  <i class="bi bi-collection"></i>
+                </button>
+              </div>
             </td>
           </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- 모바일 카드 뷰 -->
+
+      <!-- ✅ 모바일 카드 뷰 -->
       <div class="card-mobile d-md-none">
         <div th:each="sess : ${group.sessions}"
              th:classappend="${sess.imminent} ? ' imminent' : ''"
              class="card shadow-sm mb-3">
-          <div class="card-body">
-            <!-- 시간 -->
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="fw-semibold" th:text="${sess.sessionTime}">09:00~09:50</span>
-              <span class="badge text-bg-info" th:if="${sess.imminent}">임박</span>
+          <div class="card-body position-relative">
+
+            <!-- 상단: 시간 + ... 메뉴 -->
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <span class="fw-semibold" th:text="${sess.sessionTime}">09:00~09:50</span>
+                <span class="badge text-bg-info ms-2" th:if="${sess.imminent}">임박</span>
+              </div>
+
+              <!-- ... 드롭다운 -->
+              <div class="dropdown">
+                <button class="btn btn-sm btn-light-secondary btn-action" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <button class="dropdown-item text-success"
+                            th:attr="data-member-id=${sess.memberId},
+                               data-session-id=${sess.sessionId},
+                               data-package-id=${sess.packageId},
+                               data-status='ATTENDED'">
+                      <i class="bi bi-check-lg me-2"></i> 출석
+                    </button>
+                  </li>
+                  <li>
+                    <button class="dropdown-item text-warning"
+                            th:attr="data-member-id=${sess.memberId},
+                               data-session-id=${sess.sessionId},
+                               data-package-id=${sess.packageId},
+                               data-status='NO_SHOW'">
+                      <i class="bi bi-x-lg me-2"></i> 결석
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" class="dropdown-item text-secondary edit-btn"
+                            th:data-session-id="${sess.sessionId}"
+                            th:data-date="${#temporals.format(sess.sessionTime, 'yyyy-MM-dd')}"
+                            th:data-time="${#temporals.format(sess.sessionTime, 'HH:mm')}"
+                            th:data-trainer-id="${sess.trainerId}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editSessionModal">
+                      <i class="bi bi-pencil me-2"></i> 수정
+                    </button>
+                  </li>
+                  <li>
+                    <form th:action="@{/lecture/sessions/delete}" method="post">
+                      <input type="hidden" name="sessionId" th:value="${sess.sessionId}">
+                      <button type="submit" class="dropdown-item text-danger"
+                              onclick="return confirm('정말 이 수업을 취소하시겠습니까?');">
+                        <i class="bi bi-trash me-2"></i> 삭제
+                      </button>
+                    </form>
+                  </li>
+                  <li>
+                    <button type="button" class="dropdown-item text-info group-view-btn"
+                            th:data-batch-id="${sess.batchId}">
+                      <i class="bi bi-collection me-2"></i> 그룹 보기
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-            <!-- 회원 -->
+            <!-- 회원 정보 -->
             <div class="mb-2">
+              <i class="bi bi-person me-1"></i>
               <span th:text="${sess.memberName}">홍길동</span>
               <small class="text-muted">· <span th:text="${sess.phone}">1234</span></small>
             </div>
 
             <!-- 트레이너 -->
             <div class="mb-2">
-              <i class="bi bi-person-badge"></i>
+              <i class="bi bi-person-badge me-1"></i>
               <span th:text="${sess.trainerName}">트레이너 김</span>
             </div>
 
@@ -251,65 +491,26 @@
 
             <!-- 상태 -->
             <div class="mb-2">
-        <span class="badge status-badge"
+        <span class="status-badge"
               th:style="'background-color:' + ${sess.statusColor} + '; color:white;'"
-              th:text="${sess.label}">예약</span>
-            </div>
-
-            <!-- 관리 버튼 -->
-            <div class="d-flex gap-2 flex-wrap">
-              <button type="button" class="btn btn-sm btn-success"
-                      th:attr="data-member-id=${sess.memberId},
-                         data-session-id=${sess.sessionId},
-                         data-package-id=${sess.packageId},
-                         data-status='ATTENDED'">O</button>
-
-              <button type="button" class="btn btn-sm btn-warning"
-                      th:attr="data-member-id=${sess.memberId},
-                         data-session-id=${sess.sessionId},
-                         data-package-id=${sess.packageId},
-                         data-status='NO_SHOW'">X</button>
-
-              <button type="button"
-                      class="btn btn-outline-secondary btn-sm edit-btn"
-                      th:data-session-id="${sess.sessionId}"
-                      th:data-date="${#temporals.format(sess.sessionTime, 'yyyy-MM-dd')}"
-                      th:data-time="${#temporals.format(sess.sessionTime, 'HH:mm')}"
-                      th:data-trainer-id="${sess.trainerId}"
-                      data-bs-toggle="modal"
-                      data-bs-target="#editSessionModal">
-                수정
-              </button>
-
-              <form th:action="@{/lecture/sessions/delete}" method="post" style="display:inline;">
-                <input type="hidden" name="sessionId" th:value="${sess.sessionId}">
-                <button type="submit" class="btn btn-sm btn-outline-danger"
-                        onclick="return confirm('정말 이 수업을 취소하시겠습니까?');">
-                  취소
-                </button>
-              </form>
+              th:text="${sess.label}">
+        </span>
             </div>
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- 페이지네이션 -->
     <nav th:if="${totalPages > 1}" class="mt-4">
       <ul class="pagination justify-content-center">
-        <!-- 이전 -->
         <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
           <a class="page-link" th:href="@{/lecture/list(page=${currentPage - 1})}">이전</a>
         </li>
-
-        <!-- 번호 -->
         <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
             th:classappend="${currentPage == i} ? 'active'">
           <a class="page-link" th:href="@{/lecture/list(page=${i})}" th:text="${i}">1</a>
         </li>
-
-        <!-- 다음 -->
         <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
           <a class="page-link" th:href="@{/lecture/list(page=${currentPage + 1})}">다음</a>
         </li>
@@ -358,6 +559,34 @@
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 그룹 보기 모달 -->
+  <div class="modal fade" id="groupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-collection me-2 text-primary"></i> 그룹 수업 보기
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- ✅ 그룹 수업 목록 (동적 로딩 예정) -->
+          <div id="groupSessionsContainer">
+            <p class="text-muted">해당 그룹의 수업을 불러오는 중입니다...</p>
+          </div>
+        </div>
+
+        <div class="modal-footer d-flex justify-content-between">
+          <span class="text-muted small">※ 그룹 전체를 삭제하면 되돌릴 수 없습니다.</span>
+          <button type="button" id="deleteGroupBtn" class="btn btn-danger">
+            <i class="bi bi-trash me-1"></i> 그룹 전체 삭제
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -531,6 +760,81 @@
       });
     });
 
+    let groupModal = null;
+    document.addEventListener("DOMContentLoaded", () => {
+      const modalEl = document.getElementById("groupModal");
+      groupModal = new bootstrap.Modal(modalEl); // ✅ 한 번만 초기화
+
+      document.querySelectorAll(".group-view-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const batchId = btn.dataset.batchId;
+
+          // 모달 열기
+          groupModal.show();
+          console.log("모달 염");
+
+          // 그룹 세션 불러오기
+          axios.get(`/lecture/sessions/group/${batchId}`)
+                  .then(res => {
+                    const sessions = res.data.body;
+
+                    if (!sessions.length) {
+                      document.getElementById("groupSessionsContainer").innerHTML =
+                              `<p class="text-muted">이 그룹에 포함된 수업이 없습니다.</p>`;
+                      return;
+                    }
+
+                    // 테이블 표시
+                    let html = `
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle text-center">
+                <thead class="table-light">
+                  <tr>
+                    <th>날짜</th>
+                    <th>시간</th>
+                    <th>회원</th>
+                    <th>트레이너</th>
+                    <th>상품</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+                    sessions.forEach(s => {
+                      html += `
+              <tr>
+                <td>${s.sessionDate}</td>
+                <td>${s.sessionTime}</td>
+                <td>${s.memberName}</td>
+                <td>${s.trainerName}</td>
+                <td>${s.productName}</td>
+              </tr>`;
+                    });
+                    html += "</tbody></table></div>";
+
+                    document.getElementById("groupSessionsContainer").innerHTML = html;
+
+                    // 삭제 버튼 이벤트
+                    document.getElementById("deleteGroupBtn").onclick = () => {
+                      if (!confirm("이 그룹 전체 수업을 삭제하시겠습니까?")) return;
+                      axios.post(`/lecture/sessions/group/delete/${batchId}`)
+                              .then(() => {
+                                alert("그룹 전체가 삭제되었습니다.");
+                                groupModal.hide(); // ✅ 모달 닫기
+                                location.reload();
+                              })
+                              .catch(err => {
+                                console.error(err);
+                                alert("그룹 삭제 중 오류가 발생했습니다.");
+                              });
+                    };
+                  })
+                  .catch(err => {
+                    console.error(err);
+                    document.getElementById("groupSessionsContainer").innerHTML =
+                            `<p class="text-danger">그룹 데이터를 불러오는 중 오류가 발생했습니다.</p>`;
+                  });
+        });
+      });
+    });
   </script>
 </main>
 </html>

@@ -56,4 +56,10 @@ public interface PtSessionMapper {
                        @Param("sessionDate") LocalDate sessionDate,
                        @Param("sessionTime") LocalTime sessionTime,
                        @Param("trainerId") Long trainerId);
+
+    void deleteByBatchId(@Param("batchId") String batchId);
+
+    List<PtSession> findSessionIdByBatchId(@Param("batchId") String batchId);
+
+    List<SessionGroupDTO> findSessionViewByBatchId(@Param("batchId") String batchId);
 }

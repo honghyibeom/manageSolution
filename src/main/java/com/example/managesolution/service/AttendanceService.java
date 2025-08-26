@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 public class AttendanceService {
 
     private final AttendanceMapper attendanceMapper;
-    private final PtPackageMapper ptPackageMapper;
     private final PtSessionMapper ptSessionMapper;
 
     // pt 출석 api

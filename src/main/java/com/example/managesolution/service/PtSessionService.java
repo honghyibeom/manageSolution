@@ -191,6 +191,7 @@ public class PtSessionService {
 
         int createdCount = 0;
         // insert
+        String batchId = UUID.randomUUID().toString();
         for (LocalDate date : dates) {
 
             //이거 특정한 회원이 동일한 날짜/시간에 이미 세션이 있는지 확인하게 변경해야됨.
@@ -203,6 +204,7 @@ public class PtSessionService {
                     .packageId(form.getPackageId())
                     .sessionDate(date)
                     .sessionTime(form.getTime())
+                    .batchId(batchId)
                     .build();
             ptSessionMapper.insert(ptSession);
             createdCount++;
@@ -230,14 +232,23 @@ public class PtSessionService {
         return ptSessionMapper.ptSessionViews(lectureSearchDTO, pageSize, offset);
     }
 
-    /** start~end를 1일씩 순회하며 repeatDays(1=월..7=일)에 속하는 날짜만 반환 */
-    private List<LocalDate> expandDates(LocalDate start, LocalDate end, List<Integer> repeatDays) {
-        List<LocalDate> out = new ArrayList<>();
-        for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
-            int dow = d.getDayOfWeek().getValue(); // 1=월..7=일
-            if (repeatDays.contains(dow)) out.add(d);
+    @Transactional
+    public ResponseDTO deleteGroupSession(String batchId) {
+        List<PtSession> session = ptSessionMapper.findSessionIdByBatchId(batchId);
+        for (PtSession sess : session) {
+            ptPackageMapper.increaseRemainingCount(sess.getPackageId());
         }
-        return out;
+        ptSessionMapper.deleteByBatchId(batchId);
+        return ResponseDTO.builder()
+                .message("그룹 삭제 완료")
+                .build();
+    }
+    public ResponseDTO getGroupSession(String batchId) {
+        List<SessionGroupDTO> group = ptSessionMapper.findSessionViewByBatchId(batchId);
+        return ResponseDTO.builder()
+                .message("group 조회")
+                .body(group)
+                .build();
     }
 
     public List<SessionSummaryDTO> getSummeryList(List<SessionViewDTO> sessions) {
@@ -258,7 +269,7 @@ public class PtSessionService {
                 .count();
 
         return List.of(
-                new SessionSummaryDTO("오늘 총 건수", total, false),
+                new SessionSummaryDTO("총 건수", total, false),
                 new SessionSummaryDTO("출석률", attendRate, true),
                 new SessionSummaryDTO("노쇼", noShowCount, false),
                 new SessionSummaryDTO("임박(30분↓)", imminentCount, false)
@@ -304,6 +315,16 @@ public class PtSessionService {
 
     public void updateSession(SessionUpdateDTO dto) {
         ptSessionMapper.updateSession(dto.getSessionId(), dto.getDate(), dto.getTime(), dto.getTrainerId());
+    }
+
+    /** start~end를 1일씩 순회하며 repeatDays(1=월..7=일)에 속하는 날짜만 반환 */
+    private List<LocalDate> expandDates(LocalDate start, LocalDate end, List<Integer> repeatDays) {
+        List<LocalDate> out = new ArrayList<>();
+        for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
+            int dow = d.getDayOfWeek().getValue(); // 1=월..7=일
+            if (repeatDays.contains(dow)) out.add(d);
+        }
+        return out;
     }
 
 }

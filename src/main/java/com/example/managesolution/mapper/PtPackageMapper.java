@@ -33,6 +33,8 @@ public interface PtPackageMapper {
 
     int decreaseRemainingCount(@Param("packageId") Long packageId);
 
+    void increaseRemainingCount(@Param("packageId") Long packageId);
+
     PtPackage findByMemberId(Long memberId);
 
     PtPackage findByPackageId(Long packageId);

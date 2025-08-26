@@ -337,11 +337,12 @@
         </div>
 
         <!-- ✅ 결제 내역 -->
+        <!-- ✅ 결제 내역 -->
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-header fw-bold d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-receipt text-success me-1"></i> 결제  내역</span>
+                        <span><i class="bi bi-receipt text-success me-1"></i> 결제 내역</span>
                         <form method="get" class="d-flex" role="search">
                             <input type="text" name="historyKeyword" class="form-control form-control-sm me-2 search-compact"
                                    placeholder="결제내역 회원명 검색" th:value="${param.keyword}">
@@ -350,6 +351,7 @@
                     </div>
 
                     <div class="card-body fixed-height">
+                        <!-- 🖥️ 데스크탑 테이블 -->
                         <div class="scroll-table table-desktop">
                             <table class="table table-bordered text-center align-middle">
                                 <thead class="table-light">
@@ -366,7 +368,8 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="pay : ${paymentHistory}">
+                                <tr th:each="pay : ${paymentHistory}"
+                                    th:classappend="${#temporals.format(pay.paymentDate, 'yyyy-MM-dd')} == ${#temporals.format(T(java.time.LocalDate).now(), 'yyyy-MM-dd')} ? 'table-warning'">
                                     <td th:text="${#temporals.format(pay.paymentDate, 'yyyy-MM-dd HH:mm')}"></td>
                                     <td th:text="${pay.memberName}"></td>
                                     <td th:text="${pay.phone}"></td>
@@ -381,9 +384,10 @@
                             </table>
                         </div>
 
+                        <!-- 📱 모바일 카드 -->
                         <div class="card-mobile">
-                            <div class="row row-cols-1 mb-2 " th:each="pay : ${paymentHistory}">
-                                <div class="card shadow-sm border-0">
+                            <div class="row row-cols-1 mb-2" th:each="pay : ${paymentHistory}">
+                                <div class="card shadow-sm border-0" th:classappend="${#temporals.format(pay.paymentDate, 'yyyy-MM-dd')} == ${#temporals.format(T(java.time.LocalDate).now(), 'yyyy-MM-dd')} ? 'border-warning border-2'">
                                     <div class="card-body py-4 px-4">
                                         <!-- 회원명 + 결제수단 -->
                                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -392,9 +396,9 @@
                                                 <span th:text="${pay.memberName}">회원명</span>
                                             </h5>
                                             <span class="badge bg-light text-dark border px-3 py-2">
-                                                <i class="bi bi-credit-card me-1"></i>
-                                                <span th:text="${pay.method == 'CARD' ? '카드' : '현금'}"></span>
-                                            </span>
+                                        <i class="bi bi-credit-card me-1"></i>
+                                        <span th:text="${pay.method == 'CARD' ? '카드' : '현금'}"></span>
+                                    </span>
                                         </div>
 
                                         <!-- 상세정보 -->
@@ -416,9 +420,13 @@
 
                                         <!-- 하단 날짜 -->
                                         <div class="text-muted">
-                                            <p class="mb-2">
+                                            <p class="mb-2"
+                                               th:classappend="${#temporals.format(pay.paymentDate, 'yyyy-MM-dd')} == ${#temporals.format(T(java.time.LocalDate).now(), 'yyyy-MM-dd')} ? 'text-danger fw-bold'">
                                                 <i class="bi bi-calendar-check me-2"></i>
-                                                결제일: <span th:text="${#temporals.format(pay.paymentDate, 'yyyy-MM-dd')}"></span>
+                                                결제일:
+                                                <span th:text="${#temporals.format(pay.paymentDate, 'yyyy-MM-dd')}"></span>
+                                                <span th:if="${#temporals.format(pay.paymentDate, 'yyyy-MM-dd')} == ${#temporals.format(T(java.time.LocalDate).now(), 'yyyy-MM-dd')}"
+                                                      class="badge bg-danger ms-2">Today</span>
                                             </p>
                                             <p class="mb-2">
                                                 <i class="bi bi-calendar-plus me-2"></i>
@@ -438,6 +446,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- 페이지네이션 -->
         <nav th:if="${totalPages > 1}" class="mt-4">
