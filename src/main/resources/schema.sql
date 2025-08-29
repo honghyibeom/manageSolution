@@ -66,34 +66,6 @@ CREATE TABLE pt_package (
                             FOREIGN KEY (productId) REFERENCES product(productId) ON DELETE SET NULL
 );
 
--- PT 세션 테이블
-CREATE TABLE pt_session (
-                            sessionId BIGINT AUTO_INCREMENT PRIMARY KEY,
-                            packageId BIGINT NOT NULL,
-                            trainerId BIGINT,
-                            memberId BIGINT NOT NULL,
-                            sessionDate DATE NOT NULL,
-                            sessionTime TIME NOT NULL,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            status VARCHAR(10) NOT NULL DEFAULT 'BOOKED',
-                            batchId varchar(36),
-                            FOREIGN KEY (packageId) REFERENCES pt_package(packageId) ON DELETE CASCADE,
-                            FOREIGN KEY (trainerId) REFERENCES app_user(userId) ON DELETE SET NULL,
-                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE
-);
-
--- 출석 테이블
-CREATE TABLE attendance (
-                            attendanceId BIGINT AUTO_INCREMENT PRIMARY KEY,
-                            memberId BIGINT NOT NULL,
-                            sessionId BIGINT NOT NULL,
-                            attendedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            status  VARCHAR(10) NOT NULL DEFAULT 'ATTENDED',
-                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
-                            FOREIGN KEY (sessionId) REFERENCES pt_session(sessionId) ON DELETE CASCADE,
-                            UNIQUE (memberId, sessionId)
-);
-
 CREATE TABLE trainer (
                          trainerId BIGINT PRIMARY KEY,         -- == app_user.userId
                          birthDate DATE,
@@ -117,4 +89,59 @@ CREATE TABLE payment (
                          method VARCHAR(50), -- 예: CARD, CASH, BANK_TRANSFER
                          FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
                          FOREIGN KEY (productId) REFERENCES product(productId) ON DELETE SET NULL
+);
+
+CREATE TABLE subscription (
+                              subscriptionId BIGINT AUTO_INCREMENT PRIMARY KEY,
+                              memberId BIGINT NOT NULL,
+                              productId BIGINT NOT NULL,
+                              productType VARCHAR(20) NOT NULL,   -- 'MEMBERSHIP' 또는 'PT'
+                              trainerId BIGINT,              -- PT일 때만 사용
+                              paymentId BIGINT,
+                              startDate DATE NOT NULL,
+                              endDate DATE NOT NULL,
+                              totalCount INT,                -- PT 전용
+                              remainingCount INT,            -- PT 전용
+                              price INT NOT NULL,
+                              isActive BOOLEAN DEFAULT TRUE,
+                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                              FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
+                              FOREIGN KEY (trainerId) REFERENCES app_user(userId) ON DELETE SET NULL,
+                              FOREIGN KEY (productId) REFERENCES product(productId) ON DELETE SET NULL
+);
+CREATE TABLE refund (
+                        refundId BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        paymentId BIGINT NOT NULL,        -- 어떤 결제를 환불했는지
+                        amount INT NOT NULL,              -- 환불 금액
+                        reason VARCHAR(255),              -- 환불 사유 (중도해지, 상품변경 등)
+                        refundDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (paymentId) REFERENCES payment(paymentId)
+);
+
+-- PT 세션 테이블
+CREATE TABLE pt_session (
+                            sessionId BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            subscriptionId BIGINT NOT NULL,
+                            trainerId BIGINT,
+                            memberId BIGINT NOT NULL,
+                            sessionDate DATE NOT NULL,
+                            sessionTime TIME NOT NULL,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            status VARCHAR(10) NOT NULL DEFAULT 'BOOKED',
+                            batchId varchar(36),
+                            FOREIGN KEY (subscriptionId) REFERENCES subscription(subscriptionId) ON DELETE CASCADE,
+                            FOREIGN KEY (trainerId) REFERENCES app_user(userId) ON DELETE SET NULL,
+                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE
+);
+
+-- 출석 테이블
+CREATE TABLE attendance (
+                            attendanceId BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            memberId BIGINT NOT NULL,
+                            sessionId BIGINT NOT NULL,
+                            attendedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            status  VARCHAR(10) NOT NULL DEFAULT 'ATTENDED',
+                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
+                            FOREIGN KEY (sessionId) REFERENCES pt_session(sessionId) ON DELETE CASCADE,
+                            UNIQUE (memberId, sessionId)
 );

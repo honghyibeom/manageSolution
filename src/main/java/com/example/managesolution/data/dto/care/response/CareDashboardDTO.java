@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class CareDashboardDTO {
     private List<PtCareDTO> ptMembers;
-    private List<ImminentCareDTO> membershipMembers;
+    private List<ImminentCareDTO> imminentMembers;
 }

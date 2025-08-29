@@ -32,13 +32,22 @@
     </select>
 
     <select id="getMonthlyMemberCountsRaw" resultType="MonthCountDTO">
-        SELECT TO_CHAR(p.created_at, 'yyyy-MM') AS "month",
-               COUNT(*) AS count
-        FROM pt_package p
-                 JOIN app_user u ON p.trainerId = u.userId
+        SELECT TO_CHAR(months.dt, 'yyyy-MM') AS "month",
+               COUNT(DISTINCT s.memberId) AS count
+        FROM (
+                 SELECT DATEADD('MONTH', -5, CURRENT_DATE) AS dt
+                 UNION ALL SELECT DATEADD('MONTH', -4, CURRENT_DATE)
+                 UNION ALL SELECT DATEADD('MONTH', -3, CURRENT_DATE)
+                 UNION ALL SELECT DATEADD('MONTH', -2, CURRENT_DATE)
+                 UNION ALL SELECT DATEADD('MONTH', -1, CURRENT_DATE)
+                 UNION ALL SELECT CURRENT_DATE
+             ) months
+                 LEFT JOIN subscription s
+                           ON s.productType = 'PT'
+                               AND months.dt BETWEEN s.startDate AND s.endDate
+                 JOIN app_user u ON s.trainerId = u.userId
         WHERE u.name = #{trainerName}
-          AND p.created_at >= DATEADD('MONTH', -6, CURRENT_DATE)
-        GROUP BY TO_CHAR(p.created_at, 'yyyy-MM')
+        GROUP BY TO_CHAR(months.dt, 'yyyy-MM')
         ORDER BY "month"
     </select>
 

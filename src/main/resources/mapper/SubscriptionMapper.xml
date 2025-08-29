@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.managesolution.mapper.SubscriptionMapper">
+    <insert id="insert" parameterType="Subscription" useGeneratedKeys="true" keyProperty="subscriptionId">
+        INSERT INTO subscription (memberId, productId, productType, trainerId, paymentId,startDate,endDate,
+                                  totalCount,remainingCount,price,isActive,created_at)
+        VALUES (#{memberId}, #{productId}, #{productType}, #{trainerId}, #{paymentId},
+                #{startDate}, #{endDate}, #{totalCount}, #{remainingCount},
+                #{price}, #{isActive}, #{createdAt})
+    </insert>
+
+    <!-- ✅ 최신 구독 조회 -->
+    <select id="findLatestByMemberId" parameterType="long" resultType="Subscription">
+        SELECT
+            s.subscriptionId,
+            s.memberId,
+            s.productId,
+            s.productType,
+            s.trainerId,
+            s.paymentId,
+            s.startDate,
+            s.endDate,
+            s.totalCount,
+            s.remainingCount,
+            s.price,
+            s.isActive,
+            s.created_at
+        FROM subscription s
+        WHERE s.memberId = #{memberId}
+        ORDER BY s.created_at DESC
+        LIMIT 1
+    </select>
+
+    <!-- ✅ 구독 수정 (결제 전일 때만 사용) -->
+    <update id="update" parameterType="Subscription">
+        UPDATE subscription
+        SET
+            productId = #{productId},
+            productType = #{productType},
+            trainerId = #{trainerId},
+            startDate = #{startDate},
+            endDate = #{endDate},
+            totalCount = #{totalCount},
+            remainingCount = #{remainingCount},
+            price = #{price},
+            isActive = #{isActive}
+        WHERE subscriptionId = #{subscriptionId}
+          AND paymentId IS NULL
+    </update>
+
+<!--    구독 활성화 -->
+    <update id="activateAndUpdatePaymentId">
+        UPDATE subscription
+        SET
+            isActive = TRUE,
+            paymentId = #{paymentId}
+        WHERE subscriptionId = #{subscriptionId}
+          AND paymentId IS NULL
+    </update>
+
+    <select id="findByTrainerId" parameterType="long" resultType="PtMemberDTO">
+        SELECT
+            s.subscriptionId,
+            s.memberId,
+            m.name,
+            m.phone,
+            m.birthDate,
+            s.totalCount,
+            s.remainingCount,
+            s.startDate,
+            s.endDate
+        FROM subscription s
+                 INNER JOIN member m
+                            ON s.memberId = m.memberId
+        WHERE   s.trainerId = #{trainerId}
+          AND   s.endDate &gt; NOW()
+        ORDER BY m.name
+    </select>
+
+    <update id="updateTrainerByMemberId">
+        UPDATE subscription
+        SET trainerId = #{trainerId}
+        WHERE memberId = #{memberId}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM subscription WHERE subscriptionId = #{subscriptionId}
+    </delete>
+
+    <select id="findBySubscriptionId" parameterType="long" resultType="Subscription">
+        SELECT top 1 memberId, trainerId, productId, totalCount, remainingCount, startDate, endDate, price
+        FROM subscription
+        WHERE subscriptionId = #{subscriptionId}
+        ORDER BY endDate DESC
+    </select>
+
+    <update id="updateSubscription" parameterType="Subscription">
+        UPDATE subscription
+        SET trainerId       = #{trainerId},
+            productId       = #{productId},
+            startDate       = #{startDate},
+            endDate         = #{endDate},
+            totalCount      = #{totalCount},
+            remainingCount  = #{remainingCount},
+            price           = #{price}
+        WHERE memberId = #{memberId}
+    </update>
+
+    <update id="increaseRemainingCount">
+        UPDATE subscription
+        SET remainingCount = remainingCount + 1
+        WHERE subscriptionId = #{subscriptionId}
+          AND totalCount &gt; remainingCount
+    </update>
+
+    <select id="findFirstPtByPtMembers" resultType="PtCareDTO">
+        SELECT
+        m.name        AS memberName,
+        m.phone       AS memberPhone,
+        1             AS count,
+        sub.totalCount,
+        ps.sessionDate,
+        ps.sessionTime
+        FROM subscription sub
+        INNER JOIN member m
+        ON sub.memberId = m.memberId
+        INNER JOIN pt_session ps
+        ON sub.subscriptionId = ps.subscriptionId
+        LEFT OUTER JOIN attendance a
+        ON ps.sessionId = a.sessionId
+        WHERE a.attendanceId IS NULL
+        AND sub.isActive = TRUE
+        AND sub.productType = 'PT'
+        AND ps.sessionDate = (
+        SELECT MIN(ps2.sessionDate)
+        FROM pt_session ps2
+        LEFT JOIN attendance a2
+        ON ps2.sessionId = a2.sessionId
+        WHERE ps2.subscriptionId = sub.subscriptionId
+        AND a2.attendanceId IS NULL
+        )
+        <if test="keyword != null and keyword != ''">
+            AND m.phone LIKE CONCAT(#{keyword}, '%')
+        </if>
+        ORDER BY ps.sessionDate ASC, ps.sessionTime ASC;
+    </select>
+
+    <select id="findImminentByMemberships" resultType="ImminentCareDTO">
+        SELECT
+            m.name  AS memberName,
+            m.phone AS phone,
+            p.name  AS productName,
+            CASE WHEN sub.productType = 'PT'
+            THEN CAST((sub.totalCount - sub.remainingCount) AS VARCHAR)
+            ELSE '-' END     AS remainingCount,
+            sub.endDate AS endDate
+        FROM subscription sub
+            JOIN member m ON sub.memberId = m.memberId
+            JOIN product p ON sub.productId = p.productId
+        WHERE sub.isActive = TRUE
+        AND sub.endDate BETWEEN CURRENT_DATE AND DATEADD('DAY', 7, CURRENT_DATE)
+        <if test="keyword != null and keyword != ''">
+            AND m.name LIKE CONCAT(#{keyword}, '%')
+        </if>
+        AND sub.paymentId IS NOT NULL
+        ORDER BY sub.endDate ASC
+    </select>
+
+
+</mapper>

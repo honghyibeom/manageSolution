@@ -9,9 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.*;
-import java.util.stream.Collector;
-
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/care")
@@ -23,7 +20,7 @@ public class CareController {
         CareDashboardDTO dashboard = careService.getCareDashboard(keyword);
 
         model.addAttribute("ptMembers", dashboard.getPtMembers());
-        model.addAttribute("membershipMembers", dashboard.getMembershipMembers());
+        model.addAttribute("imminentMembers", dashboard.getImminentMembers());
         model.addAttribute("keyword", keyword);
 
         return "member/care";

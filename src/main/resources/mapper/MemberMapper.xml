@@ -5,24 +5,37 @@
 
 <mapper namespace="com.example.managesolution.mapper.MemberMapper">
 <!--    회원 전체 조회-->
-    <select id="findPaged" resultType="MemberProductDTO">
-        SELECT m.memberId,
-               m.name,
-               m.phone,
-               m.birthDate,
-               m.gender,
-               m.status,
-               COALESCE(p1.name, p2.name) AS productName,
-               m.created_at AS createdAt
+    <select id="findMembers" resultType="MemberProductDTO">
+        SELECT
+        m.memberId,
+        m.name,
+        m.phone,
+        m.birthDate,
+        m.gender,
+        m.status,
+        p.name AS productName,
+        m.created_at AS createdAt
         FROM member m
-                LEFT JOIN membership ms
-                       ON m.memberId = ms.memberId
-                LEFT JOIN product p1
-                          ON ms.productId = p1.productId
-                LEFT JOIN pt_package pp
-                          ON m.memberId = pp.memberId
-                LEFT JOIN product p2
-                          ON pp.productId = p2.productId
+        LEFT JOIN subscription s
+        ON m.memberId = s.memberId
+         AND s.isActive = TRUE   -- 활성화된 이용권만
+        LEFT JOIN product p
+        ON s.productId = p.productId
+        <where>
+            <if test="status != null and status != ''">
+                AND m.status = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                <choose>
+                    <when test="isNumeric">
+                        AND m.phone LIKE CONCAT('%', #{keyword}, '%')
+                    </when>
+                    <otherwise>
+                        AND m.name LIKE CONCAT('%', #{keyword}, '%')
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
         ORDER BY m.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
@@ -36,6 +49,37 @@
         SELECT memberId, name, phone, birthDate, gender, status, memo, created_at as createdAt
         FROM member
         WHERE memberId = #{memberId}
+    </select>
+
+    <select id="findFormById" parameterType="long" resultType="MemberFormDTO">
+        SELECT
+            m.memberId,
+            m.name,
+            m.phone,
+            m.birthDate,
+            m.gender,
+            m.status,
+            m.memo,
+            m.created_at AS createdAt,
+
+            s.productType,
+            s.productId,
+            s.startDate,
+            s.endDate,
+            s.price,
+            s.trainerId,
+            s.totalCount,
+            s.remainingCount
+        FROM member m
+                 LEFT JOIN (
+            SELECT sub.*
+            FROM subscription sub
+            WHERE sub.memberId = #{memberId}
+            AND sub.isActive = true
+            ORDER BY sub.endDate DESC
+            LIMIT 1
+        ) s ON s.memberId = m.memberId
+        WHERE m.memberId = #{memberId}
     </select>
 
 <!--    회원 등록 useGeneratedKey는 키 자동 생성-->
@@ -61,167 +105,79 @@
         DELETE FROM member WHERE memberId = #{memberId}
     </delete>
 
-<!--   회원 이름 검색-->
-    <select id="findByNameContaining" resultType="MemberProductDTO">
-        SELECT *
-        FROM member
-        WHERE name LIKE CONCAT(#{keyword}, '%')
-        ORDER BY created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-<!-- 회원 폰 번호 검색-->
-    <select id="findByPhoneContaining" resultType="MemberProductDTO">
-        SELECT m.memberId,
-               m.name,
-               m.phone,
-               m.birthDate,
-               m.gender,
-               m.status,
-               COALESCE(p1.name, p2.name) AS productName,
-               m.created_at AS createdAt
-        FROM member m
-                 LEFT JOIN membership ms
-                           ON m.memberId = ms.memberId
-                 LEFT JOIN product p1
-                           ON ms.productId = p1.productId
-                 LEFT JOIN pt_package pp
-                           ON m.memberId = pp.memberId
-                 LEFT JOIN product p2
-                           ON pp.productId = p2.productId
-        WHERE m.phone LIKE CONCAT(#{keyword}, '%')
-        ORDER BY m.created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-    <!-- 상태 검색 -->
-    <select id="findByStatus" resultType="MemberProductDTO">
-        SELECT m.memberId,
-               m.name,
-               m.phone,
-               m.birthDate,
-               m.gender,
-               m.status,
-               COALESCE(p1.name, p2.name) AS productName,
-               m.created_at AS createdAt
-        FROM member m
-                 LEFT JOIN membership ms
-                           ON m.memberId = ms.memberId
-                 LEFT JOIN product p1
-                           ON ms.productId = p1.productId
-                 LEFT JOIN pt_package pp
-                           ON m.memberId = pp.memberId
-                 LEFT JOIN product p2
-                           ON pp.productId = p2.productId
-        WHERE m.status = #{status}
-        ORDER BY m.created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-    <select id="findByStatusAndPhone" resultType="MemberProductDTO">
-        SELECT m.memberId,
-               m.name,
-               m.phone,
-               m.birthDate,
-               m.gender,
-               m.status,
-               COALESCE(p1.name, p2.name) AS productName,
-               m.created_at AS createdAt
-        FROM member m
-                 LEFT JOIN membership ms
-                           ON m.memberId = ms.memberId
-                 LEFT JOIN product p1
-                           ON ms.productId = p1.productId
-                 LEFT JOIN pt_package pp
-                           ON m.memberId = pp.memberId
-                 LEFT JOIN product p2
-                           ON pp.productId = p2.productId
-        WHERE m.status = #{status}
-          AND m.phone LIKE CONCAT(#{keyword}, '%')
-        ORDER BY m.created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-    <select id="findByStatusAndName" resultType="MemberProductDTO">
-        SELECT m.memberId,
-               m.name,
-               m.phone,
-               m.birthDate,
-               m.gender,
-               m.status,
-               COALESCE(p1.name, p2.name) AS productName,
-               m.created_at AS createdAt
-        FROM member m
-                 LEFT JOIN membership ms
-                           ON m.memberId = ms.memberId
-                               AND ms.isActive = TRUE
-                 LEFT JOIN product p1
-                           ON ms.productId = p1.productId
-                 LEFT JOIN pt_package pp
-                           ON m.memberId = pp.memberId AND pp.isActive = TRUE
-                 LEFT JOIN product p2
-                           ON pp.productId = p2.productId
-        WHERE m.status = #{status}
-          AND m.name LIKE CONCAT(#{keyword}, '%')
-        ORDER BY m.created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
     <select id="findUnpaidMembers" resultType="MemberUnpaidDTO">
         SELECT
         m.memberId,
+        s.subscriptionId,
         m.name AS memberName,
         m.phone,
         p.name AS productName,
         p.type AS productType,
-        COALESCE(ms.price, pp.price) AS amount,
+        s.price AS amount,
         p.productId
         FROM member m
-        LEFT JOIN membership ms ON ms.memberId = m.memberId
-        LEFT JOIN pt_package pp ON pp.memberId = m.memberId
-        LEFT JOIN payment pay ON pay.memberId = m.memberId
-        LEFT JOIN product p ON (ms.productId = p.productId OR pp.productId = p.productId)
-        WHERE (ms.paymentId IS NULL AND pp.paymentId IS NULL)
-        AND p.productId IS NOT NULL
+        JOIN subscription s ON s.memberId = m.memberId
+        JOIN product p ON s.productId = p.productId
+        WHERE s.paymentId IS NULL
         <if test="keyword != null and keyword != ''">
             AND m.name LIKE CONCAT('%', #{keyword}, '%')
         </if>
-        ORDER BY m.created_at DESC
+        <if test="startDate != null">
+            AND s.startDate &gt;= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND s.startDate &lt;= #{endDate}
+        </if>
+        ORDER BY m.name
     </select>
 
 
     <select id="findExpiredMembers" resultType="MemberExpiredDTO">
         SELECT
-            m.memberId,
-            GREATEST(
-                    COALESCE(ms.endDate, '1900-01-01'),
-                    COALESCE(pp.endDate, '1900-01-01')
-            ) AS expiredDate,
-            m.name AS memberName,
-            m.phone,
-            prevProd.name AS previousProduct,
-            prevProd.type AS productType,
-            prevProd.price AS amount
+        m.memberId,
+        latest.endDate AS expiredDate,
+        m.name AS memberName,
+        m.phone,
+        p.name AS previousProduct,
+        s.productType AS productType,
+        latest.price AS amount
         FROM member m
-                 LEFT JOIN membership ms ON ms.memberId = m.memberId AND ms.isActive = FALSE
-                 LEFT JOIN pt_package pp ON pp.memberId = m.memberId AND pp.isActive = FALSE
-                 LEFT JOIN product prevProd ON prevProd.productId = COALESCE(ms.productId, pp.productId)
-        WHERE (ms.membershipId IS NOT NULL OR pp.packageId IS NOT NULL)
-          AND NOT EXISTS (
-            SELECT 1
-            FROM membership ms2
-            WHERE ms2.memberId = m.memberId AND ms2.isActive = TRUE
-            UNION ALL
-            SELECT 1
-            FROM pt_package pp2
-            WHERE pp2.memberId = m.memberId AND pp2.isActive = TRUE
+                JOIN (
+                    SELECT s1.*
+                    FROM subscription s1
+                    WHERE s1.endDate = (
+                            SELECT MAX(s2.endDate)
+                            FROM subscription s2
+                            WHERE s2.memberId = s1.memberId
+                            )
+                    ) latest
+                                    ON latest.memberId = m.memberId
+                JOIN product p      ON p.productId = latest.productId
+                JOIN subscription s ON s.subscriptionId = latest.subscriptionId
+
+        -- 📌 오늘 기준 만료
+        WHERE latest.endDate &lt; CURRENT_DATE
+
+        -- 📌 현재 활성 이용권이 없는 경우만
+        AND NOT EXISTS (
+        SELECT 1 FROM subscription s3
+        WHERE s3.memberId = m.memberId
+        AND s3.isActive = TRUE
         )
-        AND (ms.paymentId IS NOT NULL OR pp.paymentId IS NOT NULL)
+
         <if test="keyword != null and keyword != ''">
             AND m.name LIKE CONCAT('%', #{keyword}, '%')
         </if>
-        ORDER BY expiredDate ASC
+        <if test="startDate != null">
+            AND latest.endDate &gt;= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND latest.endDate &lt;= #{endDate}
+        </if>
+
+        ORDER BY latest.endDate DESC
     </select>
+
 
     <update id="updateStatusActive">
         UPDATE member

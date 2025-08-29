@@ -15,7 +15,7 @@ import java.time.LocalTime;
 public class SessionViewDTO {
     private Long sessionId;
     private Long memberId;
-    private Long packageId;
+    private Long subscriptionId;
     private Long trainerId;
     private String batchId;
     private Boolean imminent;

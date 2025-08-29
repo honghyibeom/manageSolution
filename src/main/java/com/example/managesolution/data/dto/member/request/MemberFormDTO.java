@@ -32,28 +32,22 @@ public class MemberFormDTO {
     private Status status;
     private String memo;
 
-    // 선택된 상품 타입
-    private String productType;
+    // 상품(Subscription) 정보
+    @NotBlank(message = "상품 종류를 선택하세요.")
+    private String productType;   // MEMBERSHIP or PT
 
-    // 회원권 정보
-    private Long membershipProductId;
-    @FutureOrPresent(message = "과거로 설정할 수 없습니다.")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate membershipStartDate;
-    @FutureOrPresent(message = "과거로 설정할 수 없습니다.")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate membershipEndDate;
-    private Integer membershipPrice;
+    private Long productId;
 
-    // PT 패키지 정보
-    private Long ptProductId;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate startDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate endDate;
+
+    private Integer price;
+
+    // PT 전용
     private Long trainerId;
-    @FutureOrPresent(message = "과거로 설정할 수 없습니다.")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate ptStartDate;
-    @FutureOrPresent(message = "과거로 설정할 수 없습니다.")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate ptEndDate;
-    private Integer ptTotalCount;
-    private Integer ptPrice;
+    private Integer totalCount;
+    private Integer remainingCount;
 }

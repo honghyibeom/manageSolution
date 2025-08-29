@@ -6,6 +6,6 @@ import lombok.Data;
 public class AttendanceRequestDTO {
     private Long memberId;
     private Long sessionId;
-    private Long packageId;
+    private Long subscriptionId;
     private String status; //"ATTENDED" or "NO_SHOW"
 }

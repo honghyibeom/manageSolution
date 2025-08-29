@@ -2,46 +2,27 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
+
 <head>
     <title>수업 등록</title>
-
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
     <style>
+        /* 공통 테이블 행 */
         .clickable-row { cursor: pointer; }
-        .clickable-row:hover { background-color: #f8f9fa; }
+        .clickable-row:hover { background-color: #f1f8ff; transition: 0.2s; }
+        .table-primary { background-color: #e3f2fd !important; }
 
-        /* 왼쪽 카드 영역 */
-        .left-column {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            height: 800px;
-        }
-        .left-column .card {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .left-column .card-body.scroll-table {
-            flex: 1;
-            overflow-y: auto;
-        }
+        /* 좌측 영역 */
+        .left-column { display: flex; flex-direction: column; gap: 1rem; height: 800px; }
+        .left-column .card { flex: 1; display: flex; flex-direction: column; }
+        .left-column .card-body.scroll-table { flex: 1; overflow-y: auto; }
 
-        /* 오른쪽 달력 영역 */
-        .calendar-container {
-            min-height: 700px;
-            display: flex;
-            flex-direction: column;
-        }
-        .calendar-box {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+        /* 우측 캘린더 */
+        .calendar-container { min-height: 700px; display: flex; flex-direction: column; }
+        .calendar-box { flex: 1; display: flex; flex-direction: column; }
 
-        /* daterangepicker를 카드 안에 꽉 채우기 */
+        /* daterangepicker inline */
         #calendarInline .daterangepicker {
             position: static !important;
             transform: none !important;
@@ -50,32 +31,66 @@
             height: 100% !important;
             border: none;
         }
-
-        /* 날짜 버튼 크기 키우기 */
         #calendarInline .daterangepicker td,
         #calendarInline .daterangepicker th {
-            padding: 12px 14px;
-            font-size: 18px;
+            padding: 10px 12px;
+            font-size: 15px;
         }
-
+        #calendarInline .drp-buttons { display: none !important; }
+        /* 📌 왼쪽 달력 오른쪽 여백 */
         #calendarInline .daterangepicker .drp-calendar.left {
-            margin-right: 100px !important; /* 기본은 20px */
-        }
-        #calendarInline .daterangepicker .drp-buttons {
-            display: none !important;
+            margin-right: 60px !important;
         }
 
+        /* 선택 강조 */
+        .member-row.selected { background-color: #e7f1ff; }
+
+        /* 요일 버튼 */
+        .day-btns .btn {
+            min-width: 48px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #495057;          /* 기본 글자색 진하게 */
+            border-color: #adb5bd;   /* 기본 테두리 조금 더 진하게 */
+        }
+
+        /* 기본 상태: 선택 가능 요일 버튼 */
+        .day-btns .btn-outline-primary {
+            background-color: #e7f1ff;   /* 연한 파란색 */
+            border-color: #b6d4fe;
+            color: #000;
+        }
+
+        /* 체크된 상태 */
+        .day-btns .btn-check:checked + .btn-outline-primary {
+            background-color: #0d6efd;   /* 진한 파란색 */
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+        /* disable 된 상태 */
+        .day-btns .btn-check:disabled + .btn-outline-primary {
+            background-color: #f1f3f5;   /* 연한 회색 */
+            border-color: #dee2e6;
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        /* 시간 버튼 */
         .time-btn {
-            min-width:80px;
-            height: 40px;
+            min-width: 90px;
+            height: 42px;
             font-size: 14px;
             text-align: center;
         }
-        .member-row.selected { background-color: #e7f1ff; }
-        .dow-disabled { opacity: .5; }
+        .time-btn.active { background-color: #0d6efd; color: #fff; }
 
-        .member-row.selected {
-            background-color: #e7f1ff; /* 선택 효과 */
+        /* 모바일 카드 */
+        .member-row.card { border: 1px solid #dee2e6; border-radius: 10px; }
+        .member-row.card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: 0.2s;
         }
     </style>
 </head>
@@ -85,16 +100,14 @@
         <h4 class="fw-bold mb-4">수업 등록</h4>
 
         <div class="row">
-            <!-- 왼쪽 영역 (그대로) -->
+            <!-- 좌측 패널 -->
             <div class="col-12 col-md-5">
                 <div class="left-column">
-                    <!-- 트레이너 목록 카드 -->
+                    <!-- 강사 목록 -->
                     <div class="card shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span class="text-black fw-bold">강사 목록</span>
-                        </div>
+                        <div class="card-header fw-bold">강사 목록</div>
                         <div class="card-body scroll-table">
-                            <table class="table table-striped table-hover text-center align-middle">
+                            <table class="table table-hover text-center align-middle">
                                 <thead class="table-light">
                                 <tr>
                                     <th>이름</th>
@@ -118,14 +131,14 @@
                         </div>
                     </div>
 
-                    <!-- 해당 트레이너 회원 목록 카드 -->
+                    <!-- 회원 목록 -->
                     <div class="card shadow-sm">
                         <div class="card-header fw-bold">
                             <span th:if="${selectedTrainerId != null}">강사 회원 목록</span>
                             <span th:if="${selectedTrainerId == null}" class="text-muted">강사를 선택해주세요</span>
                         </div>
                         <div class="card-body scroll-table d-none d-md-block">
-                            <table class="table table-striped table-hover text-center align-middle"
+                            <table class="table table-hover text-center align-middle"
                                    th:if="${ptMembers != null and !ptMembers.isEmpty()}">
                                 <thead class="table-light">
                                 <tr>
@@ -140,10 +153,10 @@
                                 <tr th:each="pm : ${ptMembers}"
                                     class="member-row"
                                     th:attr="data-member-id=${pm.memberId},
-                                                data-package-id=${pm.packageId},
-                                                data-remaining=${pm.remainingCount},
-                                                data-start=${#temporals.format(pm.startDate, 'yyyy-MM-dd')},
-                                                data-end=${#temporals.format(pm.endDate, 'yyyy-MM-dd')}">
+                               data-subscription-id=${pm.subscriptionId},
+                               data-remaining=${pm.remainingCount},
+                               data-start=${#temporals.format(pm.startDate, 'yyyy-MM-dd')},
+                               data-end=${#temporals.format(pm.endDate, 'yyyy-MM-dd')}">
                                     <td th:text="${pm.name}"></td>
                                     <td th:text="${pm.remainingCount}"></td>
                                     <td th:text="${pm.totalCount}"></td>
@@ -161,28 +174,19 @@
                                 <div th:each="pm : ${ptMembers}"
                                      class="card mb-2 shadow-sm member-row"
                                      th:attr="data-member-id=${pm.memberId},
-                                              data-package-id=${pm.packageId},
-                                              data-remaining=${pm.remainingCount},
-                                              data-start=${#temporals.format(pm.startDate, 'yyyy-MM-dd')},
-                                              data-end=${#temporals.format(pm.endDate, 'yyyy-MM-dd')}">
+                              data-subscription-id=${pm.subscriptionId},
+                              data-remaining=${pm.remainingCount},
+                              data-start=${#temporals.format(pm.startDate, 'yyyy-MM-dd')},
+                              data-end=${#temporals.format(pm.endDate, 'yyyy-MM-dd')}">
                                     <div class="card-body p-2">
-                                        <!-- 이름 + 잔여횟수 -->
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="fw-bold" th:text="${pm.name}">홍길동</span>
-                                            <span class="badge bg-primary"
-                                                  th:text="'잔여 ' + ${pm.remainingCount} + '회'">잔여 10회</span>
+                                            <span class="badge bg-primary" th:text="'잔여 ' + ${pm.remainingCount} + '회'"></span>
                                         </div>
-
-                                        <!-- 총 횟수 -->
-                                        <div class="mb-1 small text-muted">
-                                            총 <span th:text="${pm.totalCount}">30</span> 회
-                                        </div>
-
-                                        <!-- 기간 -->
+                                        <div class="mb-1 small text-muted">총 <span th:text="${pm.totalCount}">30</span> 회</div>
                                         <div class="small">
-                                            <span th:text="${#temporals.format(pm.startDate, 'yyyy-MM-dd')}">2025-08-01</span>
-                                            ~
-                                            <span th:text="${#temporals.format(pm.endDate, 'yyyy-MM-dd')}">2025-12-01</span>
+                                            <span th:text="${#temporals.format(pm.startDate, 'yyyy-MM-dd')}"></span> ~
+                                            <span th:text="${#temporals.format(pm.endDate, 'yyyy-MM-dd')}"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -193,24 +197,19 @@
                 </div>
             </div>
 
-            <!-- 오른쪽 영역 -->
+            <!-- 우측 패널 -->
             <div class="col-12 col-md-7">
                 <form>
                     <div class="calendar-container">
                         <!-- 기간 선택 -->
                         <div class="card shadow-sm mb-2 calendar-box" style="height: 700px;">
-                            <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                <span>기간 선택</span>
-                            </div>
+                            <div class="card-header fw-bold"><i class="bi bi-calendar-range me-2"></i>기간 선택</div>
                             <div class="card-body p-2">
-                                <!-- 안내 문구: 초기 표시 -->
                                 <div id="calendarPlaceholder"
                                      class="d-flex align-items-center justify-content-center border rounded h-100 text-muted"
                                      style="min-height: 360px;">
                                     회원을 먼저 선택해주세요
                                 </div>
-
-                                <!-- 실제 달력 영역: 초기에는 숨김 -->
                                 <div id="calendarArea" class="d-none">
                                     <input type="text" id="selectedRange" class="form-control mb-2" readonly>
                                     <div id="calendarInline" style="width: 100%; height: 100%;"></div>
@@ -220,50 +219,33 @@
 
                         <!-- 요일 선택 -->
                         <div class="card shadow-sm mb-2">
-                            <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                <span>요일 선택 (반복)</span>
-                                <!-- 선택된 트레이너 ID 보관 -->
-                                <div id="pageMeta" th:attr="data-trainer-id=${selectedTrainerId}"></div>
-
-                                <div class="d-flex align-items-center flex-wrap gap-3">
-                                    <label class="form-check-label">
-                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="월"> 월
-                                    </label>
-                                    <label class="form-check-label">
-                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="화"> 화
-                                    </label>
-                                    <label class="form-check-label">
-                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="수"> 수
-                                    </label>
-                                    <label class="form-check-label">
-                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="목"> 목
-                                    </label>
-                                    <label class="form-check-label">
-                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="금"> 금
-                                    </label>
-                                    <label class="form-check-label">
-                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="토"> 토
-                                    </label>
-                                    <label class="form-check-label">
-                                        <input type="checkbox" class="form-check-input" name="dayOfWeek" value="일"> 일
-                                    </label>
-                                </div>
+                            <div class="card-header fw-bold"><i class="bi bi-calendar-week me-2"></i>요일 선택 (반복)</div>
+                            <div class="card-body d-flex flex-wrap gap-2 day-btns">
+                                <input type="checkbox" class="btn-check" id="mon" name="dayOfWeek" value="월">
+                                <label class="btn btn-outline-primary" for="mon">월</label>
+                                <input type="checkbox" class="btn-check" id="tue" name="dayOfWeek" value="화">
+                                <label class="btn btn-outline-primary" for="tue">화</label>
+                                <input type="checkbox" class="btn-check" id="wed" name="dayOfWeek" value="수">
+                                <label class="btn btn-outline-primary" for="wed">수</label>
+                                <input type="checkbox" class="btn-check" id="thu" name="dayOfWeek" value="목">
+                                <label class="btn btn-outline-primary" for="thu">목</label>
+                                <input type="checkbox" class="btn-check" id="fri" name="dayOfWeek" value="금">
+                                <label class="btn btn-outline-primary" for="fri">금</label>
+                                <input type="checkbox" class="btn-check" id="sat" name="dayOfWeek" value="토">
+                                <label class="btn btn-outline-primary" for="sat">토</label>
+                                <input type="checkbox" class="btn-check" id="sun" name="dayOfWeek" value="일">
+                                <label class="btn btn-outline-primary" for="sun">일</label>
                             </div>
                         </div>
 
                         <!-- 시간 선택 -->
                         <div class="card shadow-sm">
-                            <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-1">
-                                <span>시간 선택</span>
-                            </div>
+                            <div class="card-header fw-bold"><i class="bi bi-clock me-2"></i>시간 선택</div>
                             <div class="card-body">
-                                <!-- 오전 -->
                                 <div class="mb-3">
                                     <h6 class="fw-bold mb-2">오전</h6>
                                     <div id="amButtons" class="d-flex flex-wrap gap-2"></div>
                                 </div>
-
-                                <!-- 오후 -->
                                 <div>
                                     <h6 class="fw-bold mb-2">오후</h6>
                                     <div id="pmButtons" class="d-flex flex-wrap gap-2"></div>
@@ -271,14 +253,13 @@
                             </div>
                         </div>
 
-                        <!-- 버튼 영역 -->
+                        <!-- 버튼 -->
                         <div class="mt-4 text-end">
-                            <a th:href="@{/lecture/new}"  class="btn btn-secondary">취소</a>
+                            <a th:href="@{/lecture/new}" class="btn btn-secondary">취소</a>
                             <button type="button" id="registerBtn" class="btn btn-primary">등록</button>
                         </div>
                     </div>
                 </form>
-                <!-- ✅ 폼 끝 -->
             </div>
         </div>
     </div>
@@ -700,7 +681,7 @@
                 const memberId = Number(memberRow.dataset.memberId || 0);
                 if (!memberId) return alert('회원 정보가 올바르지 않습니다.');
 
-                const packageId = Number(memberRow.dataset.packageId);
+                const subscriptionId = Number(memberRow.dataset.subscriptionId);
 
                 // 시간 선택
                 const timeBtn = document.querySelector('.time-btn.btn-dark');
@@ -745,7 +726,7 @@
                 const payload = {
                     trainerId,
                     memberId,
-                    packageId,
+                    subscriptionId,
                     startDate,   // "YYYY-MM-DD"
                     endDate,     // "YYYY-MM-DD"
                     time,        // "HH:mm"

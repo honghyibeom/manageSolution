@@ -74,8 +74,8 @@
     </select>
 
     <insert id="insert" parameterType="PtSession" useGeneratedKeys="true" keyProperty="ptSessionId">
-        INSERT INTO pt_session (memberId, trainerId, packageId, sessionDate, sessionTime, batchId)
-        VALUES ( #{memberId}, #{trainerId},#{packageId}, #{sessionDate}, #{sessionTime}, #{batchId} )
+        INSERT INTO pt_session (memberId, trainerId, subscriptionId, sessionDate, sessionTime, batchId)
+        VALUES ( #{memberId}, #{trainerId},#{subscriptionId}, #{sessionDate}, #{sessionTime}, #{batchId} )
     </insert>
 
     <delete id="deleteById" parameterType="long">
@@ -129,8 +129,8 @@
         SELECT
         s.sessionId AS sessionId,
         m.memberId AS memberId,
-        pp.packageId AS packageId,
-        t.trainerId AS trainerId,
+        sub.subscriptionId AS subscriptionId,
+        sub.trainerId AS trainerId,
         s.batchId AS batchId,
 
         -- 임박 여부: 현재 시각 기준 30분 이내 시작이면 true
@@ -140,14 +140,14 @@
         NOW(),
         CAST(CONCAT(s.sessionDate, ' ', s.sessionTime) AS DATETIME)
         ) BETWEEN 0 AND 30
-        THEN TRUE
-        ELSE FALSE
+        THEN TRUE ELSE FALSE
         END AS imminent,
+
         m.name AS memberName,
         RIGHT(m.phone, 4) AS phone,
         a.name AS trainerName,
         p.name AS productName,
-        pp.remainingCount AS remainingCount,
+        COALESCE(sub.remainingCount, 0) AS remainingCount,
 
         -- 상태 색상
         CASE s.status
@@ -171,11 +171,13 @@
         FROM pt_session s
         JOIN member m   ON s.memberId = m.memberId
         JOIN trainer t  ON s.trainerId = t.trainerId
-                LEFT JOIN app_user a ON t.trainerId = a.userId
-        LEFT JOIN pt_package pp ON s.packageId = pp.packageId
-                LEFT JOIN product p  ON pp.productId = p.productId
+        LEFT JOIN app_user a ON t.trainerId = a.userId
+        LEFT JOIN subscription sub ON s.subscriptionId = sub.subscriptionId
+        LEFT JOIN product p  ON sub.productId = p.productId
 
         WHERE 1=1
+        AND sub.productType = 'PT'   <!-- PT 전용 -->
+
         <!-- 날짜 범위 필터 -->
         <if test="cond.startDate != null">
             AND s.sessionDate &gt;= #{cond.startDate}
@@ -198,9 +200,6 @@
         </if>
 
         ORDER BY s.sessionDate ASC, s.sessionTime ASC
-        <!-- MySQL -->
-        <!-- LIMIT #{offset}, #{limit} -->
-        <!-- H2 -->
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
@@ -236,18 +235,20 @@
     </select>
 
     <select id="findSessionViewByBatchId" parameterType="String" resultType="SessionGroupDTO">
-        SELECT s.sessionDate AS sessionDate,
-               s.sessionTime AS sessionTime,
-               m.name        AS memberName,
-               a.name        AS trainerName,
-               p.name        AS productName
+        SELECT
+        s.sessionDate   AS sessionDate,
+        s.sessionTime   AS sessionTime,
+        m.name          AS memberName,
+        a.name          AS trainerName,
+        p.name          AS productName
         FROM pt_session s
-                 JOIN member m ON s.memberId = m.memberId
-                 JOIN trainer t ON s.trainerId = t.trainerId
-                        LEFT JOIN app_user a ON t.trainerId = a.userId
-                 LEFT JOIN pt_package pp ON s.packageId = pp.packageId
-                        LEFT JOIN product p ON pp.productId = p.productId
-        WHERE batchId = #{batchId}
+        JOIN member m ON s.memberId = m.memberId
+        JOIN trainer t ON s.trainerId = t.trainerId
+        LEFT JOIN app_user a ON t.trainerId = a.userId
+        LEFT JOIN subscription sub ON s.subscriptionId = sub.subscriptionId
+        LEFT JOIN product p ON sub.productId = p.productId
+        WHERE s.batchId = #{batchId}
+        AND sub.productType = 'PT'   <!-- PT 전용 -->
         ORDER BY s.sessionDate
     </select>
 

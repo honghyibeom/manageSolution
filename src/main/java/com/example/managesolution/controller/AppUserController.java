@@ -46,6 +46,7 @@ public class AppUserController {
         model.addAttribute("trainerPtStats", trainerPtStats);
 
 
+
         return "/dashboard";
     }
 

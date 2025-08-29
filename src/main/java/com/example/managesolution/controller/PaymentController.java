@@ -2,15 +2,16 @@ package com.example.managesolution.controller;
 
 import com.example.managesolution.data.dto.payment.response.MemberExpiredDTO;
 import com.example.managesolution.data.dto.payment.response.PaymentDTO;
-import com.example.managesolution.service.MembershipService;
 import com.example.managesolution.service.PaymentService;
-import com.example.managesolution.service.PtPackageService;
+import com.example.managesolution.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -18,37 +19,33 @@ import java.util.List;
 @RequestMapping("/payment")
 public class PaymentController {
     private final PaymentService paymentService;
-    private final PtPackageService ptPackageService;
-    private final MembershipService membershipService;
+    private final SubscriptionService subscriptionService;
 
     // 결제관리 페이지 조회
     @GetMapping("")
-    public String list(@RequestParam(value = "unpaidKeyword", required = false) String unpaidKeyword,
-                       @RequestParam(value = "expiredKeyword", required = false) String expiredKeyword,
-                       @RequestParam(value = "historyKeyword", required = false) String historyKeyword,
+    public String list(@RequestParam(value = "startDate", required = false)
+                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                       @RequestParam(value = "endDate", required = false)
+                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                       @RequestParam(value = "keyword", required = false) String keyword,
                        @RequestParam(defaultValue = "1") int page,
                        Model model) {
 
         int pageSize = 10;
-        int totalCount = paymentService.countAll(historyKeyword);
+        // 결제 내역 페이징
+        int totalCount = paymentService.countAll(keyword,startDate, endDate);
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
-        System.out.println("totalCount: " + totalCount);
-        System.out.println("totalPages: " + totalPages);
-        List<MemberExpiredDTO> memberExpiredDTO = paymentService.getExpiredMembers(expiredKeyword);
+
+        // 서비스 호출 시 keyword + 시간을 같이 넘기도록 변경
+        List<MemberExpiredDTO> memberExpiredDTO = paymentService.getExpiredMembers(keyword, startDate, endDate);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
-        model.addAttribute("unpaidMembers", paymentService.getUnpaidMembers(unpaidKeyword));
         model.addAttribute("expiredMembers", memberExpiredDTO);
-        model.addAttribute("paymentHistory", paymentService.getPaymentHistory(historyKeyword, page, pageSize));
+        model.addAttribute("unpaidMembers", paymentService.getUnpaidMembers(keyword, startDate, endDate));
+        model.addAttribute("paymentHistory", paymentService.getPaymentHistory(keyword,startDate, endDate, page, pageSize));
         return "payment/list";
     }
 
-    // 마감 회원 삭제
-    @PostMapping("/{id}/delete/expired")
-    public String registerProduct(@PathVariable Long id) {
-        membershipService.deleteExpiredMembershipAndPtPackage(id);
-        return "redirect:/payment";
-    }
 
 //    ------------------------------------RestAPI---------------------------------
 
@@ -64,13 +61,7 @@ public class PaymentController {
     @ResponseBody
     @PostMapping("/unpaid/delete")
     public ResponseEntity<Void> deleteUnpaidProducts(@RequestBody List<PaymentDTO> unpaidList) {
-        unpaidList.forEach(dto -> {
-            if ("MEMBERSHIP".equals(dto.getProductType())) {
-                membershipService.deleteUnpaidMemberShip(dto.getMemberId());
-            } else if ("PT".equals(dto.getProductType())) {
-                ptPackageService.deleteUnpaidPtPackages(dto.getMemberId());
-            }
-        });
+        subscriptionService.deleteUnpaid(unpaidList);
         return ResponseEntity.ok().build();
     }
 

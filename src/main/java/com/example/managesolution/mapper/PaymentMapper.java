@@ -8,12 +8,15 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
 public interface PaymentMapper {
 
     List<PaymentHistoryDTO> findPaymentHistory(@Param("keyword") String keyword,
+                                               @Param("startDate") LocalDateTime startDate,
+                                               @Param("endDate") LocalDateTime endDate,
                                                @Param("limit")int limit,
                                                @Param("offset")int offset);
 
@@ -29,7 +32,10 @@ public interface PaymentMapper {
             @Param("type") String type
     );
 
-    int countAll(@Param("keyword") String keyword);
+    int countAll(@Param("keyword") String keyword,
+                 @Param("startDate") LocalDate startDate,
+                 @Param("endDate") LocalDate endDate
+                 );
 
     List<DetailStatisticsDTO> findStatisticsDetails(String category, String name, LocalDate startDate, LocalDate endDate);
 }

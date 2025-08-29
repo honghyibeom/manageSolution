@@ -5,10 +5,41 @@
 
 <head>
   <title th:text="${trainer.trainerId != null} ? '강사 수정' : '강사 등록'">강사 등록</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    .form-wrapper {
-      max-width: 900px;
-      margin: 0 auto;
+    body { background-color: #f9fafc; }
+    .form-wrapper { max-width: 900px; margin: 0 auto; }
+    .card { border-radius: 14px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .card-header {
+      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+      font-weight: 600;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .form-label { font-weight: 600; }
+    .btn-check + .btn { min-width: 100px; }
+    .btn-group .btn { border-radius: 8px; }
+    /* 연한 Primary */
+    .btn-outline-primary {
+      color: #4a90e2;
+      border-color: #4a90e2;
+    }
+    .btn-outline-primary:hover,
+    .btn-outline-primary:checked + .btn-outline-primary,
+    .btn-check:checked + .btn-outline-primary {
+      background-color: #4a90e2;
+      color: #fff;
+    }
+
+    /* 연한 Danger */
+    .btn-outline-danger {
+      color: #e57373;
+      border-color: #e57373;
+    }
+    .btn-outline-danger:hover,
+    .btn-check:checked + .btn-outline-danger {
+      background-color: #e57373;
+      color: #fff;
     }
   </style>
 </head>
@@ -17,116 +48,126 @@
   <div class="container py-4 form-wrapper">
     <div class="card shadow-sm">
       <div class="card-body">
-        <h4 class="fw-bold mb-4" th:text="${trainer.trainerId != null} ? '강사 수정' : '강사 등록'">강사 등록</h4>
+        <div class="d-flex align-items-center mb-4">
+          <i class="bi bi-person-workspace text-primary fs-3 me-2"></i>
+          <h4 class="fw-bold mb-0" th:text="${trainer.trainerId != null} ? '강사 수정' : '강사 등록'">강사 등록</h4>
+        </div>
 
         <form th:action="${trainer.trainerId != null} ? @{'/trainer/' + ${trainer.trainerId} + '/edit'} : @{/trainer/register}"
               method="post" th:object="${trainer}">
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">이메일</label>
-              <input type="email" th:field="*{email}" class="form-control" />
-              <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <label class="form-label">비밀번호</label>
-              <input type="password" th:field="*{password}" class="form-control" />
-              <div class="text-danger small" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">비밀번호 확인</label>
-              <input type="password" th:field="*{passwordConfirm}" class="form-control" />
-              <div class="text-danger small" th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"></div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">이름</label>
-              <input type="text" th:field="*{name}" class="form-control" />
-              <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <label class="form-label">전화번호</label>
-              <input type="text" th:field="*{phone}" class="form-control" id="phoneInput" maxlength="13"  />
-              <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">생년월일</label>
-              <input type="date" th:field="*{birthDate}" class="form-control" />
-              <div class="text-danger small" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <label class="form-label d-block">성별</label>
-              <div class="btn-group" role="group" aria-label="성별 선택">
-                <input type="radio" class="btn-check" th:field="*{gender}" id="male" value="남성" />
-                <label class="btn btn-outline-primary" for="male">남성</label>
-
-                <input type="radio" class="btn-check" th:field="*{gender}" id="female" value="여성" />
-                <label class="btn btn-outline-danger" for="female">여성</label>
+          <!-- 계정 정보 -->
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-envelope-at me-2"></i> 계정 정보</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">이메일</label>
+                  <input type="email" th:field="*{email}" class="form-control" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">비밀번호</label>
+                  <input type="password" th:field="*{password}" class="form-control" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
               </div>
-              <div class="text-danger small" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">비밀번호 확인</label>
+                  <input type="password" th:field="*{passwordConfirm}" class="form-control" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">경력(년)</label>
-              <input type="text" th:field="*{careerYears}" class="form-control" />
-              <div class="text-danger small" th:if="${#fields.hasErrors('careerYears')}" th:errors="*{careerYears}"></div>
+          <!-- 개인 정보 -->
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-person-vcard me-2"></i> 개인 정보</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">이름</label>
+                  <input type="text" th:field="*{name}" class="form-control" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">전화번호</label>
+                  <input type="text" th:field="*{phone}" class="form-control" id="phoneInput" maxlength="13" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">생년월일</label>
+                  <input type="date" th:field="*{birthDate}" class="form-control" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label d-block">성별</label>
+                  <div class="btn-group w-100" role="group" aria-label="성별 선택">
+                    <input type="radio" class="btn-check" th:field="*{gender}" id="male" value="남성" />
+                    <label class="btn btn-outline-primary" for="male"><i class="bi bi-gender-male me-1"></i> 남성</label>
+                    <input type="radio" class="btn-check" th:field="*{gender}" id="female" value="여성" />
+                    <label class="btn btn-outline-danger" for="female"><i class="bi bi-gender-female me-1"></i> 여성</label>
+                  </div>
+                  <div class="text-danger small" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">기본급</label>
-              <input type="text" th:field="*{baseSalary}" class="form-control" />
-              <div class="text-danger small" th:if="${#fields.hasErrors('baseSalary')}" th:errors="*{baseSalary}"></div>
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <label class="form-label">수당</label>
-              <input type="text" th:field="*{payPerSession}" class="form-control" />
-              <div class="text-danger small" th:if="${#fields.hasErrors('payPerSession')}" th:errors="*{payPerSession}"></div>
+          <!-- 근무 정보 -->
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-briefcase me-2"></i> 근무 정보</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">경력(년)</label>
+                  <input type="number" th:field="*{careerYears}" class="form-control" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('careerYears')}" th:errors="*{careerYears}"></div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">기본급</label>
+                  <input type="number" th:field="*{baseSalary}" class="form-control" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('baseSalary')}" th:errors="*{baseSalary}"></div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">수당 (PT 1회)</label>
+                  <input type="number" th:field="*{payPerSession}" class="form-control" />
+                  <div class="text-danger small" th:if="${#fields.hasErrors('payPerSession')}" th:errors="*{payPerSession}"></div>
+                </div>
+              </div>
             </div>
           </div>
 
           <input type="hidden" th:field="*{role}" value="TRAINER" />
 
           <div class="text-end">
-            <button type="submit" class="btn btn-primary" th:text="${trainer.trainerId != null} ? '수정' : '등록'">등록</button>
-            <a th:href="@{/trainer}" class="btn btn-secondary">취소</a>
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="bi bi-save me-1"></i>
+              <span th:text="${trainer.trainerId != null} ? '수정' : '등록'">등록</span>
+            </button>
+            <a th:href="@{/trainer}" class="btn btn-secondary px-4"><i class="bi bi-x-circle me-1"></i> 취소</a>
           </div>
-
         </form>
       </div>
     </div>
   </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const phoneInput = document.getElementById("phoneInput");
-
       phoneInput.addEventListener("input", function (e) {
-        let value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 남김
-
-        // 전화번호 패턴 맞게 하이픈 삽입
+        let value = e.target.value.replace(/[^0-9]/g, '');
         if (value.length <= 3) {
-          // 010
           e.target.value = value;
         } else if (value.length <= 7) {
-          // 010-1234
           e.target.value = value.replace(/(\d{3})(\d{1,4})/, '$1-$2');
         } else {
-          // 010-1234-5678
           e.target.value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
         }
       });

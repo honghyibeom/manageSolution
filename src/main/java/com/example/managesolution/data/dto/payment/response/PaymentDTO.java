@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PaymentDTO {
     private Long memberId;
+    private Long subscriptionId;
     private Long productId;
     private Integer amount;
     private String productType;

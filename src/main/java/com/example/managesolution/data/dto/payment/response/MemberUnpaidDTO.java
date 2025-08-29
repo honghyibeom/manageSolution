@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MemberUnpaidDTO {
     private Long memberId;
+    private Long subscriptionId;
     private String memberName;
     private String phone;
     private String productName;

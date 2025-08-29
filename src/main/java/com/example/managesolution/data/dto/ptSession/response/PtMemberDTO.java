@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class PtMemberDTO {
+    private Long subscriptionId;
     private Long memberId;
     private String name;
     private String phone;
@@ -16,5 +17,4 @@ public class PtMemberDTO {
     private int totalCount;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Long packageId;
 }

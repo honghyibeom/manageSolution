@@ -2,7 +2,7 @@ package com.example.managesolution.controller;
 
 import com.example.managesolution.data.dto.trainer.request.TrainerFormDTO;
 import com.example.managesolution.data.enumerate.Role;
-import com.example.managesolution.service.PtPackageService;
+import com.example.managesolution.service.SubscriptionService;
 import com.example.managesolution.service.TrainerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TrainerController {
 
-    private final PtPackageService ptPackageService;
+    private final SubscriptionService subscriptionService;
     private final PasswordEncoder passwordEncoder;
     private final TrainerService trainerService;
 
@@ -36,7 +36,7 @@ public class TrainerController {
     @GetMapping("/{id}")
     public String trainerDetail(@PathVariable Long id, Model model) {
         model.addAttribute("trainers", trainerService.getTrainerList());
-        model.addAttribute("ptMembers", ptPackageService.findByTrainerId(id));
+        model.addAttribute("ptMembers", subscriptionService.findByTrainerId(id));
         model.addAttribute("selectedTrainerId", id);
         return "trainer/trainer";
     }
@@ -73,7 +73,7 @@ public class TrainerController {
     @PostMapping("/change")
     public String changeTrainer(@RequestParam List<Long> selectedMemberIds,
                                 @RequestParam Long newTrainerId) {
-        ptPackageService.updateTrainerForMembers(selectedMemberIds, newTrainerId);
+        subscriptionService.updateTrainerForMembers(selectedMemberIds, newTrainerId);
         return "redirect:/trainer";
     }
 

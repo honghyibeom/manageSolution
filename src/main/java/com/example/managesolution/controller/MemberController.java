@@ -1,8 +1,8 @@
 package com.example.managesolution.controller;
 
-import com.example.managesolution.data.domain.Member;
 import com.example.managesolution.data.dto.member.request.MemberFormDTO;
 import com.example.managesolution.data.dto.member.response.MemberProductDTO;
+import com.example.managesolution.exception.CustomException;
 import com.example.managesolution.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,11 +53,7 @@ public class MemberController {
         MemberFormDTO memberFormDTO = new MemberFormDTO();
         model.addAttribute("memberForm", memberFormDTO);
         model.addAttribute("mode", "create");
-
-        System.out.println("등록 진입: memberId = " + memberFormDTO.getMemberId());
-
-        model.addAttribute("membershipProducts", productService.getMembershipProducts());
-        model.addAttribute("ptProducts", productService.getPtProducts());
+        model.addAttribute("products", productService.findAll());
         model.addAttribute("trainers", trainerService.getTrainerList());
 
         return "member/form";
@@ -69,11 +65,9 @@ public class MemberController {
     public String save(@ModelAttribute("memberForm") @Valid MemberFormDTO dto, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             // 상품/트레이너 목록 재주입 필요
-            model.addAttribute("membershipProducts", productService.getMembershipProducts());
-            model.addAttribute("ptProducts", productService.getPtProducts());
+            model.addAttribute("products", productService.findAll());
             model.addAttribute("trainers", trainerService.getTrainerList());
             model.addAttribute("memberForm", dto);
-
             return "member/form";
         }
 
@@ -82,19 +76,14 @@ public class MemberController {
     }
 
 
-    //회원 수정 + 상품 까지 수정
+    //회원 수정 + 상품 까지 수정 폼 가져오기
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable Long id, Model model) {
-
         MemberFormDTO dto = memberService.toFormDTO(id);
-
         model.addAttribute("memberForm", dto);
         model.addAttribute("mode", "edit");
-
-        model.addAttribute("membershipProducts", productService.getMembershipProducts());
-        model.addAttribute("ptProducts", productService.getPtProducts());
+        model.addAttribute("products", productService.findAll());
         model.addAttribute("trainers", trainerService.getTrainerList());
-
         return "member/form";
     }
 
@@ -105,15 +94,22 @@ public class MemberController {
                          BindingResult bindingResult, Model model) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("membershipProducts", productService.getMembershipProducts());
-            model.addAttribute("ptProducts", productService.getPtProducts());
+            model.addAttribute("products", productService.findAll());
             model.addAttribute("trainers", trainerService.getTrainerList());
             model.addAttribute("memberForm", dto);
+            dto.setMemberId(id);
             return "member/form";
         }
-        Member member = memberService.findById(id);
-        dto.setStatus(member.getStatus());
-        memberService.update(id, dto);
+        try {
+            memberService.update(id, dto);
+        } catch (CustomException e) {
+            bindingResult.reject("globalError", e.getErrorCode().getErrorMessage());
+            model.addAttribute("products", productService.findAll());
+            model.addAttribute("trainers", trainerService.getTrainerList());
+            model.addAttribute("memberForm", dto);
+            dto.setMemberId(id);
+            return "member/form";
+        }
         return "redirect:/members";
     }
 
@@ -127,29 +123,24 @@ public class MemberController {
     //기존 member에서 상품만 등록 하려는 폼 보여주기
     @GetMapping("/{id}/register/product")
     public String registerForm(@PathVariable Long id, Model model) {
+        model.addAttribute("products", productService.findAll());
+        model.addAttribute("trainers", trainerService.getTrainerList());
         MemberFormDTO dto = memberService.toBasicFormDTO(id);
 
         model.addAttribute("memberForm", dto);
 
         model.addAttribute("mode", "register");
-        model.addAttribute("membershipProducts", productService.getMembershipProducts());
-        model.addAttribute("ptProducts", productService.getPtProducts());
-        model.addAttribute("trainers", trainerService.getTrainerList());
 
         return "member/productRegister";
     }
 
     // 상품만 등록
-    @PostMapping("/{id}/register")
+    @PostMapping("/{id}/register/product")
     public String registerProduct(@PathVariable Long id, @Valid @ModelAttribute("memberForm") MemberFormDTO dto,
-                                  BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("membershipProducts", productService.getMembershipProducts());
-            model.addAttribute("ptProducts", productService.getPtProducts());
+                                  Model model) {
+            model.addAttribute("products", productService.findAll());
             model.addAttribute("trainers", trainerService.getTrainerList());
             model.addAttribute("memberForm", dto);
-            return "member/form";
-        }
         memberService.registerNewProduct(id, dto);
         return "redirect:/payment";
     }

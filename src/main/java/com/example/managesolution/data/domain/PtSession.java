@@ -17,7 +17,7 @@ public class PtSession {
     private Long ptSessionId;
     private Long memberId;
     private Long trainerId;
-    private Long packageId;
+    private Long subscriptionId;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate sessionDate;
     @DateTimeFormat(pattern = "HH:mm")

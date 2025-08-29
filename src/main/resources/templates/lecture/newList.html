@@ -348,7 +348,7 @@
                 <button type="button" class="btn btn-light-success"
                         th:attr="data-member-id=${sess.memberId},
                      data-session-id=${sess.sessionId},
-                     data-package-id=${sess.packageId},
+                     data-subscription-id=${sess.subscriptionId},
                      data-status='ATTENDED'">
                   O
                 </button>
@@ -357,7 +357,7 @@
                 <button type="button" class="btn btn-light-warning"
                         th:attr="data-member-id=${sess.memberId},
                      data-session-id=${sess.sessionId},
-                     data-package-id=${sess.packageId},
+                     data-subscription-id=${sess.subscriptionId},
                      data-status='NO_SHOW'">
                   X
                 </button>
@@ -426,7 +426,7 @@
                     <button class="dropdown-item text-success"
                             th:attr="data-member-id=${sess.memberId},
                                data-session-id=${sess.sessionId},
-                               data-package-id=${sess.packageId},
+                               data-subscription-id=${sess.subscriptionId},
                                data-status='ATTENDED'">
                       <i class="bi bi-check-lg me-2"></i> 출석
                     </button>
@@ -435,7 +435,7 @@
                     <button class="dropdown-item text-warning"
                             th:attr="data-member-id=${sess.memberId},
                                data-session-id=${sess.sessionId},
-                               data-package-id=${sess.packageId},
+                               data-subscription-id=${sess.subscriptionId},
                                data-status='NO_SHOW'">
                       <i class="bi bi-x-lg me-2"></i> 결석
                     </button>
@@ -598,12 +598,8 @@
   <script th:src="@{https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js}"></script>
   <script th:inline="javascript">
     $(function() {
-      // Thymeleaf 변수를 문자열로 안전하게 바인딩
-      const startDateVal = /*[[${cond.startDate}]]*/ null;
-      const endDateVal   = /*[[${cond.endDate}]]*/ null;
-
-      const start = startDateVal ? moment(startDateVal, 'YYYY-MM-DD') : moment().startOf('month');
-      const end   = endDateVal   ? moment(endDateVal, 'YYYY-MM-DD')   : moment().endOf('month');
+      const start = moment().startOf('month');
+      const end   = moment().endOf('month');
 
       // datepicker 초기화
       $('#dateRange').daterangepicker({
@@ -660,7 +656,7 @@
         const payload = {
           memberId: btn.dataset.memberId,
           sessionId: btn.dataset.sessionId,
-          packageId: btn.dataset.packageId,
+          subscriptionId: btn.dataset.subscriptionId,
           status: btn.dataset.status
         };
 

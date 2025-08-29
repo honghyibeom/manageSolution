@@ -125,17 +125,42 @@
             <i class="bi bi-credit-card me-2 text-primary"></i>결제 관리
         </h4>
 
+        <!-- 📅 기간 필터 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <form method="get" class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+                    <!-- 왼쪽: 기간 -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0 fw-bold">기간</label>
+                        <input type="date" name="startDate" th:value="${param.startDate}"
+                               class="form-control form-control-sm" style="width:auto;">
+                        ~
+                        <input type="date" name="endDate" th:value="${param.endDate}"
+                               class="form-control form-control-sm" style="width:auto;">
+
+                        <!-- 오른쪽: 검색 -->
+                        <div class="search-group d-flex" style="min-width:140px;">
+                            <input type="text" name="keyword" class="form-control form-control-sm search-compact ps-4"
+                                   placeholder="회원명 검색" th:value="${param.keyword}">
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary">조회</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="row gx-4">
             <!-- ✅ 미결제 회원 -->
             <div class="col-12 col-md-6 mb-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-header fw-bold d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-exclamation-circle text-danger me-1"></i> 미결제  회원</span>
-                        <form method="get" class="d-flex" role="search">
-                            <input type="text" name="unpaidKeyword" class="form-control form-control-sm me-2 search-compact"
-                                   placeholder="미결제 회원명 검색" th:value="${param.keyword}">
-                            <button type="submit" class="btn btn-sm btn-outline-secondary search-btn">검색</button>
-                        </form>
+<!--                        <form method="get" class="d-flex" role="search">-->
+<!--                            <input type="text" name="unpaidKeyword" class="form-control form-control-sm me-2 search-compact"-->
+<!--                                   placeholder="미결제 회원명 검색" th:value="${param.keyword}">-->
+<!--                            <button type="submit" class="btn btn-sm btn-outline-secondary search-btn">검색</button>-->
+<!--                        </form>-->
                     </div>
 
                     <div class="card-body fixed-height">
@@ -157,6 +182,7 @@
                                     <td><input type="checkbox" class="payment-checkbox"
                                                th:value="${member.memberId}"
                                                th:data-product-id="${member.productId}"
+                                               th:data-subscription-id="${member.subscriptionId}"
                                                th:data-amount="${member.amount}"
                                                th:data-product-type="${member.productType}"></td>
                                     <td th:text="${member.memberName}"></td>
@@ -239,11 +265,11 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-header fw-bold d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-hourglass-split text-warning me-1"></i> 마감  회원</span>
-                        <form method="get" class="d-flex" role="search">
-                            <input type="text" name="expiredKeyword" class="form-control form-control-sm me-2 search-compact"
-                                   placeholder="마감 회원명 검색" th:value="${param.keyword}">
-                            <button type="submit" class="btn btn-sm btn-outline-secondary search-btn">검색</button>
-                        </form>
+<!--                        <form method="get" class="d-flex" role="search">-->
+<!--                            <input type="text" name="expiredKeyword" class="form-control form-control-sm me-2 search-compact"-->
+<!--                                   placeholder="마감 회원명 검색" th:value="${param.keyword}">-->
+<!--                            <button type="submit" class="btn btn-sm btn-outline-secondary search-btn">검색</button>-->
+<!--                        </form>-->
                     </div>
 
                     <div class="card-body fixed-height">
@@ -270,9 +296,6 @@
                                     <td th:text="${#numbers.formatInteger(member.amount, 0, 'COMMA')}"></td>
                                     <td>
                                         <a th:href="@{'/members/' + ${member.memberId} + '/register/product'}" class="btn btn-sm btn-primary">등록</a>
-                                        <form th:action="@{'/payment/' + ${member.memberId} + '/delete/expired'}" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
-                                        </form>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -337,17 +360,16 @@
         </div>
 
         <!-- ✅ 결제 내역 -->
-        <!-- ✅ 결제 내역 -->
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-header fw-bold d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-receipt text-success me-1"></i> 결제 내역</span>
-                        <form method="get" class="d-flex" role="search">
-                            <input type="text" name="historyKeyword" class="form-control form-control-sm me-2 search-compact"
-                                   placeholder="결제내역 회원명 검색" th:value="${param.keyword}">
-                            <button type="submit" class="btn btn-sm btn-outline-secondary search-btn">검색</button>
-                        </form>
+<!--                        <form method="get" class="d-flex" role="search">-->
+<!--                            <input type="text" name="historyKeyword" class="form-control form-control-sm me-2 search-compact"-->
+<!--                                   placeholder="결제내역 회원명 검색" th:value="${param.keyword}">-->
+<!--                            <button type="submit" class="btn btn-sm btn-outline-secondary search-btn">검색</button>-->
+<!--                        </form>-->
                     </div>
 
                     <div class="card-body fixed-height">
@@ -480,6 +502,7 @@
                 selected.push({
                     memberId: cb.value,
                     productId: cb.dataset.productId,
+                    subscriptionId: cb.dataset.subscriptionId,
                     amount: cb.dataset.amount,
                     productType: cb.dataset.productType,
                     method: method
@@ -516,6 +539,7 @@
                 selected.push({
                     memberId: cb.value,
                     productId: cb.dataset.productId,
+                    subscriptionId: cb.dataset.subscriptionId,
                     productType: cb.dataset.productType
                 });
             });

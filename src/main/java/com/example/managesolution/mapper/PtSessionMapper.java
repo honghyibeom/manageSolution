@@ -13,26 +13,8 @@ import java.util.List;
 
 @Mapper
 public interface PtSessionMapper {
-    List<DayLessonDTO> getSessionCountByMonth(@Param("startDate") LocalDate startDate,
-                                              @Param("endDate") LocalDate endDate);
-
-    List<DayLessonDTO> getSessionCountByMonthAndTrainer(
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            @Param("trainerId") Long trainerId
-    );
-
-
-    List<LessonDTO> selectLessonsByDate(@Param("sessionDate") Date sessionDate);
-
-    List<LessonDTO> selectLessonsByDateAndTrainer(@Param("sessionDate") Date sessionDate,
-                                                  @Param("trainerId") Long trainerId);
 
     void insert(PtSession session);
-
-    int existsTrainerExact(@Param("trainerId") Long trainerId,
-                           @Param("date") LocalDate date,
-                           @Param("time") LocalTime time);
 
     int existsMemberExact(@Param("memberId") Long memberId,
                            @Param("date") LocalDate date,

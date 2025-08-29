@@ -6,23 +6,28 @@
 <mapper namespace="com.example.managesolution.mapper.PaymentMapper">
     <select id="findPaymentHistory" resultType="PaymentHistoryDTO">
         SELECT
-            p.paidAt AS paymentDate,
-            m.name AS memberName,
-            m.phone,
-            prod.name AS productName,
-            prod.type AS productType,
-            p.amount,
-            p.method,
-            COALESCE(ms.startDate, pp.startDate) AS startDate,
-            COALESCE(ms.endDate, pp.endDate) AS endDate
+        p.paidAt AS paymentDate,
+        m.name AS memberName,
+        m.phone,
+        prod.name AS productName,
+        prod.type AS productType,
+        p.amount,
+        p.method,
+        s.startDate,
+        s.endDate
         FROM payment p
-                 INNER JOIN member m ON p.memberId = m.memberId
-                 LEFT JOIN product prod ON p.productId = prod.productId
-                 LEFT JOIN membership ms ON ms.paymentId = p.paymentId
-                 LEFT JOIN pt_package pp ON pp.paymentId = p.paymentId
+        INNER JOIN member m ON p.memberId = m.memberId
+        LEFT JOIN subscription s ON s.paymentId = p.paymentId
+        LEFT JOIN product prod ON p.productId = prod.productId
         <where>
             <if test="keyword != null and keyword != ''">
-                 m.name LIKE CONCAT('%', #{keyword}, '%')
+                AND m.name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="startDate != null">
+                AND p.paidAt &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND p.paidAt &lt;= #{endDate}
             </if>
         </where>
         ORDER BY p.paidAt DESC
@@ -40,20 +45,24 @@
         prod.type AS productType,
         p.amount,
         p.method,
-        COALESCE(ms.startDate, pp.startDate) AS startDate,
-        COALESCE(ms.endDate, pp.endDate) AS endDate
+        s.startDate,
+        s.endDate
         FROM payment p
         INNER JOIN member m ON p.memberId = m.memberId
         LEFT JOIN product prod ON p.productId = prod.productId
-        LEFT JOIN membership ms ON ms.paymentId = p.paymentId
-        LEFT JOIN pt_package pp ON pp.paymentId = p.paymentId
+        LEFT JOIN subscription s ON s.paymentId = p.paymentId
         <where>
             <if test="keyword != null and keyword != ''">
-                m.name LIKE CONCAT('%', #{keyword}, '%')
+                AND m.name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="startDate != null">
+                AND p.paidAt &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND p.paidAt &lt;= #{endDate}
             </if>
         </where>
-        ORDER BY p.paidAt DESC
-        )
+        ) t
     </select>
 
     <insert id="insertPayment" useGeneratedKeys="true" keyProperty="paymentId">

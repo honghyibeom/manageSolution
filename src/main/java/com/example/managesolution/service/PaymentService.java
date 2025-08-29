@@ -3,11 +3,9 @@ package com.example.managesolution.service;
 import com.example.managesolution.data.domain.Payment;
 import com.example.managesolution.data.dto.payment.response.*;
 import com.example.managesolution.data.dto.statistics.response.*;
-import com.example.managesolution.mapper.MemberMapper;
-import com.example.managesolution.mapper.MemberShipMapper;
-import com.example.managesolution.mapper.PaymentMapper;
-import com.example.managesolution.mapper.PtPackageMapper;
+import com.example.managesolution.mapper.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,20 +20,25 @@ import java.util.List;
 public class PaymentService {
     private final PaymentMapper paymentMapper;
     private final MemberMapper memberMapper;
-    private final MemberShipMapper memberShipMapper;
-    private final PtPackageMapper ptPackageMapper;
+    private final SubscriptionMapper subscriptionMapper;
+    private final ProductMapper productMapper;
 
-    public List<MemberUnpaidDTO> getUnpaidMembers(String keyword) {
-        return memberMapper.findUnpaidMembers(keyword);
+    public List<MemberUnpaidDTO> getUnpaidMembers(String keyword, LocalDate startDate,
+                                                  LocalDate endDate) {
+        return memberMapper.findUnpaidMembers(keyword, startDate, endDate);
     }
 
-    public List<MemberExpiredDTO> getExpiredMembers(String keyword) {
-        return memberMapper.findExpiredMembers(keyword);
+    public List<MemberExpiredDTO> getExpiredMembers(String keyword, LocalDate startDate,
+                                                    LocalDate endDate) {
+        return memberMapper.findExpiredMembers(keyword, startDate, endDate);
     }
 
-    public List<PaymentHistoryDTO> getPaymentHistory(String keyword, int page, int size) {
+    public List<PaymentHistoryDTO> getPaymentHistory(String keyword,LocalDate startDate, LocalDate endDate,
+                                                     int page, int size) {
         int offset = (page - 1) * size;
-        return paymentMapper.findPaymentHistory(keyword, size, offset);
+        LocalDateTime start = (startDate != null) ? startDate.atStartOfDay() : null;          // 00:00:00
+        LocalDateTime end   = (endDate != null) ? endDate.atStartOfDay() : null;
+        return paymentMapper.findPaymentHistory(keyword,start,end, size, offset);
     }
 
     @Transactional
@@ -60,19 +63,12 @@ public class PaymentService {
             // member status update
             memberMapper.updateStatusActive(dto.getMemberId());
 
-            if ("MEMBERSHIP".equals(dto.getProductType())) {
-                memberShipMapper.activateByMemberId(dto.getMemberId());
-            }
-            else {
-                ptPackageMapper.activateByMemberId(dto.getMemberId());
-            }
+            // 2. 구독 활성화
+            subscriptionMapper.activateAndUpdatePaymentId(dto.getSubscriptionId(), payment.getPaymentId());
 
-            // membership or ptpackage update
-            if ("MEMBERSHIP".equalsIgnoreCase(dto.getProductType())) {
-                memberShipMapper.updatePaymentId(dto.getMemberId(), payment.getPaymentId());
-            } else if ("PT".equalsIgnoreCase(dto.getProductType())) {
-                ptPackageMapper.updatePaymentId(dto.getMemberId(), payment.getPaymentId());
-            }
+            // 3. 회원 활성화
+            memberMapper.updateStatusActive(dto.getMemberId());
+
         }
     }
 
@@ -103,10 +99,10 @@ public class PaymentService {
         }
 
         // 🔷 PT권 테이블 데이터 조회
-        List<PtMemberSalesDTO> ptMembers = ptPackageMapper.selectPtMembers(startDate, endDate);
+        List<PtMemberSalesDTO> ptMembers = productMapper.selectPtMembers(startDate, endDate);
 
         // 🔷 회원권 테이블 데이터 조회
-        List<MembershipSalesDTO> membershipMembers = memberShipMapper.selectMembershipMembers(startDate, endDate);
+        List<MembershipSalesDTO> membershipMembers = productMapper.selectMembershipMembers(startDate, endDate);
 
         // 🔷 PT권 합계 계산
         long ptTotalAmount = ptMembers.stream()
@@ -148,8 +144,8 @@ public class PaymentService {
                 .ptSummary(ptSummary)
                 .build();
     }
-    public int countAll(String keyword) {
-        return paymentMapper.countAll(keyword);
+    public int countAll(String keyword, LocalDate startDate, LocalDate endDate) {
+        return paymentMapper.countAll(keyword,startDate, endDate);
     }
 
     public List<DetailStatisticsDTO> findDetails(String category, String name, LocalDate start, LocalDate end) {

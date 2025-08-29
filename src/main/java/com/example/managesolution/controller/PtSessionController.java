@@ -29,17 +29,9 @@ import java.util.Map;
 @Log4j2
 public class PtSessionController {
     private final PtSessionService ptSessionService;
-    private final PtPackageService ptPackageService;
     private final AttendanceService attendanceService;
     private final TrainerService trainerService;
-
-    // 수업 관리 페이지 조회
-    @GetMapping("")
-    public String index(Model model) {
-        model.addAttribute("year", LocalDate.now().getYear());
-        model.addAttribute("month", LocalDate.now().getMonthValue());
-        return "lecture/list";
-    }
+    private final SubscriptionService subscriptionService;
 
     // new 수업 관리 페이지 조회
     @GetMapping("/new")
@@ -56,7 +48,7 @@ public class PtSessionController {
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
         List<SessionSummaryDTO> summary = ptSessionService.getSummeryList(sessionView);
-        List<DateGroupDTO> dateGroup = ptSessionService.getDateGroup(cond, sessionView);
+        List<DateGroupDTO> dateGroup = ptSessionService.getDateGroup(sessionView);
 
         model.addAttribute("trainers", trainerService.getTrainerList());
         model.addAttribute("summaryList", summary);
@@ -81,7 +73,7 @@ public class PtSessionController {
     @GetMapping("/{id}")
     public String trainerDetail(@PathVariable Long id, Model model) {
         model.addAttribute("trainers", trainerService.getTrainerList());
-        model.addAttribute("ptMembers", ptPackageService.findByTrainerId(id));
+        model.addAttribute("ptMembers", subscriptionService.findByTrainerId(id));
         model.addAttribute("selectedTrainerId", id);
         return "lecture/form";
     }
@@ -106,79 +98,6 @@ public class PtSessionController {
 
 //    --------------------------------------json----------------------------------------------------------
 
-    // 캘린더 폼 생성 및 수업 건수 조회
-    @ResponseBody
-    @GetMapping("/month")
-    public List<DayLessonDTO> getMonthLessons(
-            @RequestParam int year,
-            @RequestParam int month,
-            @RequestParam(required = false) Long trainerId
-    ) {
-        return ptSessionService.getLessonCalendar(year, month, trainerId);
-    }
-
-
-    // 선택한 날짜 수업 일정 조회
-    @ResponseBody
-    @GetMapping("/day")
-    public List<LessonDTO> getLessonsByDate(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) Long trainerId
-    ) {
-        return ptSessionService.getLessonsByDate(date, trainerId);
-    }
-
-    // 수업 등록
-//    @ResponseBody
-//    @PostMapping("/register")
-//    public ResponseEntity<?> registerLecture(@ModelAttribute PtSessionDTO form) {
-//        ptSessionService.register(form);
-//        return ResponseEntity.ok(Map.of("success", true));
-//    }
-
-    // 수업 삭제
-    @ResponseBody
-    @PostMapping("/delete")
-    public Map<String, Object> deleteLessons(@RequestBody List<Long> sessionIds) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            ptSessionService.deleteByIds(sessionIds);
-            response.put("success", true);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
-        }
-        return response;
-    }
-
-    // 트레이너들 조회
-    @GetMapping("/trainers")
-    @ResponseBody
-    public List<TrainerDTO> getTrainerList() {
-        return trainerService.getTrainerList(); // 트레이너 리스트 반환
-    }
-
-    // 트레이너에 해당하는 회원들 조회
-    @GetMapping("/members")
-    @ResponseBody
-    public List<PtMemberDTO> getMembersByTrainer(@RequestParam Long trainerId) {
-        return ptPackageService.findByTrainerId(trainerId);
-    }
-
-    // 회원 선택했을때 상품Id 반환 (PtSession 저장을 하기위해)
-    @GetMapping("/package/active")
-    @ResponseBody
-    public Map<String, Long> getActivePackage(@RequestParam Long memberId) {
-        Long packageId = ptPackageService.findPackageIdByMemberId(memberId);
-        return Map.of("packageId", packageId);
-    }
-
-    // 출석 api
-    @PostMapping("/attend")
-    @ResponseBody
-    public ResponseEntity<ResponseDTO> attend(@RequestBody AttendanceRequestDTO dto) {
-        return ResponseEntity.ok(attendanceService.attend(dto));
-    }
     // new 트레이너의 스케줄 date와 time api
     @GetMapping("/trainers/{trainerId}/busy")
     @ResponseBody
@@ -193,6 +112,7 @@ public class PtSessionController {
     public ResponseEntity<ResponseDTO> registerJson(@RequestBody @Valid RegisterRangeFormDTO form) {
         return ResponseEntity.ok(ptSessionService.registerRangeResponse(form));
     }
+
     // new 출석
     @PostMapping("/sessions/status")
     @ResponseBody

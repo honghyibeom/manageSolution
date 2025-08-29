@@ -4,127 +4,219 @@
       layout:decorate="~{layout}">
 
 <head>
-    <title th:replace="~{::title}">회원 등록</title>
+    <title>회원 등록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f9fafc;
+        }
+
+        .card {
+            border-radius: 14px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .card-header {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            font-weight: 600;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .btn-check + .btn {
+            min-width: 100px;
+        }
+        .btn-group .btn {
+            border-radius: 8px;
+        }
+        /* 연한 Primary */
+        .btn-outline-primary {
+            color: #4a90e2;
+            border-color: #4a90e2;
+        }
+        .btn-outline-primary:hover,
+        .btn-outline-primary:checked + .btn-outline-primary,
+        .btn-check:checked + .btn-outline-primary {
+            background-color: #4a90e2;
+            color: #fff;
+        }
+
+        /* 연한 Danger */
+        .btn-outline-danger {
+            color: #e57373;
+            border-color: #e57373;
+        }
+        .btn-outline-danger:hover,
+        .btn-check:checked + .btn-outline-danger {
+            background-color: #e57373;
+            color: #fff;
+        }
+    </style>
 </head>
 
 <body>
 <main layout:fragment="content" class="container mt-4"
       th:data-mode="${memberForm.memberId == null ? 'create' : 'edit'}">
-    <h4 class="fw-bold mb-4" th:text="${memberForm.memberId == null ? '회원 등록' : '회원 수정'}"></h4>
 
+    <!-- 제목 -->
+    <div class="d-flex align-items-center mb-4">
+        <i class="bi bi-person-plus-fill text-primary fs-3 me-2"></i>
+        <h4 class="fw-bold mb-0" th:text="${memberForm.memberId == null ? '회원 등록' : '회원 수정'}"></h4>
+    </div>
+
+    <!-- 등록 폼 -->
     <form th:action="@{${memberForm.memberId == null} ? '/members' : '/members/' + ${memberForm.memberId} + '/edit'}"
           th:object="${memberForm}" method="post">
 
-        <div class="row justify-content-center">
-            <!-- 왼쪽: 회원 정보 -->
+        <div class="row g-4 justify-content-center">
+            <!-- 왼쪽: 회원 기본 정보 -->
             <div class="col-md-6">
-                <div class="card p-4 mb-4">
+                <div class="card p-4 h-100">
+                    <div class="card-header mb-3"><i class="bi bi-person-badge me-2"></i> 회원 정보</div>
+
                     <div class="mb-3">
                         <label class="form-label">이름</label>
-                        <input type="text" th:field="*{name}" class="form-control" />
+                        <input type="text" th:field="*{name}" class="form-control" placeholder="이름 입력"/>
                         <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">전화번호</label>
-                        <input type="text" th:field="*{phone}" class="form-control" id="phoneInput" maxlength="13" />
+                        <input type="text" th:field="*{phone}" class="form-control" id="phoneInput" maxlength="13" placeholder="010-0000-0000"/>
                         <div class="text-danger small" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">생년월일</label>
-                        <input type="date" th:field="*{birthDate}" class="form-control" />
+                        <input type="date" th:field="*{birthDate}" class="form-control"/>
                         <div class="text-danger small" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label m-6">성별</label>
-                            <input type="radio" class="btn-check" name="gender" id="male" value="남성" th:field="*{gender}">
-                            <label class="btn btn-outline-primary" for="male">남성</label>
 
-                            <input type="radio" class="btn-check" name="gender" id="female" value="여성" th:field="*{gender}">
-                            <label class="btn btn-outline-danger" for="female">여성</label>
+                    <div class="mb-3">
+                        <label class="form-label">성별</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" id="male" value="남성" th:field="*{gender}">
+                            <label class="btn btn-outline-primary" for="male"><i class="bi bi-gender-male me-1"></i> 남성</label>
+
+                            <input type="radio" class="btn-check" id="female" value="여성" th:field="*{gender}">
+                            <label class="btn btn-outline-danger" for="female"><i class="bi bi-gender-female me-1"></i> 여성</label>
+                        </div>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">이용 상태</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" id="ACTIVE" value="ACTIVE" th:field="*{status}">
+                            <label class="btn btn-outline-success" for="ACTIVE"><i class="bi bi-check-circle me-1"></i> 이용함</label>
+
+                            <input type="radio" class="btn-check" id="INACTIVE" value="INACTIVE" th:field="*{status}">
+                            <label class="btn btn-outline-secondary" for="INACTIVE"><i class="bi bi-x-circle me-1"></i> 이용 안함</label>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">메모</label>
-                        <textarea th:field="*{memo}" class="form-control" rows="3"></textarea>
+                        <textarea th:field="*{memo}" class="form-control" rows="3" placeholder="특이사항을 입력하세요"></textarea>
                     </div>
                 </div>
             </div>
 
             <!-- 오른쪽: 상품 등록 -->
             <div class="col-md-6">
-                <div class="card p-4 mb-4">
-                    <label class="form-label">상품 등록</label>
-                    <select th:field="*{productType}" id="productType" onchange="toggleProductSection()" class="form-select mb-3">
-                        <option value="">선택</option>
-                        <option value="MEMBERSHIP">회원권</option>
-                        <option value="PT">PT 패키지</option>
-                    </select>
+                <div class="card shadow-sm p-4 h-100">
+                    <div class="card-header bg-light fw-bold mb-3">
+                        <i class="bi bi-box-seam me-2 text-primary"></i> 상품 등록
+                    </div>
 
-                    <!-- 회원권 -->
-                    <div id="membershipSection" class="d-none">
-                        <div class="mb-2">
-                            <label class="form-label">회원권 상품</label>
-                            <select th:field="*{membershipProductId}" id="membershipProductId" onchange="handleMembershipChange()" class="form-select">
-                                <option th:each="p : ${membershipProducts}" th:value="${p.productId}"
-                                        th:data-duration="${p.duration}" th:data-price="${p.price}" th:text="${p.name}"></option>
-                            </select>
+                    <!-- 상품 선택 -->
+                    <div class="mb-3">
+                        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
                         </div>
-                        <div class="mb-2">
-                            <label class="form-label">시작일</label>
-                            <input type="date" th:field="*{membershipStartDate}" id="membershipStartDate" onchange="recalculateMembershipEndDate()" class="form-control" />
-                            <div class="text-danger small" th:if="${#fields.hasErrors('membershipStartDate')}" th:errors="*{membershipStartDate}"></div>
+                        <label class="form-label fw-semibold">상품 선택</label>
+                        <select th:field="*{productId}" id="productId" onchange="handleProductChange()" class="form-select">
+                            <option value="">선택하세요</option>
+                            <optgroup label="회원권">
+                                <option th:each="p : ${products}" th:if="${p.type == 'MEMBERSHIP'}"
+                                        th:value="${p.productId}"
+                                        th:data-type="MEMBERSHIP"
+                                        th:data-duration="${p.duration}"
+                                        th:data-price="${p.price}"
+                                        th:text="${p.name}"></option>
+                            </optgroup>
+                            <optgroup label="PT 패키지">
+                                <option th:each="p : ${products}" th:if="${p.type == 'PT'}"
+                                        th:value="${p.productId}"
+                                        th:data-type="PT"
+                                        th:data-count="${p.count}"
+                                        th:data-duration="${p.duration}"
+                                        th:data-price="${p.price}"
+                                        th:text="${p.name}"></option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- hidden: productType 자동 세팅 -->
+                    <input type="hidden" th:field="*{productType}" id="productType"/>
+
+                    <!-- PT 전용: 트레이너 -->
+                    <div class="mb-3 d-none" id="trainerSection">
+                        <label class="form-label fw-semibold">트레이너</label>
+                        <select th:field="*{trainerId}" class="form-select">
+                            <option th:each="t : ${trainers}" th:value="${t.trainerId}" th:text="${t.name}"></option>
+                        </select>
+                    </div>
+
+                    <!-- 날짜 -->
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label fw-semibold">시작일</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-calendar-event"></i></span>
+                                <input type="date" th:field="*{startDate}" id="startDate"
+                                       onchange="recalculateEndDate()" class="form-control"/>
+                            </div>
                         </div>
-                        <div class="mb-2">
-                            <label class="form-label">종료일</label>
-                            <input type="date" th:field="*{membershipEndDate}" id="membershipEndDate" class="form-control" />
-                            <div class="text-danger small" th:if="${#fields.hasErrors('membershipEndDate')}" th:errors="*{membershipEndDate}"></div>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">가격</label>
-                            <input type="number" th:field="*{membershipPrice}" id="membershipPrice" class="form-control" />
+                        <div class="col">
+                            <label class="form-label fw-semibold">종료일</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-calendar-x"></i></span>
+                                <input type="date" th:field="*{endDate}" id="endDate" class="form-control"/>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- PT -->
-                    <div id="ptSection" class="d-none">
-                        <div class="mb-2">
-                            <label class="form-label">PT 상품</label>
-                            <select th:field="*{ptProductId}" id="ptProductId" onchange="handlePtProductChange()" class="form-select">
-                                <option th:each="p : ${ptProducts}" th:value="${p.productId}"
-                                        th:data-count="${p.count}" th:data-duration="${p.duration}" th:data-price="${p.price}" th:text="${p.name}"></option>
-                            </select>
+                    <!-- PT 전용: 횟수 -->
+                    <div class="row mb-3 d-none" id="countSection">
+                        <div class="col">
+                            <label class="form-label fw-semibold">총 횟수</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-list-ol"></i></span>
+                                <input type="number" th:field="*{totalCount}" id="totalCount" class="form-control"/>
+                            </div>
                         </div>
-                        <div class="mb-2">
-                            <label class="form-label">트레이너</label>
-                            <select th:field="*{trainerId}" class="form-select">
-                                <option th:each="t : ${trainers}" th:value="${t.trainerId}" th:text="${t.name}"></option>
-                            </select>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">시작일</label>
-                            <input type="date" th:field="*{ptStartDate}" id="ptStartDate" onchange="recalculatePtEndDate()" class="form-control" />
-                            <div class="text-danger small" th:if="${#fields.hasErrors('ptStartDate')}" th:errors="*{ptStartDate}"></div>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">종료일</label>
-                            <input type="date" th:field="*{ptEndDate}" id="ptEndDate" class="form-control" />
-                            <div class="text-danger small" th:if="${#fields.hasErrors('ptEndDate')}" th:errors="*{ptEndDate}"></div>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">총 횟수</label>
-                            <input type="number" th:field="*{ptTotalCount}" id="ptTotalCount" class="form-control" />
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">가격</label>
-                            <input type="number" th:field="*{ptPrice}"  id="ptPrice" class="form-control" />
+                    </div>
+
+                    <!-- 가격 -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">가격</label>
+                        <div class="input-group">
+                            <input type="number" th:field="*{price}" id="price" class="form-control"/>
+                            <span class="input-group-text">원</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="text-end mt-3">
-            <button type="submit" class="btn btn-primary">저장</button>
-            <a th:href="@{/members}" class="btn btn-secondary">취소</a>
+        <!-- 버튼 -->
+        <div class="text-end mt-4">
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-1"></i> 저장</button>
+            <a th:href="@{/members}" class="btn btn-secondary px-4"><i class="bi bi-x-circle me-1"></i> 취소</a>
         </div>
     </form>
 
@@ -151,7 +243,43 @@
                 }
             }
         }
+        function handleProductChange() {
+            const sel = document.getElementById("productId").selectedOptions[0];
+            if (!sel) return;
 
+            // ✅ productType 자동 세팅
+            document.getElementById("productType").value = sel.dataset.type;
+
+            const type = sel.dataset.type;
+            const duration = parseInt(sel.dataset.duration);
+            const price = parseInt(sel.dataset.price);
+
+            // 오늘 날짜 기본값
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("startDate").value = today;
+
+            if (!isNaN(duration)) {
+                document.getElementById("endDate").value = addDays(new Date(today), duration);
+            }
+            if (!isNaN(price)) {
+                document.getElementById("price").value = price;
+            }
+
+            // PT 전용 처리
+            if (type === "PT") {
+                document.getElementById("trainerSection").classList.remove("d-none");
+                document.getElementById("countSection").classList.remove("d-none");
+
+                const count = parseInt(sel.dataset.count);
+                if (!isNaN(count)) {
+                    document.getElementById("totalCount").value = count;
+                    document.getElementById("remainingCount").value = count;
+                }
+            } else {
+                document.getElementById("trainerSection").classList.add("d-none");
+                document.getElementById("countSection").classList.add("d-none");
+            }
+        }
 
         function addDays(date, days) {
             const result = new Date(date);
@@ -159,66 +287,14 @@
             return result.toISOString().split('T')[0];
         }
 
-        function handleMembershipChange() {
-            const sel = document.getElementById("membershipProductId").selectedOptions[0];
-            if (!sel) return;
-
-            const duration = parseInt(sel.dataset.duration);
-            const price = parseInt(sel.dataset.price);
-
-            document.querySelector("input[name='membershipStartDate']").value = new Date().toISOString().split('T')[0];
-
-            const startDate = document.querySelector("input[name='membershipStartDate']").value || new Date().toISOString().split('T')[0];
-            if (!isNaN(duration)) {
-                document.querySelector("input[name='membershipEndDate']").value = addDays(new Date(startDate), duration);
-            }
-            if (!isNaN(price)) {
-                document.querySelector("input[name='membershipPrice']").value = price;
-            }
-        }
-
-        function handlePtProductChange() {
-            const sel = document.getElementById("ptProductId").selectedOptions[0];
-            if (!sel) return;
-
-            const count = parseInt(sel.dataset.count);
-            const duration = parseInt(sel.dataset.duration);
-            const price = parseInt(sel.dataset.price);
-
-            document.getElementById("ptStartDate").value = new Date().toISOString().split('T')[0];
-
-            const startDate = document.getElementById("ptStartDate").value || new Date().toISOString().split('T')[0];
-            if (!isNaN(duration)) {
-                document.getElementById("ptEndDate").value = addDays(new Date(startDate), duration);
-            }
-            if (!isNaN(count)) {
-                document.getElementById("ptTotalCount").value = count;
-            }
-            if (!isNaN(price)) {
-                document.querySelector("input[name='ptPrice']").value = price;
-            }
-        }
-
-
-        function recalculateMembershipEndDate() {
-            const start = document.querySelector("input[name='membershipStartDate']").value;
-            const sel = document.getElementById("membershipProductId").selectedOptions[0];
+        function recalculateEndDate() {
+            const start = document.getElementById("startDate").value;
+            const sel = document.getElementById("productId").selectedOptions[0];
             if (!start || !sel) return;
 
             const duration = parseInt(sel.dataset.duration);
             if (!isNaN(duration)) {
-                document.querySelector("input[name='membershipEndDate']").value = addDays(new Date(start), duration);
-            }
-        }
-
-        function recalculatePtEndDate() {
-            const start = document.getElementById("ptStartDate").value;
-            const sel = document.getElementById("ptProductId").selectedOptions[0];
-            if (!start || !sel) return;
-
-            const duration = parseInt(sel.dataset.duration);
-            if (!isNaN(duration)) {
-                document.getElementById("ptEndDate").value = addDays(new Date(start), duration);
+                document.getElementById("endDate").value = addDays(new Date(start), duration);
             }
         }
 

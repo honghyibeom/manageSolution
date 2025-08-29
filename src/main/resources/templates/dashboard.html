@@ -238,7 +238,7 @@
     </div>
 
     <script th:inline="javascript">
-        const trainerPtStats = [[${trainerPtStats}]];
+        const trainerPtStats = /*[[${trainerPtStats}]]*/ {};
         const ctx = document.getElementById("ptTrainerChart").getContext("2d");
         new Chart(ctx, {
             type: 'bar',

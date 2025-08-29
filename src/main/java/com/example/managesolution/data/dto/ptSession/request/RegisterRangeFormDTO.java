@@ -20,7 +20,7 @@ import java.util.List;
 public class RegisterRangeFormDTO {
     @NotNull private Long trainerId;
     @NotNull private Long memberId;
-    @NotNull private Long packageId;
+    @NotNull private Long subscriptionId;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

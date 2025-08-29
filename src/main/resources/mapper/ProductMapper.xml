@@ -71,4 +71,34 @@
         GROUP BY pr.productId, pr.name
         ORDER BY rank;
     </select>
+
+    <select id="selectPtMembers" resultType="PtMemberSalesDTO">
+        SELECT
+            p.name AS productName,
+            COUNT(pm.paymentId) AS count,
+            COALESCE(p.price, 0) AS unitPrice,
+            COALESCE(SUM(pm.amount), 0) AS totalAmount
+        FROM product p
+                 LEFT JOIN payment pm
+                           ON pm.productId = p.productId
+                               AND pm.paidAt BETWEEN #{startDate} AND #{endDate}
+        WHERE p.type = 'PT'
+        GROUP BY p.name, p.price
+        ORDER BY p.name
+    </select>
+
+    <select id="selectMembershipMembers" resultType="MembershipSalesDTO">
+        SELECT
+            p.name AS productName,
+            COUNT(pm.paymentId) AS count,
+            COALESCE(p.price, 0) AS unitPrice,
+            COALESCE(SUM(pm.amount), 0) AS totalAmount
+        FROM product p
+                 LEFT JOIN payment pm
+                           ON pm.productId = p.productId
+                               AND pm.paidAt BETWEEN #{startDate} AND #{endDate}
+        WHERE p.type = 'MEMBERSHIP'
+        GROUP BY p.name, p.price
+        ORDER BY p.name
+    </select>
 </mapper>

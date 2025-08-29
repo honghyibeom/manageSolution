@@ -162,26 +162,26 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="membership : ${membershipMembers}">
-                                <td th:text="${membership.memberName}"></td>
-                                <td th:text="${membership.phone}"></td>
-                                <td th:text="${membership.productName}"></td>
+                            <tr th:each="imminentMember : ${imminentMembers}">
+                                <td th:text="${imminentMember.memberName}"></td>
+                                <td th:text="${imminentMember.phone}"></td>
+                                <td th:text="${imminentMember.productName}"></td>
                                 <td>
                                     <!-- 잔여횟수 조건부 -->
                                     <span class="badge bg-danger"
-                                          th:if="${membership.remainingCount != null and membership.remainingCount != '-' and T(Integer).parseInt(membership.remainingCount) <= 3}"
-                                          th:text="'잔여 ' + ${membership.remainingCount}">
+                                          th:if="${imminentMember.remainingCount != null and imminentMember.remainingCount != '-' and T(Integer).parseInt(imminentMember.remainingCount) <= 3}"
+                                          th:text="'잔여 ' + ${imminentMember.remainingCount}">
                                         </span>
                                     <span class="badge bg-success"
-                                          th:if="${membership.remainingCount != null and membership.remainingCount != '-' and T(Integer).parseInt(membership.remainingCount) > 3}"
-                                          th:text="'잔여 ' + ${membership.remainingCount}">
+                                          th:if="${imminentMember.remainingCount != null and imminentMember.remainingCount != '-' and T(Integer).parseInt(imminentMember.remainingCount) > 3}"
+                                          th:text="'잔여 ' + ${imminentMember.remainingCount}">
                                         </span>
                                     <span class="badge bg-secondary"
-                                          th:if="${membership.remainingCount == '-'}"
-                                          th:text="${membership.remainingCount}">
+                                          th:if="${imminentMember.remainingCount == '-'}"
+                                          th:text="${imminentMember.remainingCount}">
                                         </span>
                                 </td>
-                                <td th:text="${#temporals.format(membership.endDate, 'yyyy-MM-dd')}"></td>
+                                <td th:text="${#temporals.format(imminentMember.endDate, 'yyyy-MM-dd')}"></td>
                             </tr>
                             </tbody>
                         </table>
@@ -189,29 +189,29 @@
 
                     <!-- 모바일 카드 -->
                     <div class="card-mobile">
-                        <div th:each="membership : ${membershipMembers}" class="card shadow-sm mb-2 p-3">
-                            <div class="fw-bold" th:text="${membership.memberName}"></div>
-                            <div class="text-muted small" th:text="${membership.phone}"></div>
+                        <div th:each="imminentMember : ${imminentMembers}" class="card shadow-sm mb-2 p-3">
+                            <div class="fw-bold" th:text="${imminentMember.memberName}"></div>
+                            <div class="text-muted small" th:text="${imminentMember.phone}"></div>
                             <div class="mt-2">
-                                <span class="badge bg-secondary" th:text="${membership.productName}"></span>
+                                <span class="badge bg-secondary" th:text="${imminentMember.productName}"></span>
                             </div>
                             <div class="mt-2">
                                 <!-- 잔여횟수 조건부 -->
                                 <span class="badge bg-danger"
-                                      th:if="${membership.remainingCount != null and membership.remainingCount != '-' and T(Integer).parseInt(membership.remainingCount) <= 3}"
-                                      th:text="'잔여 ' + ${membership.remainingCount}">
+                                      th:if="${imminentMember.remainingCount != null and imminentMember.remainingCount != '-' and T(Integer).parseInt(imminentMember.remainingCount) <= 3}"
+                                      th:text="'잔여 ' + ${imminentMember.remainingCount}">
                                 </span>
                                 <span class="badge bg-success"
-                                      th:if="${membership.remainingCount != null and membership.remainingCount != '-' and T(Integer).parseInt(membership.remainingCount) > 3}"
-                                      th:text="'잔여 ' + ${membership.remainingCount}">
+                                      th:if="${imminentMember.remainingCount != null and imminentMember.remainingCount != '-' and T(Integer).parseInt(imminentMember.remainingCount) > 3}"
+                                      th:text="'잔여 ' + ${imminentMember.remainingCount}">
                                 </span>
                                 <span class="badge bg-secondary"
-                                      th:if="${membership.remainingCount == '-'}"
-                                      th:text="${membership.remainingCount}">
+                                      th:if="${imminentMember.remainingCount == '-'}"
+                                      th:text="${imminentMember.remainingCount}">
                                 </span>
                             </div>
                             <div class="mt-2 small text-muted">
-                                종료일: [[${#temporals.format(membership.endDate, 'yyyy-MM-dd')}]]
+                                종료일: [[${#temporals.format(imminentMember.endDate, 'yyyy-MM-dd')}]]
                             </div>
                         </div>
                     </div>
