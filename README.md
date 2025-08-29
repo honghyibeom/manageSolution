@@ -14,13 +14,12 @@
 ### 🧑‍🤝‍🧑 맴버구성
 홍희범 - JavaSpringBoot 
 
-### ⚙️ 개발 환경
-- `Java 17`
-- `JDK 17.0.14`
-- **IDE** : Intelij
-- **Framework** : Springboot(3.3.1)
-- **Database** : Maria DB(11xe), H2
-- **SQL Mapper** : myBatis
+- ### ⚙️ 개발 환경
+![Java](https://img.shields.io/badge/Java-17-007396?logo=java)
+![Spring Boot](https://img.shields.io/badge/SpringBoot-3.3.1-6DB33F?logo=springboot)
+![MyBatis](https://img.shields.io/badge/MyBatis-Mapper-red)
+![Thymeleaf](https://img.shields.io/badge/Thymeleaf-Template-brightgreen)
+![MariaDB](https://img.shields.io/badge/MariaDB-11.0-blue?logo=mariadb)
 
 ### 📌 사용 기술
 - Spring Security
@@ -28,43 +27,18 @@
 - Thymeleaf
 
 ## 📌 주요 기능
-#### 로그인
-- form 방식 로그인
-- securityConfig
 
-#### 회원 관리
-- 회원 CRUD
-- 회원별 상품 CRUD
+| 기능           | 설명                                   |
+| -------------- | -------------------------------------- |
+| 로그인         | Spring Security 기반 form 로그인       |
+| 회원 관리      | 회원 CRUD, 상품(PT/회원권) CRUD        |
+| 결제 관리      | 미결제/마감 회원 조회, 결제 내역 조회  |
+| 강사 관리      | 강사 CRUD, 담당 회원 관리              |
+| 수업 관리      | 트레이너별 수업 CRUD, 시간표 조회      |
+| 매출 통계      | 총 매출, 일/월별 매출 그래프, 상품별 매출 |
+| CARE 뷰       | PT 첫 수업 조회, 마감 임박 회원 조회    |
+| 관리자 대시보드 | 회원 통계, 상품 순위, 트레이너 일정 조회 |
 
-#### 결제 관리
-- 미 결제 회원 조회 및 처리
-- 마감 회원 조회 및 처리
-- 결제 내역 조회
-
-#### 강사(트레이너) 관리
-- 강사 CRUD
-- 강사 담당 회원 조회
-
-#### 상품 관리
-- 상품(pt권, 회원권) CRUD
-
-#### 수업 관리
-- 트레이너 별 수업 조회
-- 수업 CRUD
-  
-#### 매출 통계
-- 총 매출, 월,일 매출 조회
-- 기간별 매출 그래프 및 상품별로 매출 조회
-
-#### 회원 CARE 뷰
-- pt 첫 수업 조회
-- 마감 임박 회원 조회
-
-#### 관리자 대시보드 뷰
-- 회원 통계 조회
-- 상품 순위 조회
-- 트레이너 시간표 조회
-- 트레이너 담당 회원 조회
 
 ## 🗒 ERD
 <img width="1660" height="1007" alt="Untitled (1)" src="https://github.com/user-attachments/assets/a6d5e6d4-85f2-42e4-9839-eb32150f3bae" />
@@ -92,9 +66,11 @@
 <img width="1259" height="829" alt="image" src="https://github.com/user-attachments/assets/a1894464-6929-4477-be01-36dabb4890c4" />
 
 
-
-
-
+## 🔮 향후 개선 계획
+- 얼굴인식 출석 기능
+- 환불 기능
+- 모바일 앱 버전 출시
+- Docker 기반 배포 자동화
 
 
 ## 📁 프로젝트 구조
