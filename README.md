@@ -87,6 +87,9 @@
 
 ### 2. 수업 등록/조회 UI 개선
 #### 초기 버전
+![image.png](attachment:721cf1b7-36a6-4c36-8f57-9eecfcfd9716:image.png)
+![image.png](attachment:5ddc6cd8-e155-40c9-8d84-ee1cb64b5890:image.png)
+
 - 달력에서 날짜 클릭 → 해당 날짜의 PT 수업 등록 및 조회
 - 문제점
   - 날짜별로 클릭해야 해서 전체 조회 불가능
@@ -95,6 +98,8 @@
     - 시간대를 일일이 입력해야 함
 
 #### 개선 버전
+![image.png](attachment:4609f14d-66f1-4e03-81da-1a7d97052daa:image.png)
+![image.png](attachment:f647786f-6364-454e-b48f-a4e0b8ce2268:34f240db-12ef-4e6b-a845-1d94d51895bd.png)
 - **전체 조회 기능 추가** : 날짜 단위가 아니라 기간/트레이너 단위 조회 가능
 - **등록 UI 개선** : 
   - 반복 등록 시 요일·주차 선택 가능
