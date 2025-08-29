@@ -14,7 +14,7 @@
 ### 🧑‍🤝‍🧑 맴버구성
 홍희범 - JavaSpringBoot 
 
-- ### ⚙️ 개발 환경
+### ⚙️ 개발 환경
 ![Java](https://img.shields.io/badge/Java-17-007396?logo=java)
 ![Spring Boot](https://img.shields.io/badge/SpringBoot-3.3.1-6DB33F?logo=springboot)
 ![MyBatis](https://img.shields.io/badge/MyBatis-Mapper-red)
