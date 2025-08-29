@@ -1,4 +1,4 @@
-# SpringBoot-Project
+# GYM CRM Solution Project
 - springBoot + mybatis + thymeleaf <br>
  웹 프로젝트 입니다. <br>
 
