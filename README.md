@@ -6,7 +6,7 @@
 헬스장 및 운동 시설의 고객관리 프로젝트입니다. <br>
 오래된 헬스장에 가보면 수기 관리하고 있어서 <br>
 기본적인 회원 관리 및 매출현황을 편하게 관리할 수 있도록 하면 어떨까<br>
-그리고 CCR과 mybatis를 경험해보고자 프로젝트를 만들었습니다. <br>
+그리고 SSR과 mybatis를 경험해보고자 프로젝트를 만들었습니다. <br>
 
 ## 🕰️ 개발 기간
 * 24.06.26일 - 진행중
@@ -49,7 +49,6 @@
 - 상품(pt권, 회원권) CRUD
 
 #### 수업 관리
-- 달력 생성
 - 트레이너 별 수업 조회
 - 수업 CRUD
   
@@ -71,6 +70,32 @@
 <img width="1660" height="1007" alt="Untitled (1)" src="https://github.com/user-attachments/assets/a6d5e6d4-85f2-42e4-9839-eb32150f3bae" />
 
 ## 🖼️ View
+#### 관리 메뉴
+- 회원 관리
+<img width="1357" height="626" alt="image" src="https://github.com/user-attachments/assets/aaf8a6b8-9ce6-483d-87cc-416e9ac8060a" />
+
+- 결제 관리
+<img width="1610" height="817" alt="image" src="https://github.com/user-attachments/assets/34268d8d-b268-4a5d-89b0-f00a4102bdac" />
+
+- 강사 관리
+<img width="1260" height="715" alt="image" src="https://github.com/user-attachments/assets/f4ca1656-1887-476c-84bd-88b5846d2103" />
+
+- 상품 관리
+<img width="1365" height="698" alt="image" src="https://github.com/user-attachments/assets/520631ea-253a-4fe5-b106-ee44d5ac53b0" />
+
+- 수업 관리
+<img width="1358" height="680" alt="image" src="https://github.com/user-attachments/assets/94713497-a229-4d2c-ace4-337016042dce" />
+
+#### 리포트
+<img width="1613" height="776" alt="image" src="https://github.com/user-attachments/assets/5815862f-b192-45c5-aa97-b9eeafb5e7ef" />
+<img width="901" height="884" alt="image" src="https://github.com/user-attachments/assets/08998422-a0ed-4dbc-858a-8bd1cb0fceee" />
+<img width="1259" height="829" alt="image" src="https://github.com/user-attachments/assets/a1894464-6929-4477-be01-36dabb4890c4" />
+
+
+
+
+
+
 
 ## 📁 프로젝트 구조
 
