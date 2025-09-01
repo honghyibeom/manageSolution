@@ -6,5 +6,6 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface AttendanceMapper {
 
+    // 출석 등록
     void insertAttendance(Attendance attendance);
 }
