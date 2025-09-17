@@ -30,14 +30,12 @@
                 <i class="bi bi-box-seam me-2"></i> 상품 관리
             </a>
 
-
             <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/lecture/new}">
                 <i class="bi bi-calendar-event me-2"></i> 수업 관리
             </a>
-            
+
             <!-- 🔻 구분선 -->
             <div class="border-top my-2"></div>
-
 
             <!-- 📊 리포트/분석 영역 -->
             <div class="text-muted small text-uppercase px-3">리포트</div>
@@ -50,8 +48,12 @@
                 <i class="bi bi-bar-chart-line me-2"></i> 매출 현황
             </a>
 
-<!--            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">-->
-<!--                <i class="bi bi-clipboard-check me-2"></i> 매출 집계-->
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/attendance/report}">
+                <i class="bi bi-clipboard-check me-2"></i> 출석 현황
+            </a>
+
+<!--            <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/attendance/report}">-->
+<!--                <i class="bi bi-clipboard-check me-2"></i> 관리자 Chat-->
 <!--            </a>-->
 
         </div>

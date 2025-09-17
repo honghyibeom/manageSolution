@@ -24,6 +24,8 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.theokanning.openai-gpt3-java:service:0.18.2' // openai client
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'

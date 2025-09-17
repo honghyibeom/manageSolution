@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>출석 리포트</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 반응형 */
+        @media (max-width: 991.98px) {
+            .table-desktop { display: none; }
+            .card-mobile { display: block; }
+        }
+        @media (min-width: 992px) {
+            .table-desktop { display: block; }
+            .card-mobile { display: none; }
+        }
+
+        /* 버튼 & 배지 */
+        .btn-primary {
+            background: #42a5f5; /* 좀 더 연한 하늘색 */
+            border: none;
+        }
+        .btn-outline-primary {
+            border-color: #42a5f5;
+            color: #42a5f5;
+        }
+        .btn-outline-primary:hover {
+            background: #42a5f5;
+            color: #fff;
+        }
+        .badge.bg-success { background-color: #4caf50 !important; }
+        .badge.bg-danger { background-color: #ef5350 !important; }
+
+        /* 카드 스타일 */
+        .card {
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        .card-header {
+            background: #f5f9ff;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: bold;
+        }
+        .card.shadow-sm:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        /* 테이블 */
+        .table thead {
+            background: #f1f5fb;
+        }
+        .table-hover tbody tr:hover {
+            background: #f9fbff;
+        }
+
+        /* 모바일 카드 */
+        .card-mobile .card {
+            border-left: 4px solid #42a5f5;
+        }
+        .card-mobile .card-body h6 {
+            color: #333;
+        }
+
+        /* 차트 높이 */
+        canvas {
+            max-height: 280px;
+        }
+    </style>
+</head>
+
+<main layout:fragment="content">
+    <div class="container">
+        <!-- 페이지 제목 -->
+        <div class="d-flex align-items-center mb-4">
+            <i class="bi bi-clipboard-check text-primary fs-3 me-2"></i>
+            <h4 class="fw-bold mb-0">출석 리포트</h4>
+        </div>
+
+        <!-- 📅 기간 필터 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <form method="get" class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0 fw-bold text-secondary">기간</label>
+                        <input type="date" name="startDate" th:value="${param.startDate}"
+                               class="form-control form-control-sm" style="width:auto;">
+                        ~
+                        <input type="date" name="endDate" th:value="${param.endDate}"
+                               class="form-control form-control-sm" style="width:auto;">
+                        <button type="submit" class="btn btn-sm btn-primary">조회</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 🔍 회원별 출석 현황 -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-people me-2"></i> 회원별 출석 현황</span>
+                <form class="d-flex" style="max-width: 200px;">
+                    <input type="text" class="form-control form-control-sm me-2" placeholder="회원명 검색">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">검색</button>
+                </form>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive table-desktop">
+                    <table class="table table-bordered table-hover text-center align-middle">
+                        <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>시간</th>
+                            <th>회원명</th>
+                            <th>강사</th>
+                            <th>상품</th>
+                            <th>상태</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="report : ${reportList}">
+                            <td th:text="${report.sessionDate}">2025-09-01</td>
+                            <td th:text="${report.sessionTime}">09:00</td>
+                            <td th:text="${report.memberName}">김철수</td>
+                            <td th:text="${report.trainerName}">홍길동</td>
+                            <td th:text="${report.productName}">10회 PT</td>
+                            <td>
+                                <span th:classappend="${report.status == '출석'} ? 'badge bg-success' : 'badge bg-danger'"
+                                      th:text="${report.status}">출석</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 모바일 카드 뷰 -->
+                <div class="card-mobile">
+                    <div class="card mb-2 shadow-sm" th:each="report : ${reportList}">
+                        <div class="card-body">
+                            <h6 class="fw-bold">
+                                <span th:text="${report.memberName}">김철수</span>
+                                <span th:classappend="${report.status == '출석'} ? 'badge bg-success' : 'badge bg-danger'"
+                                      th:text="${report.status}">출석</span>
+                            </h6>
+                            <p class="mb-1">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                <span th:text="${report.sessionDate}">2025-09-01</span> (<span th:text="${report.sessionTime}">09:00</span>)
+                            </p>
+                            <p class="mb-1"><i class="bi bi-person-badge me-1"></i> 강사: <span th:text="${report.trainerName}">홍길동</span></p>
+                            <p class="mb-0"><i class="bi bi-box-seam me-1"></i> 상품: <span th:text="${report.productName}">10회 PT</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📊 차트 -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header"><i class="bi bi-calendar3-week me-2"></i> 요일별 출석 현황</div>
+                    <div class="card-body"><canvas id="weeklyChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header"><i class="bi bi-clock-history me-2"></i> 시간대별 출석 현황</div>
+                    <div class="card-body"><canvas id="timeChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🚨 휴면 회원 -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header text-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i> 휴면 회원 (최근 1개월 이상 미출석)
+            </div>
+            <div class="card-body">
+                <div class="table-responsive table-desktop">
+                    <table class="table table-bordered table-hover text-center align-middle">
+                        <thead>
+                        <tr>
+                            <th>회원명</th>
+                            <th>전화번호</th>
+                            <th>마지막 출석일</th>
+                            <th>보유 상품</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="dormant : ${dormantList}">
+                            <td th:text="${dormant.memberName}">박민수</td>
+                            <td th:text="${dormant.phone}">010-5555-6666</td>
+                            <td th:text="${dormant.lastAttendanceDate}">2025-07-10</td>
+                            <td th:text="${dormant.productName}">20회 PT</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 모바일 카드 -->
+                <div class="card-mobile">
+                    <div class="card mb-2 border-danger shadow-sm">
+                        <div class="card-body">
+                            <h6 class="fw-bold text-danger">박민수</h6>
+                            <p class="mb-1"><i class="bi bi-phone me-1"></i> 010-5555-6666</p>
+                            <p class="mb-1"><i class="bi bi-calendar-x me-1"></i> 마지막 출석: 2025-07-10</p>
+                            <p class="mb-0"><i class="bi bi-box-seam me-1"></i> 상품: 20회 PT</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Chart.js -->
+    <script th:inline="javascript">
+        const chartData = [[${chartData}]]; // { weekly: [...], time: [...] }
+
+        new Chart(document.getElementById('weeklyChart'), {
+            type: 'bar',
+            data: {
+                labels: ['월', '화', '수', '목', '금', '토', '일'],
+                datasets: [{ data: chartData.weekly, backgroundColor: '#42a5f5' }]
+            },
+            options: { plugins: { legend: { display: false } }, responsive: true }
+        });
+
+        new Chart(document.getElementById('timeChart'), {
+            type: 'line',
+            data: {
+                labels: ['06시', '09시', '12시', '15시', '18시', '21시'],
+                datasets: [{
+                    data: chartData.time,
+                    borderColor: '#ef5350',
+                    backgroundColor: 'rgba(239,83,80,0.2)',
+                    fill: true, tension: 0.3
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, responsive: true }
+        });
+    </script>
+</main>
+</html>

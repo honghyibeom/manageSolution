@@ -64,28 +64,3 @@ INSERT INTO payment (memberId, productId, amount, paidAt, method) VALUES
                                                                       (7, 3, 500000, DATE '2025-05-12', 'CARD'),
                                                                       (8, 3, 500000, DATE '2025-06-20', 'CARD'),
                                                                       (9, 3, 500000, DATE '2025-07-05', 'CARD');
-
--- INSERT INTO membership (memberId, productId, paymentId, startDate, endDate, price, isActive) VALUES
---                                                                                                  (1, 1, 1, DATE '2025-02-01', DATE '2025-03-02', 100000, FALSE),
---                                                                                                  (2, 2, 2, DATE '2025-03-01', DATE '2025-09-01', 500000, TRUE),
---                                                                                                  (3, 1, 3, DATE '2025-04-01', DATE '2025-05-01', 100000, FALSE);
-
--- INSERT INTO pt_package (memberId, trainerId, productId, paymentId, startDate, endDate, totalCount, remainingCount, price, isActive, created_at) VALUES
---                                                                                                                                         (4, 2, 3, 4, DATE '2025-02-05', DATE '2025-10-05', 10, 10, 500000, TRUE,TIMESTAMP '2025-02-05 09:11:52.167781'),
---                                                                                                                                         (5, 2, 3, 5, DATE '2025-02-05', DATE '2025-10-05', 10, 10, 500000, TRUE,TIMESTAMP '2025-02-05 09:11:52.167781'),
---                                                                                                                                         (6, 2, 3, 6, DATE '2025-02-05', DATE '2025-10-05', 10, 10, 500000, TRUE,TIMESTAMP '2025-02-05 09:11:52.167781'),
---                                                                                                                                         (7, 3, 3, 7, DATE '2025-02-05', DATE '2025-10-05', 10, 10, 500000, TRUE,TIMESTAMP '2025-02-05 09:11:52.167781'),
---                                                                                                                                         (8, 3, 3, 8, DATE '2025-03-10', DATE '2025-10-10', 10, 10, 500000, TRUE,TIMESTAMP '2025-03-10 09:11:52.167781'),
---                                                                                                                                         (9, 2, 3, 9, DATE '2025-04-15', DATE '2025-10-15', 10, 10, 500000, TRUE,TIMESTAMP '2025-04-15 09:11:52.167781');
-
-
--- -- PT 세션 (각 패키지별로 1~2회 출석)
--- INSERT INTO pt_session (packageId, trainerId, memberId, sessionDate, sessionTime) VALUES
---                                                                                       (1, 2, 1, DATE '2025-02-10', TIME '10:00:00'),
---                                                                                       (1, 2, 1, DATE '2025-02-15', TIME '10:00:00'),
---                                                                                       (2, 3, 2, DATE '2025-03-15', TIME '11:00:00'),
---                                                                                       (2, 3, 2, DATE '2025-03-20', TIME '11:00:00'),
---                                                                                       (3, 2, 3, DATE '2025-04-20', TIME '12:00:00'),
---                                                                                       (4, 3, 1, DATE '2025-05-20', TIME '13:00:00'),
---                                                                                       (5, 2, 2, DATE '2025-06-25', TIME '14:00:00'),
---                                                                                       (6, 3, 3, DATE '2025-07-10', TIME '15:00:00');

@@ -11,4 +11,66 @@
         VALUES (#{memberId}, #{sessionId}, #{status})
     </insert>
 
+    <select id="findAttendanceReport" resultType="AttendanceReportDTO">
+        SELECT
+        s.sessionDate,
+        s.sessionTime,
+        m.name        AS memberName,
+        t.name        AS trainerName,
+        p.name        AS productName,
+        s.status
+        FROM pt_session s
+        JOIN member m ON s.memberId = m.memberId
+        JOIN subscription sub ON s.subscriptionId = sub.subscriptionId
+        JOIN product p ON sub.productId = p.productId
+        LEFT JOIN app_user t ON s.trainerId = t.userId
+        <where>
+            <if test="startDate != null">AND s.sessionDate &gt;= #{startDate}</if>
+            <if test="endDate != null">AND s.sessionDate &lt;= #{endDate}</if>
+            <if test="keyword != null and keyword != ''">
+                AND m.name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY s.sessionDate DESC, s.sessionTime DESC
+    </select>
+
+    <!-- 요일별 출석 -->
+    <select id="findWeeklyAttendance" resultType="map">
+        SELECT DAY_OF_WEEK(s.sessionDate) AS dayOfWeek, COUNT(*) AS count
+        FROM pt_session s
+                 JOIN attendance a ON s.sessionId = a.sessionId
+        WHERE s.sessionDate BETWEEN DATEADD('DAY', -7, CURRENT_DATE) AND CURRENT_DATE
+          AND a.status = 'ATTENDED'
+        GROUP BY DAY_OF_WEEK(s.sessionDate)
+    </select>
+
+    <!-- 시간대별 출석 -->
+    <select id="findTimeAttendance" resultType="map">
+        SELECT HOUR(s.sessionTime) AS hourSlot, COUNT(*) AS count
+        FROM pt_session s
+                 JOIN attendance a ON s.sessionId = a.sessionId
+        WHERE s.sessionDate BETWEEN DATEADD('DAY', -7, CURRENT_DATE) AND CURRENT_DATE
+          AND a.status = 'ATTENDED'
+        GROUP BY HOUR(s.sessionTime)
+        ORDER BY hourSlot
+    </select>
+
+    <select id="findDormantMembers" resultType="DormantMemberDTO">
+        SELECT
+        m.name AS memberName,
+        m.phone AS phone,
+        p.name AS productName,
+        MAX(a.attendedAt) AS lastAttendanceDate
+        FROM member m
+        JOIN subscription sub ON m.memberId = sub.memberId AND sub.isActive = TRUE
+        JOIN product p ON sub.productId = p.productId
+        LEFT JOIN attendance a ON m.memberId = a.memberId
+        GROUP BY m.memberId, m.name, m.phone, p.name
+        HAVING MAX(a.attendedAt) IS NULL
+        OR MAX(a.attendedAt) &lt; DATEADD('DAY', -30, CURRENT_DATE)
+        ORDER BY lastAttendanceDate NULLS FIRST
+    </select>
+
+
+
 </mapper>

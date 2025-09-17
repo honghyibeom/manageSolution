@@ -47,7 +47,7 @@ public class AppUserController {
 
 
 
-        return "/dashboard";
+        return "dashboard";
     }
 
 }

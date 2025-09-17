@@ -32,40 +32,6 @@ CREATE TABLE product (
                          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE membership (
-                            membershipId BIGINT AUTO_INCREMENT PRIMARY KEY,
-                            memberId BIGINT NOT NULL,
-                            productId BIGINT NOT NULL,             -- product.type = 'MEMBERSHIP'
-                            paymentId BIGINT,
-                            startDate DATE NOT NULL,
-                            endDate DATE NOT NULL,
-                            price INT NOT NULL,                    -- 구매 당시 가격
-                            isActive BOOLEAN DEFAULT TRUE,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
-                            FOREIGN KEY (productId) REFERENCES product(productId) ON DELETE SET NULL
-);
-
-
--- PT 패키지 테이블
-CREATE TABLE pt_package (
-                            packageId BIGINT AUTO_INCREMENT PRIMARY KEY,
-                            memberId BIGINT NOT NULL,
-                            trainerId BIGINT,             -- 로그인 가능한 트레이너
-                            productId BIGINT NOT NULL,             -- product.type = 'PT'
-                            paymentId BIGINT,
-                            startDate DATE NOT NULL,
-                            endDate DATE NOT NULL,
-                            totalCount INT NOT NULL,
-                            remainingCount INT NOT NULL,
-                            price INT NOT NULL,                    -- 구매 당시 가격
-                            isActive BOOLEAN DEFAULT TRUE,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            FOREIGN KEY (memberId) REFERENCES member(memberId) ON DELETE CASCADE,
-                            FOREIGN KEY (trainerId) REFERENCES app_user(userId) ON DELETE SET NULL,
-                            FOREIGN KEY (productId) REFERENCES product(productId) ON DELETE SET NULL
-);
-
 CREATE TABLE trainer (
                          trainerId BIGINT PRIMARY KEY,         -- == app_user.userId
                          birthDate DATE,
