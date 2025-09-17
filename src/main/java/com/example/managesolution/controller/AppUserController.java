@@ -24,7 +24,7 @@ public class AppUserController {
     }
 
     //대시보드 조회
-    @GetMapping("/dashboard")
+    @GetMapping("/")
     public String dashboard(Model model) {
         // ✅ 회원 통계
         MemberStatsDTO memberStats = dashboardService.getMemberStats();
