@@ -185,7 +185,7 @@
         WHERE memberId = #{memberId}
     </update>
 
-    <select id="getMemberStats" resultType="MemberStatsDTO">
+    <select id="getMemberStats" resultType="com.example.managesolution.data.dto.MemberStatsDTO">
         SELECT
             count(*) as totalMembers,
             sum(case when m.gender = '남성' then 1 else 0 end) as totalMale,
